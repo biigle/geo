@@ -1,0 +1,12 @@
+{
+    "name": "dias/geo",
+    "require": {
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Dias\\Modules\\Geo\\": "src"
+        }
+    }
+}
