@@ -3,32 +3,48 @@
  *
  * @type {Object}
  */
-biigle.geo.singleImageMap = {
-    template: '<div></div>',
+biigle.geo.components.imageMap = {
+    template: '<div class="image-map"></div>',
     props: {
-        lng: {
-            type: Number,
-            required: true
-        },
-        lat: {
-            type: Number,
+        images: {
+            type: Array,
             required: true
         },
         interactive: {
             type: Boolean,
             default: true
+        },
+        zoom: {
+            type: Number
+        },
+        cluster: {
+            type: Boolean,
+            default: false
         }
     },
     mounted: function () {
-        var source = new ol.source.Vector({
-            features: [
-                new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([this.lng, this.lat]))
-                })
-            ]
-        });
+        var features = [];
 
-        new ol.Map({
+        for (var i = this.images.length - 1; i >= 0; i--) {
+            features.push(new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                    this.images[i].lng,
+                    this.images[i].lat
+                ]))
+            }));
+        }
+
+        var source = new ol.source.Vector({features: features});
+        var extent = source.getExtent();
+
+        if (this.cluster) {
+            source = new ol.source.Cluster({
+                source: source,
+                distance: 5
+            });
+        }
+
+        var map = new ol.Map({
             target: this.$el,
             layers: [
                 // ArcGIS ocean map (restricted license!)
@@ -58,10 +74,7 @@ biigle.geo.singleImageMap = {
                     updateWhileInteracting: true
                 })
             ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([this.lng, this.lat]),
-                zoom: 4
-            }),
+            view: new ol.View(),
             interactions: ol.interaction.defaults({
                 altShiftDragRotate: false,
                 doubleClickZoom: this.interactive,
@@ -76,5 +89,10 @@ biigle.geo.singleImageMap = {
                 zoom: this.interactive
             }),
         });
+
+        map.getView().fit(extent, map.getSize());
+        if (this.zoom) {
+            map.getView().setZoom(this.zoom);
+        }
     }
 };

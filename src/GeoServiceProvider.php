@@ -32,6 +32,7 @@ class GeoServiceProvider extends ServiceProvider
         });
 
         $modules->addMixin('geo', 'imagesIndex');
+        $modules->addMixin('geo', 'transectsMenubar');
     }
 
     /**
