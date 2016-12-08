@@ -30,6 +30,8 @@ class GeoServiceProvider extends ServiceProvider
         ], function ($router) {
             require __DIR__.'/routes.php';
         });
+
+        $modules->addMixin('geo', 'imagesIndex');
     }
 
     /**
