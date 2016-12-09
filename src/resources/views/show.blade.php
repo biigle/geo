@@ -12,13 +12,14 @@
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
     biigle.geo.images = {!! $images !!};
+    biigle.geo.transect = {!! $transect !!};
 </script>
 @endpush
 
 @section('content')
 <main class="geo__container">
     <section id="geo-map" class="geo__map">
-        <image-map :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+        <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
     <aside class="geo__sidebar">
 

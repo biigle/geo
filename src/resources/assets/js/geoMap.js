@@ -5,14 +5,26 @@ biigle.$viewModel('geo-map', function (element) {
     new Vue({
         el: element,
         data: {
-            images: biigle.geo.images
+            images: biigle.geo.images,
+            key: 'biigle.geo.imageSequence.' + biigle.geo.transect.id
+        },
+        computed: {
+            selectedImages: function () {
+                // These will be the selected images of previous sessions.
+                // Vue will not be able to reactively update this property.
+                return JSON.parse(localStorage.getItem(this.key)) || [];
+            }
         },
         components: {
             imageMap: biigle.geo.components.imageMap
         },
         methods: {
             handleSelectedImages: function (ids) {
-                console.log(ids);
+                if (ids.length > 0) {
+                    localStorage.setItem(this.key, JSON.stringify(ids));
+                } else {
+                    localStorage.removeItem(this.key);
+                }
             }
         }
     });

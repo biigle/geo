@@ -16,7 +16,7 @@ class TransectController extends Controller
      */
     public function show($id)
     {
-        $transect = Transect::findOrFail($id);
+        $transect = Transect::select('id', 'name')->findOrFail($id);
         $this->authorize('access', $transect);
         if (!$transect->hasGeoInfo()) abort(404);
 

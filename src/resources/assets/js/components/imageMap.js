@@ -10,16 +10,18 @@ biigle.geo.components.imageMap = {
             type: Array,
             required: true
         },
+        preselected: {
+            type: Array,
+            default: function () {
+                return [];
+            }
+        },
         interactive: {
             type: Boolean,
             default: true
         },
         zoom: {
             type: Number
-        },
-        cluster: {
-            type: Boolean,
-            default: false
         },
         selectable: {
             type: Boolean,
@@ -28,20 +30,11 @@ biigle.geo.components.imageMap = {
     },
     methods: {
         extractFeatureId: function (feature) {
-            return feature.get('id');
         },
         parseSelectedFeatures: function (features) {
-            var output = [];
-            features.forEach(function (feature) {
-                if (this.cluster && feature.get('features')) {
-                    Array.prototype.push.apply(output, feature.get('features').map(this.extractFeatureId));
-                } else {
-                    output.push(this.extractFeatureId(feature));
-                }
-
-            }, this);
-
-            return output;
+            return features.getArray().map(function (feature) {
+                return feature.get('id');
+            });
         }
     },
     mounted: function () {
@@ -51,6 +44,8 @@ biigle.geo.components.imageMap = {
         for (var i = this.images.length - 1; i >= 0; i--) {
             features.push(new ol.Feature({
                 id: this.images[i].id,
+                // Determine if a feature shoule be initially selected.
+                preselected: this.preselected.indexOf(this.images[i].id) !== -1,
                 geometry: new ol.geom.Point(ol.proj.fromLonLat([
                     this.images[i].lng,
                     this.images[i].lat
@@ -60,13 +55,6 @@ biigle.geo.components.imageMap = {
 
         var source = new ol.source.Vector({features: features});
         var extent = source.getExtent();
-
-        if (this.cluster) {
-            source = new ol.source.Cluster({
-                source: source,
-                distance: 5
-            });
-        }
 
         var tileLayer = new ol.layer.Tile({
           source: new ol.source.OSM()
@@ -97,7 +85,6 @@ biigle.geo.components.imageMap = {
             controls: ol.control.defaults({zoom: this.interactive}),
         });
 
-        map.addControl(new ol.control.ScaleLine());
         map.getView().fit(extent, map.getSize());
 
         if (this.zoom) {
@@ -105,10 +92,11 @@ biigle.geo.components.imageMap = {
         }
 
         if (this.interactive) {
+            map.addControl(new ol.control.ScaleLine());
+
             map.addControl(new ol.control.ZoomToExtent({
                 extent: extent,
-                label: '\ue097',
-                tipLabel: 'Reset Zoom'
+                label: '\ue097'
             }));
 
             map.addControl(new ol.control.OverviewMap({
@@ -121,7 +109,10 @@ biigle.geo.components.imageMap = {
 
         if (this.selectable) {
             var selectInteraction = new ol.interaction.Select({
-                style: biigle.geo.ol.style.selected
+                style: biigle.geo.ol.style.selected,
+                features: features.filter(function (feature) {
+                    return feature.get('preselected');
+                })
             });
             var selectedFeatures = selectInteraction.getFeatures();
             map.addInteraction(selectInteraction);
