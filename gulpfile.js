@@ -15,7 +15,7 @@ gulp.task('sass-main', function () {
 gulp.task('sass', ['sass-main']);
 
 gulp.task('js-main', function (cb) {
-    h.angular('**/*.js', 'main.js', cb);
+    h.angular('vue/**/*.js', 'main.js', cb);
 });
 
 gulp.task('js', ['js-main']);
