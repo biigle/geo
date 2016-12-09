@@ -76,11 +76,10 @@ biigle.geo.components.imageMap = {
                 doubleClickZoom: this.interactive,
                 keyboard: this.interactive,
                 mouseWheelZoom: this.interactive,
-                shiftDragZoom: this.interactive,
+                shiftDragZoom: false,
                 dragPan: this.interactive,
                 pinchRotate: false,
                 pinchZoom: this.interactive,
-                dragZoom: false
             }),
             controls: ol.control.defaults({zoom: this.interactive}),
         });
