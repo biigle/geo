@@ -18,11 +18,16 @@ gulp.task('js-main', function (cb) {
     h.angular('vue/**/*.js', 'main.js', cb);
 });
 
-gulp.task('js', ['js-main']);
+gulp.task('js-transects', function (cb) {
+    h.angular('angular/transects/**/*.js', 'transects.js', cb);
+});
+
+gulp.task('js', ['js-main', 'js-transects']);
 
 gulp.task('watch', function () {
     gulp.watch(h.paths.sass + '**/*.scss', ['sass']);
-    gulp.watch(h.paths.js + '**/*.js', ['js-main']);
+    gulp.watch(h.paths.js + 'vue/**/*.js', ['js-main']);
+    gulp.watch(h.paths.js + 'angular/transects/**/*.js', ['js-transects']);
     gulp.watch(h.paths.public + '**/*', publish);
 });
 

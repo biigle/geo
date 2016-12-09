@@ -16,10 +16,16 @@
     }
 
     .ol-overviewmap {
-        top: 0;
-        right: 0;
+        top: .5em;
+        right: .5em;
         bottom: auto;
         left: auto;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, .4);
+
+        .ol-overviewmap-map, canvas {
+            display: block;
+        }
     }
 
     .ol-dragbox {
