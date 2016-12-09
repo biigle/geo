@@ -1,5 +1,24 @@
+%custom-icon {
+    color: white;
+    display: block;
+    font-family: "Glyphicons Halflings";
+    font-weight: normal;
+}
+
 .image-map {
     canvas {
         display: block;
+    }
+
+    .ol-zoom-extent button {
+        @extend %custom-icon;
+        padding-top: 1px;
+    }
+
+    .ol-overviewmap {
+        top: 0;
+        right: 0;
+        bottom: auto;
+        left: auto;
     }
 }

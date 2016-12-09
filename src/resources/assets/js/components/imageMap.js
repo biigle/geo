@@ -44,36 +44,31 @@ biigle.geo.components.imageMap = {
             });
         }
 
+        var tileLayer = new ol.layer.Tile({
+          source: new ol.source.OSM()
+        });
+
+        var vectorLayer = new ol.layer.Vector({
+            source: source,
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 6,
+                    fill: new ol.style.Fill({
+                        color: [0, 153, 255, 1]
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'white',
+                        width: 2
+                    })
+                })
+            }),
+            updateWhileAnimating: true,
+            updateWhileInteracting: true
+        });
+
         var map = new ol.Map({
             target: this.$el,
-            layers: [
-                // ArcGIS ocean map (restricted license!)
-                // new ol.layer.Tile({
-                //     source: new ol.source.XYZ({
-                //         url: "http://services.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}",
-                //     })
-                // }),
-                new ol.layer.Tile({
-                  source: new ol.source.OSM()
-                }),
-                new ol.layer.Vector({
-                    source: source,
-                    style: new ol.style.Style({
-                        image: new ol.style.Circle({
-                            radius: 6,
-                            fill: new ol.style.Fill({
-                                color: [0, 153, 255, 1]
-                            }),
-                            stroke: new ol.style.Stroke({
-                                color: 'white',
-                                width: 2
-                            })
-                        })
-                    }),
-                    updateWhileAnimating: true,
-                    updateWhileInteracting: true
-                })
-            ],
+            layers: [tileLayer, vectorLayer],
             view: new ol.View(),
             interactions: ol.interaction.defaults({
                 altShiftDragRotate: false,
@@ -91,8 +86,26 @@ biigle.geo.components.imageMap = {
         });
 
         map.getView().fit(extent, map.getSize());
+
         if (this.zoom) {
             map.getView().setZoom(this.zoom);
+        }
+
+        if (this.interactive) {
+            map.addControl(new ol.control.ZoomToExtent({
+                extent: extent,
+                label: '\ue097',
+                tipLabel: 'Reset Zoom'
+            }));
+            map.addControl(new ol.control.OverviewMap({
+                collapsed: false,
+                collapsible: false,
+                layers: [tileLayer],
+                view: new ol.View({
+                    zoom: 1,
+                    maxZoom: 1
+                })
+            }));
         }
     }
 };

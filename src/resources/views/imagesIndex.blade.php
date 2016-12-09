@@ -21,7 +21,7 @@
                 <a href="{{route('transect-geo', $transect->id) }}" title="Show all transect images on a world map" class="btn btn-default btn-xs">show all</a>
             </span>
         </div>
-        <image-map :images="images" :zoom="4"></image-map>
+        <image-map :images="images" :interactive="false" :zoom="2"></image-map>
     </div>
 </div>
 
