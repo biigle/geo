@@ -20,13 +20,37 @@ biigle.geo.components.imageMap = {
         cluster: {
             type: Boolean,
             default: false
+        },
+        selectable: {
+            type: Boolean,
+            default: false
+        }
+    },
+    methods: {
+        extractFeatureId: function (feature) {
+            return feature.get('id');
+        },
+        parseSelectedFeatures: function (features) {
+            var output = [];
+            features.forEach(function (feature) {
+                if (this.cluster && feature.get('features')) {
+                    Array.prototype.push.apply(output, feature.get('features').map(this.extractFeatureId));
+                } else {
+                    output.push(this.extractFeatureId(feature));
+                }
+
+            }, this);
+
+            return output;
         }
     },
     mounted: function () {
         var features = [];
+        var self = this;
 
         for (var i = this.images.length - 1; i >= 0; i--) {
             features.push(new ol.Feature({
+                id: this.images[i].id,
                 geometry: new ol.geom.Point(ol.proj.fromLonLat([
                     this.images[i].lng,
                     this.images[i].lat
@@ -50,18 +74,7 @@ biigle.geo.components.imageMap = {
 
         var vectorLayer = new ol.layer.Vector({
             source: source,
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 6,
-                    fill: new ol.style.Fill({
-                        color: [0, 153, 255, 1]
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: 'white',
-                        width: 2
-                    })
-                })
-            }),
+            style: biigle.geo.ol.style.default,
             updateWhileAnimating: true,
             updateWhileInteracting: true
         });
@@ -79,12 +92,12 @@ biigle.geo.components.imageMap = {
                 dragPan: this.interactive,
                 pinchRotate: false,
                 pinchZoom: this.interactive,
+                dragZoom: false
             }),
-            controls: ol.control.defaults({
-                zoom: this.interactive
-            }),
+            controls: ol.control.defaults({zoom: this.interactive}),
         });
 
+        map.addControl(new ol.control.ScaleLine());
         map.getView().fit(extent, map.getSize());
 
         if (this.zoom) {
@@ -97,15 +110,36 @@ biigle.geo.components.imageMap = {
                 label: '\ue097',
                 tipLabel: 'Reset Zoom'
             }));
+
             map.addControl(new ol.control.OverviewMap({
                 collapsed: false,
                 collapsible: false,
                 layers: [tileLayer],
-                view: new ol.View({
-                    zoom: 1,
-                    maxZoom: 1
-                })
+                view: new ol.View({zoom: 1, maxZoom: 1})
             }));
+        }
+
+        if (this.selectable) {
+            var selectInteraction = new ol.interaction.Select({
+                style: biigle.geo.ol.style.selected
+            });
+            var selectedFeatures = selectInteraction.getFeatures();
+            map.addInteraction(selectInteraction);
+            selectInteraction.on('select', function (e) {
+                self.$emit('select', self.parseSelectedFeatures(selectedFeatures));
+            });
+
+            var dragBox = new ol.interaction.DragBox({
+                condition: ol.events.condition.platformModifierKeyOnly
+            });
+            map.addInteraction(dragBox);
+            dragBox.on('boxend', function () {
+                selectedFeatures.clear();
+                source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
+                    selectedFeatures.push(feature);
+                });
+                self.$emit('select', self.parseSelectedFeatures(selectedFeatures));
+            });
         }
     }
 };

@@ -18,7 +18,7 @@
 @section('content')
 <main class="geo__container">
     <section id="geo-map" class="geo__map">
-        <image-map :images="images" :cluster="true"></image-map>
+        <image-map :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
     <aside class="geo__sidebar">
 

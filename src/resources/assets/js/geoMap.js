@@ -9,6 +9,11 @@ biigle.$viewModel('geo-map', function (element) {
         },
         components: {
             imageMap: biigle.geo.components.imageMap
+        },
+        methods: {
+            handleSelectedImages: function (ids) {
+                console.log(ids);
+            }
         }
     });
 });
