@@ -1,0 +1,40 @@
+.sidebar {
+    width: 50px;
+    display: flex;
+
+    &.sidebar--open {
+        width: 350px;
+    }
+
+    .sidebar__buttons {
+        width: 50px;
+        max-height: 100%;
+        overflow: hidden;
+    }
+
+    .sidebar__button {
+        display: block;
+        border-radius: 0;
+        width: 100%;
+        height: 75px;
+
+        // &:not(:first-child) {
+        //     border-top: 0;
+        // }
+    }
+
+    .sidebar__tabs {
+        flex: 1;
+    }
+
+    .sidebar__tab {
+        display: none;
+        padding: 1em;
+        max-height: 100%;
+        overflow: auto;
+
+        &.sidebar__tab--open {
+            display: block;
+        }
+    }
+}

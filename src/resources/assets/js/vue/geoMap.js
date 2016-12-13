@@ -16,7 +16,10 @@ biigle.$viewModel('geo-map', function (element) {
             }
         },
         components: {
-            imageMap: biigle.geo.components.imageMap
+            imageMap: biigle.geo.components.imageMap,
+            sidebar: biigle.geo.components.sidebar,
+            sidebarButton: biigle.geo.components.sidebarButton,
+            sidebarTab: biigle.geo.components.sidebarTab,
         },
         methods: {
             handleSelectedImages: function (ids) {

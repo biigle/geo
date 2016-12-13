@@ -21,9 +21,9 @@
     <section id="geo-map" class="geo__map">
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
-    <aside class="geo__sidebar">
-
-    </aside>
+    <sidebar id="geo-sidebar" class="geo__sidebar">
+        @include('geo::show.sidebar.labels')
+    </sidebar>
 </main>
 @endsection
 

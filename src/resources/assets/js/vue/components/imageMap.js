@@ -29,8 +29,6 @@ biigle.geo.components.imageMap = {
         }
     },
     methods: {
-        extractFeatureId: function (feature) {
-        },
         parseSelectedFeatures: function (features) {
             return features.getArray().map(function (feature) {
                 return feature.get('id');
@@ -131,5 +129,9 @@ biigle.geo.components.imageMap = {
                 self.$emit('select', self.parseSelectedFeatures(selectedFeatures));
             });
         }
+
+        biigle.geo.events.$on('sidebar.toggle', function () {
+            map.updateSize();
+        });
     }
 };
