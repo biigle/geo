@@ -4,7 +4,7 @@
  * @type {Object}
  */
 biigle.geo.components.sidebarButton = {
-    template: '<button class="sidebar__button btn btn-default btn-lg" :class="classObject" @click="toggle" :title="title">' +
+    template: '<button class="sidebar__button btn btn-default btn-lg" :class="classObject" @click="toggle" :title="tab.title">' +
         '<span v-if="open" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>' +
         '<span v-else class="glyphicon" :class="iconClass" aria-hidden="true"></span>' +
     '</button>',
@@ -14,21 +14,14 @@ biigle.geo.components.sidebarButton = {
         };
     },
     props: {
-        name: {
-            type: String,
+        tab: {
+            type: Object,
             required: true
         },
-        icon: {
-            type: String,
-            required: true
-        },
-        title: {
-            type: String
-        }
     },
     computed: {
         iconClass: function () {
-            return 'glyphicon-' + this.icon;
+            return 'glyphicon-' + this.tab.icon;
         },
         classObject: function () {
             return {
@@ -41,14 +34,14 @@ biigle.geo.components.sidebarButton = {
             if (this.open) {
                 this.$parent.$emit('close');
             } else {
-                this.$parent.$emit('open', this.name);
+                this.$parent.$emit('open', this.tab.name);
             }
         }
     },
     mounted: function () {
         var self = this;
         this.$parent.$on('open', function (name) {
-            self.open = name === self.name;
+            self.open = name === self.tab.name;
         });
 
         this.$parent.$on('close', function () {

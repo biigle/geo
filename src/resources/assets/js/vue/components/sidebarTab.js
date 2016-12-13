@@ -14,6 +14,13 @@ biigle.geo.components.sidebarTab = {
         name: {
             type: String,
             required: true
+        },
+        icon: {
+            type: String,
+            required: true
+        },
+        title: {
+            type: String
         }
     },
     computed: {
@@ -23,7 +30,7 @@ biigle.geo.components.sidebarTab = {
             };
         }
     },
-    mounted: function () {
+    created: function () {
         var self = this;
         this.$parent.$on('open', function (name) {
             self.open = name === self.name;
@@ -32,5 +39,6 @@ biigle.geo.components.sidebarTab = {
         this.$parent.$on('close', function () {
             self.open = false;
         });
+
     }
 };

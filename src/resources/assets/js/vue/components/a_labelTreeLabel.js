@@ -3,7 +3,8 @@
  *
  * @type {Object}
  */
-Vue.component('label-tree-label', {
+biigle.geo.components.labelTreeLabel = {
+    name: 'label-tree-label',
     template: '<li class="label-tree-label cf" :class="classObject">' +
         '<div class="label-tree-label__name" @click.stop="select">' +
             '<span class="label-tree-label__color" :style="colorStyle" @click.stop="toggleOpen"></span>' +
@@ -70,4 +71,4 @@ Vue.component('label-tree-label', {
             this.$emit('select', label);
         }
     }
-});
+};

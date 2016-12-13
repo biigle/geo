@@ -3,13 +3,16 @@
  *
  * @type {Object}
  */
-Vue.component('label-tree', {
+biigle.geo.components.labelTree = {
     template: '<div class="label-tree">' +
         '<h4 class="label-tree__title" :if="showTitle" v-text="tree.name"></h4>' +
         '<ul class="label-tree__list">' +
             '<label-tree-label :label="label" v-for="label in rootLabels" @select="emitSelect"></label-tree-label>' +
         '</ul>' +
     '</div>',
+    components: {
+        labelTreeLabel: biigle.geo.components.labelTreeLabel,
+    },
     props: {
         tree: {
             type: Object,
@@ -79,4 +82,4 @@ Vue.component('label-tree', {
             this.$parent.$on('select', this.selectLabel);
         }
     }
-});
+};
