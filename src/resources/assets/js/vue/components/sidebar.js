@@ -8,15 +8,17 @@ biigle.geo.components.sidebar = {
         '<div class="sidebar__buttons"><slot name="buttons"></slot></div>' +
         '<div class="sidebar__tabs"><slot name="tabs"></slot></div>' +
     '</aside>',
+    props: {
+        openTab: {
+            type: String
+        }
+    },
     data: function () {
         return {
-            openName: null,
+            open: false,
         };
     },
     computed: {
-        open: function () {
-            return this.openName !== null;
-        },
         classObject: function () {
             return {
                 'sidebar--open': this.open
@@ -25,14 +27,18 @@ biigle.geo.components.sidebar = {
     },
     mounted: function () {
         var self = this;
-        this.$on('toggle', function (name) {
-            this.openName = (this.openName === name) ? null : name;
-            this.$emit('open', this.openName);
-            // Use setTimeout so the event is handled *after* the sidebar expanded/
-            // collapsed.
-            setTimeout(function () {
-                biigle.geo.events.$emit('sidebar.toggle', self.open);
-            });
+        this.$on('open', function () {
+            this.open = true;
+            this.$emit('toggle');
         });
+
+        this.$on('close', function () {
+            this.open = false;
+            this.$emit('toggle');
+        });
+
+        if (this.openTab) {
+            this.$emit('open', this.openTab);
+        }
     }
 };

@@ -8,6 +8,15 @@ biigle.$viewModel('geo-sidebar', function (element) {
             sidebar: biigle.geo.components.sidebar,
             sidebarButton: biigle.geo.components.sidebarButton,
             sidebarTab: biigle.geo.components.sidebarTab,
+        },
+        methods: {
+            handleSidebarToggle: function () {
+                // Use setTimeout so the event is handled *after* the sidebar expanded/
+                // collapsed.
+                setTimeout(function () {
+                    biigle.geo.events.$emit('sidebar.toggle');
+                });
+            }
         }
     });
 });

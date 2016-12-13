@@ -28,5 +28,9 @@ biigle.geo.components.sidebarTab = {
         this.$parent.$on('open', function (name) {
             self.open = name === self.name;
         });
+
+        this.$parent.$on('close', function () {
+            self.open = false;
+        });
     }
 };

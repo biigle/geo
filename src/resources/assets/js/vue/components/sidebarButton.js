@@ -38,13 +38,21 @@ biigle.geo.components.sidebarButton = {
     },
     methods: {
         toggle: function () {
-            this.$parent.$emit('toggle', this.name);
+            if (this.open) {
+                this.$parent.$emit('close');
+            } else {
+                this.$parent.$emit('open', this.name);
+            }
         }
     },
     mounted: function () {
         var self = this;
         this.$parent.$on('open', function (name) {
             self.open = name === self.name;
+        });
+
+        this.$parent.$on('close', function () {
+            self.open = false;
         });
     }
 };
