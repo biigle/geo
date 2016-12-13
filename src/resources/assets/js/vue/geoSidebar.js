@@ -4,6 +4,9 @@
 biigle.$viewModel('geo-sidebar', function (element) {
     new Vue({
         el: element,
+        data: {
+            labelTrees: biigle.geo.labelTrees,
+        },
         components: {
             sidebar: biigle.geo.components.sidebar,
             sidebarButton: biigle.geo.components.sidebarButton,

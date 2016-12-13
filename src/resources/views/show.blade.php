@@ -13,6 +13,7 @@
 <script type="text/javascript">
     biigle.geo.images = {!! $images !!};
     biigle.geo.transect = {!! $transect !!};
+    biigle.geo.labelTrees = {!! $trees !!};
 </script>
 @endpush
 
@@ -21,7 +22,7 @@
     <section id="geo-map" class="geo__map">
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
-    <sidebar id="geo-sidebar" class="geo__sidebar">
+    <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle" open-tab="labels">
         @include('geo::show.sidebar.labels')
     </sidebar>
 </main>
