@@ -1,3 +1,25 @@
+.label-trees {
+    .label-typeahead {
+        margin-bottom: 1em;
+    }
+}
+
+.label-tree {
+    .label-tree__title {
+        margin-top: 0;
+    }
+}
+
+.label-tree__list {
+    list-style-type: none;
+    padding: 0;
+
+    .label-tree__list {
+        // width of the label color dot with margin
+        padding-left: 19px;
+    }
+}
+
 .label-tree-label {
     margin-top: .5em;
 
@@ -34,21 +56,5 @@
         position: absolute;
         top: 0;
         right: 0;
-    }
-}
-
-.label-tree {
-    .label-tree__title {
-        margin-top: 0;
-    }
-}
-
-.label-tree__list {
-    list-style-type: none;
-    padding: 0;
-
-    .label-tree__list {
-        // width of the label color dot with margin
-        padding-left: 19px;
     }
 }

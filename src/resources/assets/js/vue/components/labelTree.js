@@ -31,6 +31,14 @@ biigle.$component('geo.components.labelTree', {
         labels: function () {
             return this.tree.labels;
         },
+        labelMap: function () {
+            var map = {};
+            for (var i = this.labels.length - 1; i >= 0; i--) {
+                map[this.labels[i].id] = this.labels[i];
+            }
+
+            return map;
+        },
         compiledLabels: function () {
             var compiled = {};
             var parent;
@@ -51,12 +59,37 @@ biigle.$component('geo.components.labelTree', {
         }
     },
     methods: {
+        hasLabel: function (id) {
+            return this.labelMap.hasOwnProperty(id);
+        },
+        getLabel: function (id) {
+            return this.labelMap[id];
+        },
+        getParents: function (label) {
+            var parents = [];
+            while (label.parent_id !== null) {
+                label = this.getLabel(label.parent_id);
+                parents.unshift(label.id);
+            }
+
+            return parents;
+        },
         emitSelect: function (label) {
             this.$emit('select', label);
         },
         selectLabel: function (label) {
-            for (var i = this.labels.length - 1; i >= 0; i--) {
+            // The selected label does not nessecarily belong to this label tree since
+            // the tree may be displayed in a label-trees component with other trees.
+            var i;
+            for (i = this.labels.length - 1; i >= 0; i--) {
                 this.labels[i].selected = this.labels[i].id === label.id;
+            }
+
+            if (this.hasLabel(label.id)) {
+                var parents = this.getParents(label);
+                for (i = parents.length - 1; i >= 0; i--) {
+                    this.getLabel(parents[i]).open = true;
+                }
             }
         },
     },
