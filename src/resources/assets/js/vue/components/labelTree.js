@@ -5,11 +5,22 @@
  */
 biigle.$component('geo.components.labelTree', {
     template: '<div class="label-tree">' +
-        '<h4 class="label-tree__title" :if="showTitle" v-text="tree.name"></h4>' +
-        '<ul class="label-tree__list">' +
+        '<h4 class="label-tree__title" :if="showTitle">' +
+            '<button v-if="collapsible" @click.stop="collapse" class="btn btn-default btn-xs pull-right" :title="collapseTitle">' +
+                '<span v-if="collapsed" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>' +
+                '<span v-else class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>' +
+            '</button>' +
+            '{{tree.name}}' +
+        '</h4>' +
+        '<ul v-if="!collapsed" class="label-tree__list">' +
             '<label-tree-label :label="label" v-for="label in rootLabels" @select="emitSelect"></label-tree-label>' +
         '</ul>' +
     '</div>',
+    data: function () {
+        return {
+            collapsed: false
+        };
+    },
     components: {
         labelTreeLabel: biigle.$require('geo.components.labelTreeLabel'),
     },
@@ -25,6 +36,10 @@ biigle.$component('geo.components.labelTree', {
         standalone: {
             type: Boolean,
             default: false,
+        },
+        collapsible: {
+            type: Boolean,
+            default: true,
         }
     },
     computed: {
@@ -56,6 +71,9 @@ biigle.$component('geo.components.labelTree', {
         },
         rootLabels: function () {
             return this.compiledLabels[null];
+        },
+        collapseTitle: function () {
+            return this.collapsed ? 'Expand' : 'Collapse';
         }
     },
     methods: {
@@ -86,12 +104,16 @@ biigle.$component('geo.components.labelTree', {
             }
 
             if (this.hasLabel(label.id)) {
+                this.collapsed = false;
                 var parents = this.getParents(label);
                 for (i = parents.length - 1; i >= 0; i--) {
                     this.getLabel(parents[i]).open = true;
                 }
             }
         },
+        collapse: function () {
+            this.collapsed = !this.collapsed;
+        }
     },
     created: function () {
         // Set the label properties
