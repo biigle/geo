@@ -9,7 +9,9 @@ biigle.$component('geo.components.labelTrees', {
             '<button v-if="clearable" @click="clear" class="btn btn-default" title="Clear selected label"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
             '<label-typeahead v-if="typeahead" :labels="labels" @select="handleSelect"></label-typeahead>' +
         '</div>' +
-        '<label-tree :tree="tree" v-for="tree in trees" @select="handleSelect"></label-tree>' +
+        '<div class="label-trees__body">' +
+            '<label-tree :tree="tree" v-for="tree in trees" @select="handleSelect"></label-tree>' +
+        '</div>' +
     '</div>',
     components: {
         labelTypeahead: biigle.$require('geo.components.labelTypeahead'),
