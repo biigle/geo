@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.labelTreeLabel = {
+biigle.$component('geo.components.labelTreeLabel', {
     name: 'label-tree-label',
     template: '<li class="label-tree-label cf" :class="classObject">' +
         '<div class="label-tree-label__name" @click.stop="select">' +
@@ -71,4 +71,4 @@ biigle.geo.components.labelTreeLabel = {
             this.$emit('select', label);
         }
     }
-};
+});

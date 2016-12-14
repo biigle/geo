@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.sidebarButton = {
+biigle.$component('geo.components.sidebarButton', {
     template: '<button class="sidebar__button btn btn-default btn-lg" :class="classObject" @click="toggle" :title="tab.title">' +
         '<span v-if="open" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>' +
         '<span v-else class="glyphicon" :class="iconClass" aria-hidden="true"></span>' +
@@ -48,4 +48,4 @@ biigle.geo.components.sidebarButton = {
             self.open = false;
         });
     }
-};
+});

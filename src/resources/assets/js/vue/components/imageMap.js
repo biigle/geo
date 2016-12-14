@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.imageMap = {
+biigle.$component('geo.components.imageMap', {
     template: '<div class="image-map"></div>',
     props: {
         images: {
@@ -36,6 +36,8 @@ biigle.geo.components.imageMap = {
         }
     },
     mounted: function () {
+        var style = biigle.$require('geo.ol.style');
+        var events = biigle.$require('geo.events');
         var features = [];
         var self = this;
 
@@ -60,7 +62,7 @@ biigle.geo.components.imageMap = {
 
         var vectorLayer = new ol.layer.Vector({
             source: source,
-            style: biigle.geo.ol.style.default,
+            style: style.default,
             updateWhileAnimating: true,
             updateWhileInteracting: true
         });
@@ -106,7 +108,7 @@ biigle.geo.components.imageMap = {
 
         if (this.selectable) {
             var selectInteraction = new ol.interaction.Select({
-                style: biigle.geo.ol.style.selected,
+                style: style.selected,
                 features: features.filter(function (feature) {
                     return feature.get('preselected');
                 })
@@ -130,8 +132,8 @@ biigle.geo.components.imageMap = {
             });
         }
 
-        biigle.geo.events.$on('sidebar.toggle', function () {
+        events.$on('sidebar.toggle', function () {
             map.updateSize();
         });
     }
-};
+});

@@ -5,8 +5,8 @@ biigle.$viewModel('geo-map', function (element) {
     new Vue({
         el: element,
         data: {
-            images: biigle.geo.images,
-            key: 'biigle.geo.imageSequence.' + biigle.geo.transect.id
+            images: biigle.$require('geo.images'),
+            key: 'biigle.geo.imageSequence.' + biigle.$require('geo.transect.id')
         },
         computed: {
             selectedImages: function () {
@@ -16,10 +16,7 @@ biigle.$viewModel('geo-map', function (element) {
             }
         },
         components: {
-            imageMap: biigle.geo.components.imageMap,
-            sidebar: biigle.geo.components.sidebar,
-            sidebarButton: biigle.geo.components.sidebarButton,
-            sidebarTab: biigle.geo.components.sidebarTab,
+            imageMap: biigle.$require('geo.components.imageMap'),
         },
         methods: {
             handleSelectedImages: function (ids) {

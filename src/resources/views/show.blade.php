@@ -11,9 +11,9 @@
 <script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
-    biigle.geo.images = {!! $images !!};
-    biigle.geo.transect = {!! $transect !!};
-    biigle.geo.labelTrees = {!! $trees !!};
+    biigle.$declare('geo.images', {!! $images !!});
+    biigle.$declare('geo.transect', {!! $transect !!});
+    biigle.$declare('geo.labelTrees', {!! $trees !!});
 </script>
 @endpush
 

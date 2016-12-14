@@ -3,12 +3,12 @@
  *
  * @type {Object}
  */
-biigle.geo.components.labelTrees = {
+biigle.$component('geo.components.labelTrees', {
     template: '<div class="label-trees">' +
         '<label-tree :tree="tree" v-for="tree in trees" @select="handleSelect"></label-tree>' +
     '</div>',
     components: {
-        labelTree: biigle.geo.components.labelTree,
+        labelTree: biigle.$require('geo.components.labelTree'),
     },
     props: {
         trees: {
@@ -21,4 +21,4 @@ biigle.geo.components.labelTrees = {
             this.$emit('select', label);
         }
     }
-};
+});

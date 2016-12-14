@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.labelTree = {
+biigle.$component('geo.components.labelTree', {
     template: '<div class="label-tree">' +
         '<h4 class="label-tree__title" :if="showTitle" v-text="tree.name"></h4>' +
         '<ul class="label-tree__list">' +
@@ -11,7 +11,7 @@ biigle.geo.components.labelTree = {
         '</ul>' +
     '</div>',
     components: {
-        labelTreeLabel: biigle.geo.components.labelTreeLabel,
+        labelTreeLabel: biigle.$require('geo.components.labelTreeLabel'),
     },
     props: {
         tree: {
@@ -82,4 +82,4 @@ biigle.geo.components.labelTree = {
             this.$parent.$on('select', this.selectLabel);
         }
     }
-};
+});

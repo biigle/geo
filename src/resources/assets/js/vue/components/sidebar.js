@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.sidebar = {
+biigle.$component('geo.components.sidebar', {
     template: '<aside class="sidebar" :class="classObject">' +
         '<div class="sidebar__buttons">' +
             '<sidebar-button v-for="tab in tabs" :tab="tab"></sidebar-button>' +
@@ -11,7 +11,7 @@ biigle.geo.components.sidebar = {
         '<div class="sidebar__tabs"><slot name="tabs"></slot></div>' +
     '</aside>',
     components: {
-        sidebarButton: biigle.geo.components.sidebarButton,
+        sidebarButton: biigle.$require('geo.components.sidebarButton'),
     },
     data: function () {
         return {
@@ -55,4 +55,4 @@ biigle.geo.components.sidebar = {
             this.$emit('open', this.openTab);
         }
     }
-};
+});

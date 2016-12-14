@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.geo.components.sidebarTab = {
+biigle.$component('geo.components.sidebarTab', {
     template: '<div class="sidebar__tab" :class="classObject"><slot></slot></div>',
     data: function () {
         return {
@@ -41,4 +41,4 @@ biigle.geo.components.sidebarTab = {
         });
 
     }
-};
+});
