@@ -23,7 +23,9 @@
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
     <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle" open-tab="labels">
-        @include('geo::show.sidebar.labels')
+        <sidebar-tab v-cloak slot="tabs" name="labels" icon="tags" title="Show label trees">
+            <label-trees v-bind:trees="labelTrees" v-on:select="handleSelect"></label-trees>
+        </sidebar-tab>
     </sidebar>
 </main>
 @endsection

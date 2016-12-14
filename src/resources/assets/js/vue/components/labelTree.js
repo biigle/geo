@@ -98,12 +98,13 @@ biigle.$component('geo.components.labelTree', {
         selectLabel: function (label) {
             // The selected label does not nessecarily belong to this label tree since
             // the tree may be displayed in a label-trees component with other trees.
+            // It can be null, too;
             var i;
             for (i = this.labels.length - 1; i >= 0; i--) {
-                this.labels[i].selected = this.labels[i].id === label.id;
+                this.labels[i].selected = label && this.labels[i].id === label.id;
             }
 
-            if (this.hasLabel(label.id)) {
+            if (label && this.hasLabel(label.id)) {
                 this.collapsed = false;
                 var parents = this.getParents(label);
                 for (i = parents.length - 1; i >= 0; i--) {

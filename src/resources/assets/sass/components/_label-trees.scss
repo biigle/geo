@@ -1,6 +1,15 @@
 .label-trees {
-    .label-typeahead {
+    .label-trees__head {
+        display: flex;
         margin-bottom: 1em;
+    }
+
+    .label-typeahead {
+        flex: 1;
+
+        &:not(:first-child) {
+            margin-left: 1em;
+        }
     }
 }
 

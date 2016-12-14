@@ -5,7 +5,10 @@
  */
 biigle.$component('geo.components.labelTrees', {
     template: '<div class="label-trees">' +
-        '<label-typeahead v-if="typeahead" :labels="labels" @select="handleSelect"></label-typeahead>' +
+        '<div v-if="typeahead || clearable" class="label-trees__head">' +
+            '<button v-if="clearable" @click="clear" class="btn btn-default" title="Clear selected label"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
+            '<label-typeahead v-if="typeahead" :labels="labels" @select="handleSelect"></label-typeahead>' +
+        '</div>' +
         '<label-tree :tree="tree" v-for="tree in trees" @select="handleSelect"></label-tree>' +
     '</div>',
     components: {
@@ -18,6 +21,10 @@ biigle.$component('geo.components.labelTrees', {
             required: true,
         },
         typeahead: {
+            type: Boolean,
+            default: true,
+        },
+        clearable: {
             type: Boolean,
             default: true,
         }
@@ -36,6 +43,9 @@ biigle.$component('geo.components.labelTrees', {
     methods: {
         handleSelect: function (label) {
             this.$emit('select', label);
+        },
+        clear: function () {
+            this.$emit('select', null);
         }
     }
 });
