@@ -16,11 +16,14 @@ biigle.$viewModel('geo-sidebar', function (element) {
         },
         methods: {
             handleSidebarToggle: function () {
-                // Use setTimeout so the event is handled *after* the sidebar expanded/
+                // Use nextTick so the event is handled *after* the sidebar expanded/
                 // collapsed.
-                setTimeout(function () {
+                this.$nextTick(function () {
                     events.$emit('sidebar.toggle');
                 });
+            },
+            handleSelect: function (label) {
+                events.$emit('label.selected', label);
             }
         }
     });

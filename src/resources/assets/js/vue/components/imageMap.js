@@ -28,40 +28,59 @@ biigle.$component('geo.components.imageMap', {
             default: false
         }
     },
+    data: function () {
+        return {
+            source: new ol.source.Vector()
+        };
+    },
+    computed: {
+        features: function () {
+            var features = [];
+            for (var i = this.images.length - 1; i >= 0; i--) {
+                features.push(new ol.Feature({
+                    id: this.images[i].id,
+                    // Determine if a feature shoule be initially selected.
+                    preselected: this.preselected.indexOf(this.images[i].id) !== -1,
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                        this.images[i].lng,
+                        this.images[i].lat
+                    ]))
+                }));
+            }
+
+            return features;
+        }
+    },
     methods: {
         parseSelectedFeatures: function (features) {
             return features.getArray().map(function (feature) {
                 return feature.get('id');
             });
+        },
+        updateFeatures: function () {
+            this.source.clear();
+            this.source.addFeatures(this.features);
         }
+    },
+    created: function () {
+        var events = biigle.$require('geo.events');
+        events.$on('imageMap.update', this.updateFeatures);
     },
     mounted: function () {
         var style = biigle.$require('geo.ol.style');
         var events = biigle.$require('geo.events');
-        var features = [];
         var self = this;
 
-        for (var i = this.images.length - 1; i >= 0; i--) {
-            features.push(new ol.Feature({
-                id: this.images[i].id,
-                // Determine if a feature shoule be initially selected.
-                preselected: this.preselected.indexOf(this.images[i].id) !== -1,
-                geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                    this.images[i].lng,
-                    this.images[i].lat
-                ]))
-            }));
-        }
-
-        var source = new ol.source.Vector({features: features});
-        var extent = source.getExtent();
+        // var source = new ol.source.Vector({features: features});
+        this.source.addFeatures(this.features);
+        var extent = this.source.getExtent();
 
         var tileLayer = new ol.layer.Tile({
           source: new ol.source.OSM()
         });
 
         var vectorLayer = new ol.layer.Vector({
-            source: source,
+            source: this.source,
             style: style.default,
             updateWhileAnimating: true,
             updateWhileInteracting: true
@@ -109,7 +128,7 @@ biigle.$component('geo.components.imageMap', {
         if (this.selectable) {
             var selectInteraction = new ol.interaction.Select({
                 style: style.selected,
-                features: features.filter(function (feature) {
+                features: this.features.filter(function (feature) {
                     return feature.get('preselected');
                 })
             });
@@ -125,7 +144,7 @@ biigle.$component('geo.components.imageMap', {
             map.addInteraction(dragBox);
             dragBox.on('boxend', function () {
                 selectedFeatures.clear();
-                source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
+                self.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
                     selectedFeatures.push(feature);
                 });
                 self.$emit('select', self.parseSelectedFeatures(selectedFeatures));

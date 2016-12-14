@@ -22,7 +22,7 @@
     <section id="geo-map" class="geo__map">
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
-    <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle" open-tab="labels">
+    <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle">
         <sidebar-tab v-cloak slot="tabs" name="labels" icon="tags" title="Show label trees">
             <label-trees v-bind:trees="labelTrees" v-on:select="handleSelect"></label-trees>
         </sidebar-tab>
@@ -31,7 +31,7 @@
 @endsection
 
 @section('navbar')
-<div class="navbar-text navbar-transects-breadcrumbs">
-    @include('transects::partials.projectsBreadcrumb', ['projects' => $transect->projects]) / <a href="{{route('transect', $transect->id)}}">{{$transect->name}}</a> / <strong>Map</strong> @include('transects::partials.annotationSessionIndicator')
+<div id="geo-navbar" class="navbar-text navbar-transects-breadcrumbs">
+    @include('transects::partials.projectsBreadcrumb', ['projects' => $transect->projects]) / <a href="{{route('transect', $transect->id)}}">{{$transect->name}}</a> / <strong>Map</strong> @include('transects::partials.annotationSessionIndicator') <span v-if="loading" class="loader loader--active"></span><span v-else v-cloak>(<span v-text="number"></span> images)</span>
 </div>
 @endsection
