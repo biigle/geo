@@ -23,7 +23,7 @@
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
     <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle">
-        <sidebar-tab v-cloak slot="tabs" name="labels" icon="tags" title="Show label trees">
+        <sidebar-tab v-cloak slot="tabs" name="labels" icon="tags" title="Filter images by label">
             <label-trees :trees="labelTrees" :multiselect="true" v-on:select="handleSelect" v-on:deselect="handleDeselect" v-on:clear="handleCleared"></label-trees>
         </sidebar-tab>
     </sidebar>

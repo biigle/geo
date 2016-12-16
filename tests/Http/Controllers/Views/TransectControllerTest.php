@@ -1,7 +1,12 @@
 <?php
 
-class GeoModuleHttpControllersViewsTransectControllerTest extends ApiTestCase {
+namespace Dias\Tests\Modules\Geo\Http\Controllers\Views;
 
+use ApiTestCase;
+use Dias\Tests\ImageTest;
+
+class TransectControllerTest extends ApiTestCase
+{
     public function testShow() {
         $id = $this->transect()->id;
 
