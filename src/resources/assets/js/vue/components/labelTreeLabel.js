@@ -6,15 +6,15 @@
 biigle.$component('geo.components.labelTreeLabel', {
     name: 'label-tree-label',
     template: '<li class="label-tree-label cf" :class="classObject">' +
-        '<div class="label-tree-label__name" @click.stop="select">' +
-            '<span class="label-tree-label__color" :style="colorStyle" @click.stop="toggleOpen"></span>' +
-            '<span v-text="label.name"></span>' +
+        '<div class="label-tree-label__name" @click="toggleOpen">' +
+            '<span class="label-tree-label__color" :style="colorStyle"></span>' +
+            '<span v-text="label.name" @click.stop="toggleSelect"></span>' +
             '<span v-if="showFavourite" class="label-tree-label__favourite" @click.stop="toggleFavourite">' +
                 '<span class="glyphicon" :class="favouriteClass" aria-hidden="true" title=""></span>' +
             '</span>' +
         '</div>' +
         '<ul v-if="label.open" class="label-tree__list">' +
-            '<label-tree-label :label="label" v-for="label in label.children" @select="emitSelect"></label-tree-label>' +
+            '<label-tree-label :label="label" v-for="label in label.children" @select="emitSelect" @deselect="emitDeselect"></label-tree-label>' +
         '</ul>' +
     '</li>',
     data: function () {
@@ -52,23 +52,31 @@ biigle.$component('geo.components.labelTreeLabel', {
         }
     },
     methods: {
-        select: function () {
+        toggleSelect: function () {
             if (!this.label.selected) {
                 this.$emit('select', this.label);
-                this.label.open = true;
             } else {
-                this.label.open = !this.label.open;
+                this.$emit('deselect', this.label);
             }
         },
         toggleOpen: function () {
-            this.label.open = !this.label.open;
+            // If the label cannot be opened, it will be selected here instead.
+            if (!this.label.children) {
+                this.toggleSelect();
+            } else {
+                this.label.open = !this.label.open;
+            }
         },
         toggleFavourite: function () {
             this.favourite = !this.favourite;
         },
         emitSelect: function (label) {
-            // recursively propagate the event upwards
+            // bubble the event upwards
             this.$emit('select', label);
+        },
+        emitDeselect: function (label) {
+            // bubble the event upwards
+            this.$emit('deselect', label);
         }
     }
 });

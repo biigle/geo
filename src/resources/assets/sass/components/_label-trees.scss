@@ -44,8 +44,6 @@
 }
 
 .label-tree-label {
-    margin-top: .5em;
-
     &.label-tree-label--selected > .label-tree-label__name {
         color: white;
         font-weight: bold;
@@ -57,8 +55,8 @@
 
     .label-tree-label__color {
         position: absolute;
-        top: 3px;
-        left: 0;
+        top: 7px;
+        left: .25em;
         width: 1em;
         height: 1em;
         border: 2px solid white;
@@ -67,11 +65,14 @@
 
     .label-tree-label__name {
         position: relative;
-        padding: 0 19px;
+        padding: .25em;
+        padding-left: 22px;
+        border-radius: $border-radius-small;
 
         &:hover {
             color: white;
             cursor: pointer;
+            background-color: $gray-lighter;
         }
     }
 

@@ -24,6 +24,12 @@ biigle.$viewModel('geo-sidebar', function (element) {
             },
             handleSelect: function (label) {
                 events.$emit('label.selected', label);
+            },
+            handleDeselect: function (label) {
+                events.$emit('label.deselected', label);
+            },
+            handleCleared: function () {
+                events.$emit('label.cleared');
             }
         }
     });

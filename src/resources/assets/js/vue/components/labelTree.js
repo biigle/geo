@@ -13,7 +13,7 @@ biigle.$component('geo.components.labelTree', {
             '{{tree.name}}' +
         '</h4>' +
         '<ul v-if="!collapsed" class="label-tree__list">' +
-            '<label-tree-label :label="label" v-for="label in rootLabels" @select="emitSelect"></label-tree-label>' +
+            '<label-tree-label :label="label" v-for="label in rootLabels" @select="emitSelect" @deselect="emitDeselect"></label-tree-label>' +
         '</ul>' +
     '</div>',
     data: function () {
@@ -40,6 +40,10 @@ biigle.$component('geo.components.labelTree', {
         collapsible: {
             type: Boolean,
             default: true,
+        },
+        multiselect: {
+            type: Boolean,
+            default: false,
         }
     },
     computed: {
@@ -95,21 +99,33 @@ biigle.$component('geo.components.labelTree', {
         emitSelect: function (label) {
             this.$emit('select', label);
         },
+        emitDeselect: function (label) {
+            this.$emit('deselect', label);
+        },
         selectLabel: function (label) {
-            // The selected label does not nessecarily belong to this label tree since
-            // the tree may be displayed in a label-trees component with other trees.
-            // It can be null, too;
-            var i;
-            for (i = this.labels.length - 1; i >= 0; i--) {
-                this.labels[i].selected = label && this.labels[i].id === label.id;
+            if (!this.multiselect) {
+                this.clearSelectedLabels();
             }
 
-            if (label && this.hasLabel(label.id)) {
+            // The selected label does not nessecarily belong to this label tree since
+            // the tree may be displayed in a label-trees component with other trees.
+            if (this.hasLabel(label.id)) {
+                label.selected = true;
                 this.collapsed = false;
                 var parents = this.getParents(label);
-                for (i = parents.length - 1; i >= 0; i--) {
+                for (var i = parents.length - 1; i >= 0; i--) {
                     this.getLabel(parents[i]).open = true;
                 }
+            }
+        },
+        deselectLabel: function (label) {
+            if (this.hasLabel(label.id)) {
+                label.selected = false;
+            }
+        },
+        clearSelectedLabels: function () {
+            for (var i = this.labels.length - 1; i >= 0; i--) {
+                this.labels[i].selected = false;
             }
         },
         collapse: function () {
@@ -134,8 +150,11 @@ biigle.$component('geo.components.labelTree', {
         // by itself.
         if (this.standalone) {
             this.$on('select', this.selectLabel);
+            this.$on('deselect', this.deselectLabel);
         } else {
             this.$parent.$on('select', this.selectLabel);
+            this.$parent.$on('deselect', this.deselectLabel);
+            this.$parent.$on('clear', this.clearSelectedLabels);
         }
     }
 });

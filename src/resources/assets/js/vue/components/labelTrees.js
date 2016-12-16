@@ -6,11 +6,11 @@
 biigle.$component('geo.components.labelTrees', {
     template: '<div class="label-trees">' +
         '<div v-if="typeahead || clearable" class="label-trees__head">' +
-            '<button v-if="clearable" @click="clear" class="btn btn-default" title="Clear selected label"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
+            '<button v-if="clearable" @click="clear" class="btn btn-default" title="Clear selected labels"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
             '<label-typeahead v-if="typeahead" :labels="labels" @select="handleSelect"></label-typeahead>' +
         '</div>' +
         '<div class="label-trees__body">' +
-            '<label-tree :tree="tree" v-for="tree in trees" @select="handleSelect"></label-tree>' +
+            '<label-tree :tree="tree" :multiselect="multiselect" v-for="tree in trees" @select="handleSelect" @deselect="handleDeselect"></label-tree>' +
         '</div>' +
     '</div>',
     components: {
@@ -29,6 +29,10 @@ biigle.$component('geo.components.labelTrees', {
         clearable: {
             type: Boolean,
             default: true,
+        },
+        multiselect: {
+            type: Boolean,
+            default: false,
         }
     },
     computed: {
@@ -46,8 +50,11 @@ biigle.$component('geo.components.labelTrees', {
         handleSelect: function (label) {
             this.$emit('select', label);
         },
+        handleDeselect: function (label) {
+            this.$emit('deselect', label);
+        },
         clear: function () {
-            this.$emit('select', null);
+            this.$emit('clear');
         }
     }
 });
