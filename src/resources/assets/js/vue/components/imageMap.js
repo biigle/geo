@@ -154,5 +154,12 @@ biigle.$component('geo.components.imageMap', {
         events.$on('sidebar.toggle', function () {
             map.updateSize();
         });
+
+        // Update once to get the correct map size in case the map is used in combination
+        // with other Components (like the sidebar). Else the select interaction may not
+        // work correctly.
+        this.$nextTick(function () {
+            map.updateSize();
+        });
     }
 });
