@@ -1,9 +1,9 @@
 <?php
 
-namespace Dias\Modules\Geo\Console\Commands;
+namespace Biigle\Modules\Geo\Console\Commands;
 
 use Illuminate\Console\Command;
-use Dias\Modules\Geo\GeoServiceProvider as ServiceProvider;
+use Biigle\Modules\Geo\GeoServiceProvider as ServiceProvider;
 
 class Publish extends Command {
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Dias\Modules\Geo;
+namespace Biigle\Modules\Geo;
 
-use Dias\Services\Modules;
+use Biigle\Services\Modules;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,7 +11,7 @@ class GeoServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application events.
      *
-     * @param  \Dias\Services\Modules  $modules
+     * @param  \Biigle\Services\Modules  $modules
      * @param  \Illuminate\Routing\Router  $router
      *
      * @return void
@@ -25,7 +25,7 @@ class GeoServiceProvider extends ServiceProvider
         ], 'public');
 
         $router->group([
-            'namespace' => 'Dias\Modules\Geo\Http\Controllers',
+            'namespace' => 'Biigle\Modules\Geo\Http\Controllers',
             'middleware' => 'web',
         ], function ($router) {
             require __DIR__.'/routes.php';
@@ -46,7 +46,7 @@ class GeoServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('command.geo.publish', function ($app) {
-            return new \Dias\Modules\Geo\Console\Commands\Publish();
+            return new \Biigle\Modules\Geo\Console\Commands\Publish();
         });
         $this->commands('command.geo.publish');
     }

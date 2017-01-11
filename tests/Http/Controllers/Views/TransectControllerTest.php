@@ -1,9 +1,9 @@
 <?php
 
-namespace Dias\Tests\Modules\Geo\Http\Controllers\Views;
+namespace Biigle\Tests\Modules\Geo\Http\Controllers\Views;
 
 use ApiTestCase;
-use Dias\Tests\ImageTest;
+use Biigle\Tests\ImageTest;
 
 class TransectControllerTest extends ApiTestCase
 {

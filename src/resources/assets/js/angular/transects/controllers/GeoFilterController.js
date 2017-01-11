@@ -1,11 +1,11 @@
 /**
- * @namespace dias.transects
+ * @namespace biigle.transects
  * @ngdoc controller
  * @name GeoFilterController
- * @memberOf dias.transects
+ * @memberOf biigle.transects
  * @description Manages the annotation filter feature
  */
-angular.module('dias.transects').controller('GeoFilterController', function ($scope, filter, TRANSECT_ID, $q, images) {
+angular.module('biigle.transects').controller('GeoFilterController', function ($scope, filter, TRANSECT_ID, $q, images) {
         "use strict";
         var key = 'biigle.geo.imageSequence.' + TRANSECT_ID;
         var seqence = [];

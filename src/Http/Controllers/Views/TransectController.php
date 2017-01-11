@@ -1,13 +1,13 @@
 <?php
 
-namespace Dias\Modules\Geo\Http\Controllers\Views;
+namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
 use DB;
-use Dias\Role;
-use Dias\Transect;
-use Dias\LabelTree;
+use Biigle\Role;
+use Biigle\Transect;
+use Biigle\LabelTree;
 use Illuminate\Contracts\Auth\Guard;
-use Dias\Http\Controllers\Views\Controller;
+use Biigle\Http\Controllers\Views\Controller;
 
 class TransectController extends Controller
 {
