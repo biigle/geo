@@ -1,9 +1,9 @@
 /**
- * World map displaying positions of all transect images
+ * World map displaying positions of all volume images
  */
 biigle.$viewModel('geo-map', function (element) {
     var events = biigle.$require('geo.events');
-    var transectId = biigle.$require('geo.transect.id');
+    var volumeId = biigle.$require('geo.volume.id');
     var imageWithLabel = biigle.$require('geo.api.imageWithLabel');
     var messages = biigle.$require('messages.store');
 
@@ -13,7 +13,7 @@ biigle.$viewModel('geo-map', function (element) {
             allImages: biigle.$require('geo.images'),
             filteredImages: [],
             selectedLabels: [],
-            key: 'biigle.geo.imageSequence.' + transectId,
+            key: 'biigle.geo.imageSequence.' + volumeId,
             filteredImageCache: {}
         },
         computed: {
@@ -53,7 +53,7 @@ biigle.$viewModel('geo-map', function (element) {
             handleSelectedLabel: function (label) {
                 if (!this.filteredImageCache.hasOwnProperty(label.id)) {
                     events.$emit('loading.start');
-                    imageWithLabel.get({tid: transectId, lid: label.id}, {}).bind(this)
+                    imageWithLabel.get({tid: volumeId, lid: label.id}, {}).bind(this)
                         .then(function (response) {
                             this.filteredImageCache[label.id] = response.data;
                             this.addSelectedLabel(label);
