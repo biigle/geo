@@ -1,13 +1,13 @@
 /**
- * @namespace biigle.transects
+ * @namespace biigle.volumes
  * @ngdoc controller
  * @name GeoFilterController
- * @memberOf biigle.transects
+ * @memberOf biigle.volumes
  * @description Manages the annotation filter feature
  */
-angular.module('biigle.transects').controller('GeoFilterController', function ($scope, filter, TRANSECT_ID, $q, images) {
+angular.module('biigle.volumes').controller('GeoFilterController', function ($scope, filter, VOLUME_ID, $q, images) {
         "use strict";
-        var key = 'biigle.geo.imageSequence.' + TRANSECT_ID;
+        var key = 'biigle.geo.imageSequence.' + VOLUME_ID;
         var seqence = [];
 
         var refreshSequence = function () {

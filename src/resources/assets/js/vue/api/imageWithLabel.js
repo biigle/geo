@@ -5,10 +5,10 @@
  *
  * Get image IDs:
  *
- * resource.query({tid: transectId, lid: labelId}, {}).then(...)
+ * resource.query({tid: volumeId, lid: labelId}, {}).then(...)
  *
  * @type {Vue.resource}
  */
 biigle.$declare('geo.api.imageWithLabel', Vue.resource(
-    '/api/v1/transects{/tid}/images/filter/annotation-label{/lid}', {}
+    '/api/v1/volumes{/tid}/images/filter/annotation-label{/lid}', {}
 ));

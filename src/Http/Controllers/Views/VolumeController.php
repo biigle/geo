@@ -4,44 +4,44 @@ namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
 use DB;
 use Biigle\Role;
-use Biigle\Transect;
+use Biigle\Volume;
 use Biigle\LabelTree;
 use Illuminate\Contracts\Auth\Guard;
 use Biigle\Http\Controllers\Views\Controller;
 
-class TransectController extends Controller
+class VolumeController extends Controller
 {
     /**
-     * Shows the transect geo page.
+     * Shows the volume geo page.
      *
      * @param Guard $auth
-     * @param int $id transect ID
+     * @param int $id volume ID
      *
      * @return \Illuminate\Http\Response
      */
     public function show(Guard $auth, $id)
     {
-        $transect = Transect::select('id', 'name')->findOrFail($id);
-        $this->authorize('access', $transect);
-        if (!$transect->hasGeoInfo()) abort(404);
+        $volume = Volume::select('id', 'name')->findOrFail($id);
+        $this->authorize('access', $volume);
+        if (!$volume->hasGeoInfo()) abort(404);
 
         $user = $auth->user();
 
-        $images = $transect->images()->select('id', 'lng', 'lat')->get();
+        $images = $volume->images()->select('id', 'lng', 'lat')->get();
 
         if ($user->isAdmin) {
             // admins have no restrictions
-            $projectIds = $transect->projects()->pluck('id');
+            $projectIds = $volume->projects()->pluck('id');
         } else {
-            // array of all project IDs that the user and the transect have in common
+            // array of all project IDs that the user and the volume have in common
             // and where the user is editor or admin
             $projectIds = DB::table('project_user')
                 ->where('user_id', $user->id)
-                ->whereIn('project_id', function ($query) use ($transect) {
-                    $query->select('project_transect.project_id')
-                        ->from('project_transect')
-                        ->join('project_user', 'project_transect.project_id', '=', 'project_user.project_id')
-                        ->where('project_transect.transect_id', $transect->id)
+                ->whereIn('project_id', function ($query) use ($volume) {
+                    $query->select('project_volume.project_id')
+                        ->from('project_volume')
+                        ->join('project_user', 'project_volume.project_id', '=', 'project_user.project_id')
+                        ->where('project_volume.volume_id', $volume->id)
                         ->whereIn('project_user.project_role_id', [Role::$editor->id, Role::$admin->id]);
                 })
                 ->pluck('project_id');
@@ -57,6 +57,6 @@ class TransectController extends Controller
             })
             ->get();
 
-        return view('geo::show', compact('transect', 'images', 'trees'));
+        return view('geo::show', compact('volume', 'images', 'trees'));
     }
 }

@@ -5,8 +5,8 @@ $router->group([
         'namespace' => 'Views',
     ], function ($router) {
 
-    $router->get('transects/{id}/geo', [
-        'as'   => 'transect-geo',
-        'uses' => 'TransectController@show',
+    $router->get('volumes/{id}/geo', [
+        'as'   => 'volume-geo',
+        'uses' => 'VolumeController@show',
     ]);
 });
