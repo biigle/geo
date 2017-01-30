@@ -8,6 +8,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
