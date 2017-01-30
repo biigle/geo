@@ -3,6 +3,7 @@
 @section('title'){{ $volume->name }}@stop
 
 @push('styles')
+<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/geo/styles/ol.css') }}">
 <link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
 @endpush
