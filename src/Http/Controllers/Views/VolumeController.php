@@ -23,7 +23,9 @@ class VolumeController extends Controller
     {
         $volume = Volume::select('id', 'name')->findOrFail($id);
         $this->authorize('access', $volume);
-        if (!$volume->hasGeoInfo()) abort(404);
+        if (!$volume->hasGeoInfo()) {
+            abort(404);
+        }
 
         $user = $auth->user();
 

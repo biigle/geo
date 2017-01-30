@@ -7,7 +7,8 @@ use Biigle\Tests\ImageTest;
 
 class VolumeControllerTest extends ApiTestCase
 {
-    public function testShow() {
+    public function testShow()
+    {
         $id = $this->volume()->id;
 
         // not logged in
