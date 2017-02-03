@@ -10,8 +10,8 @@ biigle.$viewModel('geo-sidebar', function (element) {
             labelTrees: biigle.$require('geo.labelTrees'),
         },
         components: {
-            sidebar: biigle.$require('geo.components.sidebar'),
-            sidebarTab: biigle.$require('geo.components.sidebarTab'),
+            sidebar: biigle.$require('core.components.sidebar'),
+            sidebarTab: biigle.$require('core.components.sidebarTab'),
             labelTrees: biigle.$require('labelTrees.components.labelTrees'),
         },
         methods: {
