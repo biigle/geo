@@ -10,5 +10,5 @@
  * @type {Vue.resource}
  */
 biigle.$declare('geo.api.imageWithLabel', Vue.resource(
-    '/api/v1/volumes{/tid}/images/filter/annotation-label{/lid}', {}
+    'api/v1/volumes{/tid}/images/filter/annotation-label{/lid}', {}
 ));
