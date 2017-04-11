@@ -14,6 +14,12 @@
             data: function () {
                 return {name: 'geo selection'};
             },
+            created: function () {
+                var self = this;
+                window.addEventListener('storage', function () {
+                    self.$emit('refresh', self.rule);
+                });
+            },
         },
         getSequence: function (volumeId) {
             return new Vue.Promise(function (resolve, reject) {
@@ -23,7 +29,4 @@
     };
 
     biigle.$require('volumes.stores.filters').push(filter);
-    window.addEventListener('storage', function () {
-        bus.$emit('filters.refresh', filter.id);
-    });
 })();
