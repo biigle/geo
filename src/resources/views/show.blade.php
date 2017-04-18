@@ -3,11 +3,13 @@
 @section('title'){{ $volume->name }}@stop
 
 @push('styles')
+<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/geo/styles/ol.css') }}">
 <link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
+<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
@@ -22,8 +24,8 @@
     <section id="geo-map" class="geo__map">
         <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
-    <sidebar id="geo-sidebar" class="geo__sidebar" v-on:toggle="handleSidebarToggle">
-        <sidebar-tab v-cloak slot="tabs" name="labels" icon="tags" title="Filter images by label">
+    <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle">
+        <sidebar-tab v-cloak name="labels" icon="tags" title="Filter images by label">
             <label-trees :trees="labelTrees" :multiselect="true" v-on:select="handleSelect" v-on:deselect="handleDeselect" v-on:clear="handleCleared"></label-trees>
         </sidebar-tab>
     </sidebar>

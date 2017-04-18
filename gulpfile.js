@@ -15,19 +15,19 @@ gulp.task('sass-main', function () {
 gulp.task('sass', ['sass-main']);
 
 gulp.task('js-main', function (cb) {
-    h.angular('vue/**/*.js', 'main.js', cb);
+    h.angular('geo/**/*.js', 'main.js', cb);
 });
 
 gulp.task('js-volumes', function (cb) {
-    h.angular('angular/volumes/**/*.js', 'volumes.js', cb);
+    h.angular('volumes/**/*.js', 'volumes.js', cb);
 });
 
 gulp.task('js', ['js-main', 'js-volumes']);
 
 gulp.task('watch', function () {
     gulp.watch(h.paths.sass + '**/*.scss', ['sass']);
-    gulp.watch(h.paths.js + 'vue/**/*.js', ['js-main']);
-    gulp.watch(h.paths.js + 'angular/volumes/**/*.js', ['js-volumes']);
+    gulp.watch(h.paths.js + 'geo/**/*.js', ['js-main']);
+    gulp.watch(h.paths.js + 'volumes/**/*.js', ['js-volumes']);
     gulp.watch(h.paths.public + '**/*', publish);
 });
 
