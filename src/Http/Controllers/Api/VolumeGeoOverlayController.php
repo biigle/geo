@@ -2,7 +2,9 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
+use Exception;
 use Biigle\Volume;
+use Illuminate\Http\Request;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
 
@@ -37,5 +39,76 @@ class VolumeGeoOverlayController extends Controller
         $this->authorize('access', $volume);
 
         return GeoOverlay::where('volume_id', $id)->get();
+    }
+
+    /**
+     * Stores a new geo overlay that was uploaded with the plain method
+     *
+     * @api {post} volumes/:id/geo-overlays/plain Upload a plain geo overlay
+     * @apiGroup Volumes
+     * @apiName VolumesumesStoreGeoOverlaysPlain
+     * @apiPermission projectAdmin
+     *
+     * @apiParam {Number} id The volume ID.
+     * @apiParam (Required attributes) {File} file The image file of the geo overlay. Allowed file formats ate JPEG, PNG and TIFF. The file must not be larger than 10 MB.
+     * @apiParam (Required attributes) {Number} top_left_lat Latitude of the top left corner of the image file in Spherical Mercator.
+     * @apiParam (Required attributes) {Number} top_left_lng Longitude of the top left corner of the image file in Spherical Mercator.
+     * @apiParam (Required attributes) {Number} bottom_right_lat Latitude of the bottom right corner of the image file in Spherical Mercator.
+     * @apiParam (Required attributes) {Number} bottom_right_lng Longitude of the bottom right corner of the image file in Spherical Mercator.
+     *
+     * @apiParam (Optional attributes) {String} name A short description of the geo overlay. If empty, the filename will be taken.
+     *
+     * @apiParamExample {String} Request example:
+     * file: bath_map_1.jpg
+     * top_left_lat: 52.03737667
+     * top_left_lng: 8.49285457
+     * bottom_right_lat: 52.03719188
+     * bottom_right_lng: 8.4931067
+     *
+     * @apiSuccessExample {json} Success response:
+     * {
+     *     "id": 1,
+     *     "name": "bath_map_1.jpg",
+     *     "volume_id": 123,
+     *     "top_left_lat": 52.03737667,
+     *     "top_left_lng": 8.49285457,
+     *     "bottom_right_lat": 52.03719188,
+     *     "bottom_right_lng": 8.4931067,
+     * }
+     *
+     * @param Request $request
+     * @param int $id Volume ID
+     */
+    public function storePlain(Request $request, $id)
+    {
+        $volume = Volume::findOrFail($id);
+        $this->authorize('update', $volume);
+
+        $this->validate($request, array_merge(GeoOverlay::$createRules, [
+            'top_left_lat' => 'required|numeric',
+            'top_left_lng' => 'required|numeric',
+            'bottom_right_lat' => 'required|numeric',
+            'bottom_right_lng' => 'required|numeric',
+        ]));
+
+        $file = $request->file('file');
+
+        $overlay = new GeoOverlay;
+        $overlay->volume_id = $id;
+        $overlay->name = $request->input('name', $file->getClientOriginalName());
+        $overlay->top_left_lat = $request->input('top_left_lat');
+        $overlay->top_left_lng = $request->input('top_left_lng');
+        $overlay->bottom_right_lat = $request->input('bottom_right_lat');
+        $overlay->bottom_right_lng = $request->input('bottom_right_lng');
+        $overlay->save();
+
+        try {
+            $file->move($overlay->directory, $overlay->filename);
+        } catch (Exception $e) {
+            $overlay->delete();
+            throw $e;
+        }
+
+        return $overlay;
     }
 }

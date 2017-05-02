@@ -50,6 +50,12 @@ class GeoOverlayTest extends TestCase
         $this->assertEquals("{$path}/{$model->volume_id}", $model->directory);
     }
 
+    public function testFilenameAttribute()
+    {
+        $model = self::create();
+        $this->assertEquals("{$model->id}", $model->filename);
+    }
+
     public function testPathAttribute()
     {
         $model = self::create();

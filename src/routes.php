@@ -19,6 +19,11 @@ $router->group([
     $router->get('volumes/{id}/geo-overlays', [
         'uses' => 'VolumeGeoOverlayController@index',
     ]);
+
+    $router->post('volumes/{id}/geo-overlays/plain', [
+        'uses' => 'VolumeGeoOverlayController@storePlain',
+    ]);
+
     $router->get('geo-overlays/{id}/file', [
         'uses' => 'GeoOverlayController@showFile',
     ]);

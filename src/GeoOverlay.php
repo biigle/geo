@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 class GeoOverlay extends Model
 {
     /**
+     * Validation rules for creating a new geo overlay.
+     *
+     * @var array
+     */
+    public static $createRules = [
+        'name' => 'filled|max:512',
+        'file' => 'required|file|max:10000|mimetypes:image/jpeg,image/png,image/tiff',
+    ];
+
+    /**
      * Don't maintain timestamps for this model.
      *
      * @var bool
@@ -77,12 +87,22 @@ class GeoOverlay extends Model
     }
 
     /**
+     * Get filename of the overlay.
+     *
+     * @return string
+     */
+    public function getFilenameAttribute()
+    {
+        return strval($this->id);
+    }
+
+    /**
      * Get the local path to the overlay image file.
      *
      * @return string
      */
     public function getPathAttribute()
     {
-        return $this->directory."/{$this->id}";
+        return $this->directory.'/'.$this->filename;
     }
 }
