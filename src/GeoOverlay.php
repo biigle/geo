@@ -4,6 +4,7 @@ namespace Biigle\Modules\Geo;
 
 use File;
 use Biigle\Volume;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
 
 class GeoOverlay extends Model
@@ -104,5 +105,21 @@ class GeoOverlay extends Model
     public function getPathAttribute()
     {
         return $this->directory.'/'.$this->filename;
+    }
+
+    /**
+     * Store the uploaded image file of thes geo overlay.
+     *
+     * @param UploadedFile $file
+     *
+     * @return Symfony\Component\HttpFoundation\File\File Target file
+     */
+    public function storeFile(UploadedFile $file)
+    {
+        if (!File::isDirectory($this->directory)) {
+            File::makeDirectory($this->directory, 0755, true);
+        }
+
+        return $file->move($this->directory, $this->filename);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
+use File;
 use Mockery;
 use ApiTestCase;
 use Illuminate\Http\UploadedFile;
@@ -42,6 +43,8 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->beAdmin();
         $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/plain");
         $this->assertResponseStatus(422);
+
+        File::shouldReceive('isDirectory')->once()->andReturn(true);
 
         $mock = Mockery::mock(UploadedFile::class);
 

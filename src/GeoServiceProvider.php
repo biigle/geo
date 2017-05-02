@@ -40,6 +40,8 @@ class GeoServiceProvider extends ServiceProvider
         $modules->addMixin('geo', 'manualTutorial');
         $modules->addMixin('geo', 'volumesSidebar');
         $modules->addMixin('geo', 'volumesScripts');
+        $modules->addMixin('geo', 'volumesEditScripts');
+        $modules->addMixin('geo', 'volumesEditRight');
     }
 
     /**

@@ -50,7 +50,7 @@ class VolumeGeoOverlayController extends Controller
      * @apiPermission projectAdmin
      *
      * @apiParam {Number} id The volume ID.
-     * @apiParam (Required attributes) {File} file The image file of the geo overlay. Allowed file formats ate JPEG, PNG and TIFF. The file must not be larger than 10 MB.
+     * @apiParam (Required attributes) {File} file The image file of the geo overlay. Allowed file formats ate JPEG, PNG and TIFF. The file must not be larger than 10 MByte.
      * @apiParam (Required attributes) {Number} top_left_lat Latitude of the top left corner of the image file in Spherical Mercator.
      * @apiParam (Required attributes) {Number} top_left_lng Longitude of the top left corner of the image file in Spherical Mercator.
      * @apiParam (Required attributes) {Number} bottom_right_lat Latitude of the bottom right corner of the image file in Spherical Mercator.
@@ -85,10 +85,10 @@ class VolumeGeoOverlayController extends Controller
         $this->authorize('update', $volume);
 
         $this->validate($request, array_merge(GeoOverlay::$createRules, [
-            'top_left_lat' => 'required|numeric',
-            'top_left_lng' => 'required|numeric',
-            'bottom_right_lat' => 'required|numeric',
-            'bottom_right_lng' => 'required|numeric',
+            'top_left_lat' => 'required|numeric|max:90|min:-90',
+            'top_left_lng' => 'required|numeric|max:180|min:-180',
+            'bottom_right_lat' => 'required|numeric|max:90|min:-90',
+            'bottom_right_lng' => 'required|numeric|max:180|min:-180',
         ]));
 
         $file = $request->file('file');
@@ -103,7 +103,7 @@ class VolumeGeoOverlayController extends Controller
         $overlay->save();
 
         try {
-            $file->move($overlay->directory, $overlay->filename);
+            $overlay->storeFile($file);
         } catch (Exception $e) {
             $overlay->delete();
             throw $e;
