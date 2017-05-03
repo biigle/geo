@@ -37,7 +37,7 @@
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <p class="help-block">Latitude and longitude coordinates must be given in Spherical Mercator.</p>
+            <p class="help-block">Latitude and longitude coordinates must be given in WGS 84 (EPSG:4326).</p>
             <button type="submit" class="btn btn-success" title="Upload the new geo overlay" :disabled="!canSubmit">Submit</button>
         </div>
     </div>

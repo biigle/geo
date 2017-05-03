@@ -20,8 +20,8 @@ class CreateGeoOverlaysTable extends Migration
          | Each overlay consists of an image and the geospatial information where the
          | image should be displayed on the world map. While the input format can vary
          | the geospatial information will always be converted to the latitude and
-         | longitude of the top left and bottom right corners of the image in Spherical
-         | Mercator (EPSG:3857).
+         | longitude of the top left and bottom right corners of the image in WGS 84
+         | (EPSG:4326).
          */
         Schema::create('geo_overlays', function (Blueprint $table) {
             $table->increments('id');

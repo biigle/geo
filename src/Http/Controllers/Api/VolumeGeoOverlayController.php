@@ -51,10 +51,10 @@ class VolumeGeoOverlayController extends Controller
      *
      * @apiParam {Number} id The volume ID.
      * @apiParam (Required attributes) {File} file The image file of the geo overlay. Allowed file formats ate JPEG, PNG and TIFF. The file must not be larger than 10 MByte.
-     * @apiParam (Required attributes) {Number} top_left_lat Latitude of the top left corner of the image file in Spherical Mercator.
-     * @apiParam (Required attributes) {Number} top_left_lng Longitude of the top left corner of the image file in Spherical Mercator.
-     * @apiParam (Required attributes) {Number} bottom_right_lat Latitude of the bottom right corner of the image file in Spherical Mercator.
-     * @apiParam (Required attributes) {Number} bottom_right_lng Longitude of the bottom right corner of the image file in Spherical Mercator.
+     * @apiParam (Required attributes) {Number} top_left_lat Latitude of the top left corner of the image file in WGS 84 (EPSG:4326).
+     * @apiParam (Required attributes) {Number} top_left_lng Longitude of the top left corner of the image file in WGS 84 (EPSG:4326).
+     * @apiParam (Required attributes) {Number} bottom_right_lat Latitude of the bottom right corner of the image file in WGS 84 (EPSG:4326).
+     * @apiParam (Required attributes) {Number} bottom_right_lng Longitude of the bottom right corner of the image file in WGS 84 (EPSG:4326).
      *
      * @apiParam (Optional attributes) {String} name A short description of the geo overlay. If empty, the filename will be taken.
      *
