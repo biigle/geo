@@ -14,7 +14,7 @@ biigle.$component('geo.components.imageMap', {
             type: Array,
             default: function () {
                 return [];
-            }
+            },
         },
         interactive: {
             type: Boolean,
@@ -35,20 +35,22 @@ biigle.$component('geo.components.imageMap', {
     },
     computed: {
         features: function () {
-            var features = [];
-            for (var i = this.images.length - 1; i >= 0; i--) {
-                features.push(new ol.Feature({
-                    id: this.images[i].id,
-                    // Determine if a feature shoule be initially selected.
-                    preselected: this.preselected.indexOf(this.images[i].id) !== -1,
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                        this.images[i].lng,
-                        this.images[i].lat
-                    ]))
-                }));
-            }
+            var preselected = {};
+            this.preselected.forEach(function (p) {
+                preselected[p] = null;
+            });
 
-            return features;
+            return this.images.map(function (image) {
+                return new ol.Feature({
+                    id: image.id,
+                    // Determine if a feature should be initially selected.
+                    preselected: preselected.hasOwnProperty(image.id),
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                        image.lng,
+                        image.lat
+                    ])),
+                });
+            });
         }
     },
     methods: {
