@@ -14,7 +14,7 @@ biigle.$component('geo.components.imageMap', {
             type: Array,
             default: function () {
                 return [];
-            }
+            },
         },
         interactive: {
             type: Boolean,
@@ -26,7 +26,14 @@ biigle.$component('geo.components.imageMap', {
         selectable: {
             type: Boolean,
             default: false
-        }
+        },
+        // Must be objects of type ol.layer
+        overlays: {
+            type: Array,
+            default: function () {
+                return [];
+            },
+        },
     },
     data: function () {
         return {
@@ -35,20 +42,22 @@ biigle.$component('geo.components.imageMap', {
     },
     computed: {
         features: function () {
-            var features = [];
-            for (var i = this.images.length - 1; i >= 0; i--) {
-                features.push(new ol.Feature({
-                    id: this.images[i].id,
-                    // Determine if a feature shoule be initially selected.
-                    preselected: this.preselected.indexOf(this.images[i].id) !== -1,
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                        this.images[i].lng,
-                        this.images[i].lat
-                    ]))
-                }));
-            }
+            var preselected = {};
+            this.preselected.forEach(function (p) {
+                preselected[p] = null;
+            });
 
-            return features;
+            return this.images.map(function (image) {
+                return new ol.Feature({
+                    id: image.id,
+                    // Determine if a feature should be initially selected.
+                    preselected: preselected.hasOwnProperty(image.id),
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                        image.lng,
+                        image.lat
+                    ])),
+                });
+            });
         }
     },
     methods: {
@@ -63,12 +72,11 @@ biigle.$component('geo.components.imageMap', {
         }
     },
     created: function () {
-        var events = biigle.$require('geo.events');
-        events.$on('imageMap.update', this.updateFeatures);
+        biigle.$require('biigle.events').$on('imageMap.update', this.updateFeatures);
     },
     mounted: function () {
         var style = biigle.$require('geo.ol.style');
-        var events = biigle.$require('geo.events');
+        var events = biigle.$require('biigle.events');
         var self = this;
 
         // var source = new ol.source.Vector({features: features});
@@ -86,9 +94,13 @@ biigle.$component('geo.components.imageMap', {
             updateWhileInteracting: true
         });
 
+        var layers = [tileLayer];
+        Array.prototype.push.apply(layers, this.overlays);
+        layers.push(vectorLayer);
+
         var map = new ol.Map({
             target: this.$el,
-            layers: [tileLayer, vectorLayer],
+            layers: layers,
             view: new ol.View(),
             interactions: ol.interaction.defaults({
                 altShiftDragRotate: false,

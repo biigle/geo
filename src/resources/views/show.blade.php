@@ -16,16 +16,18 @@
     biigle.$declare('geo.images', {!! $images !!});
     biigle.$declare('geo.volume', {!! $volume !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});
+    biigle.$declare('geo.overlays', {!! \Biigle\Modules\Geo\GeoOverlay::where('volume_id', $volume->id)->get() !!});
+    biigle.$declare('geo.overlayUrl', '{!! url('api/v1/geo-overlays/{id}/file') !!}');
 </script>
 @endpush
 
 @section('content')
 <main class="geo__container">
     <section id="geo-map" class="geo__map">
-        <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+        <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays"></image-map>
     </section>
-    <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle">
-        <sidebar-tab v-cloak name="labels" icon="tags" title="Filter images by label">
+    <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>
+        <sidebar-tab name="labels" icon="tags" title="Filter images by label">
             <label-trees :trees="labelTrees" :multiselect="true" v-on:select="handleSelect" v-on:deselect="handleDeselect" v-on:clear="handleCleared"></label-trees>
         </sidebar-tab>
     </sidebar>

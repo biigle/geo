@@ -2,10 +2,11 @@
  * World map displaying positions of all volume images
  */
 biigle.$viewModel('geo-map', function (element) {
-    var events = biigle.$require('geo.events');
+    var events = biigle.$require('biigle.events');
     var volumeId = biigle.$require('geo.volume.id');
     var imageWithLabel = biigle.$require('geo.api.imageWithLabel');
     var messages = biigle.$require('messages.store');
+    var overlayUrl = biigle.$require('geo.overlayUrl');
 
     new Vue({
         el: element,
@@ -14,7 +15,8 @@ biigle.$viewModel('geo-map', function (element) {
             filteredImages: [],
             selectedLabels: [],
             key: 'biigle.geo.imageSequence.' + volumeId,
-            filteredImageCache: {}
+            filteredImageCache: {},
+            baseOverlays: biigle.$require('geo.overlays'),
         },
         computed: {
             selectedImages: function () {
@@ -31,7 +33,23 @@ biigle.$viewModel('geo-map', function (element) {
                 }
 
                 return this.allImages;
-            }
+            },
+            overlays: function () {
+                return this.baseOverlays.map(function (overlay) {
+                    return new ol.layer.Image({
+                        source: new ol.source.ImageStatic({
+                            url: overlayUrl.replace('{id}', overlay.id),
+                            imageExtent: [
+                                overlay.top_left_lng,
+                                overlay.bottom_right_lat,
+                                overlay.bottom_right_lng,
+                                overlay.top_left_lat,
+                            ],
+                            projection: 'EPSG:4326',
+                        }),
+                    });
+                });
+            },
         },
         components: {
             imageMap: biigle.$require('geo.components.imageMap'),

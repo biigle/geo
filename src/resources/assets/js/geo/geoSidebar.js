@@ -2,7 +2,7 @@
  * The sidebar of the geo show view
  */
 biigle.$viewModel('geo-sidebar', function (element) {
-    var events = biigle.$require('geo.events');
+    var events = biigle.$require('biigle.events');
 
     new Vue({
         el: element,
