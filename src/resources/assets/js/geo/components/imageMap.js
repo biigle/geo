@@ -65,12 +65,11 @@ biigle.$component('geo.components.imageMap', {
         }
     },
     created: function () {
-        var events = biigle.$require('geo.events');
-        events.$on('imageMap.update', this.updateFeatures);
+        biigle.$require('biigle.events').$on('imageMap.update', this.updateFeatures);
     },
     mounted: function () {
         var style = biigle.$require('geo.ol.style');
-        var events = biigle.$require('geo.events');
+        var events = biigle.$require('biigle.events');
         var self = this;
 
         // var source = new ol.source.Vector({features: features});

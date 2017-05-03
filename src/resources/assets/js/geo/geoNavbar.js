@@ -2,7 +2,7 @@
  * Dynamic information in the navbar of the geo show view
  */
 biigle.$viewModel('geo-navbar', function (element) {
-    var events = biigle.$require('geo.events');
+    var events = biigle.$require('biigle.events');
     var images = biigle.$require('geo.images');
 
     new Vue({
