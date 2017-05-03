@@ -26,7 +26,14 @@ biigle.$component('geo.components.imageMap', {
         selectable: {
             type: Boolean,
             default: false
-        }
+        },
+        // Must be objects of type ol.layer
+        overlays: {
+            type: Array,
+            default: function () {
+                return [];
+            },
+        },
     },
     data: function () {
         return {
@@ -87,9 +94,13 @@ biigle.$component('geo.components.imageMap', {
             updateWhileInteracting: true
         });
 
+        var layers = [tileLayer];
+        Array.prototype.push.apply(layers, this.overlays);
+        layers.push(vectorLayer);
+
         var map = new ol.Map({
             target: this.$el,
-            layers: [tileLayer, vectorLayer],
+            layers: layers,
             view: new ol.View(),
             interactions: ol.interaction.defaults({
                 altShiftDragRotate: false,
