@@ -4,7 +4,6 @@
 biigle.$viewModel('volume-geo-overlay-upload', function (element) {
     var messages = biigle.$require('messages.store');
     var resource = biigle.$require('api.geoOverlays');
-    var volumeId = biigle.$require('volumes.id');
 
     var overlayItem = {
         props: ['overlay'],
@@ -38,9 +37,6 @@ biigle.$viewModel('volume-geo-overlay-upload', function (element) {
             plainOverlayForm: biigle.$require('geo.volumes.components.plainOverlayForm'),
         },
         data: {
-            error: false,
-            success: false,
-            message: undefined,
             overlays: biigle.$require('volumes.geoOverlays'),
         },
         computed: {
