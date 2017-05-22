@@ -2,7 +2,7 @@
  * World map displaying positions of all volume images
  */
 biigle.$viewModel('geo-map', function (element) {
-    var events = biigle.$require('biigle.events');
+    var events = biigle.$require('events');
     var volumeId = biigle.$require('geo.volume.id');
     var imageWithLabel = biigle.$require('geo.api.imageWithLabel');
     var messages = biigle.$require('messages.store');
