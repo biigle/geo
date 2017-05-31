@@ -1,6 +1,6 @@
-<h4>
+<h3>
     <a href="{{route('manual-tutorials', ['geo', 'volume-map'])}}">Volume map</a>
-</h4>
+</h3>
 
 <p>
     See the volume world map in action.
