@@ -14,7 +14,7 @@ $router->group([
 $router->group([
     'namespace' => 'Api',
     'prefix' => 'api/v1',
-    'middleware' => 'auth.api',
+    'middleware' => 'auth:web,api',
 ], function ($router) {
     $router->get('volumes/{id}/geo-overlays', [
         'uses' => 'VolumeGeoOverlayController@index',
