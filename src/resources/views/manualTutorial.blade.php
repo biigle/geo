@@ -3,5 +3,5 @@
 </h3>
 
 <p>
-    See the volume world map in action.
+    The volume map shows the locations of images on a world map.
 </p>
