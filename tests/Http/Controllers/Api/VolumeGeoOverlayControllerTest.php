@@ -21,13 +21,13 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->doTestApiRoute('GET', "/api/v1/volumes/{$id}/geo-overlays");
 
         $this->beUser();
-        $this->get("/api/v1/volumes/{$id}/geo-overlays");
-        $this->assertResponseStatus(403);
+        $response = $this->get("/api/v1/volumes/{$id}/geo-overlays");
+        $response->assertStatus(403);
 
         $this->beGuest();
-        $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
-            ->seeJson([$overlay->toArray()]);
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
+            ->assertJsonFragment([$overlay->toArray()]);
+        $response->assertStatus(200);
     }
 
     public function testStorePlain()
@@ -37,12 +37,12 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/plain");
 
         $this->beEditor();
-        $this->post("/api/v1/volumes/{$id}/geo-overlays/plain");
-        $this->assertResponseStatus(403);
+        $response = $this->post("/api/v1/volumes/{$id}/geo-overlays/plain");
+        $response->assertStatus(403);
 
         $this->beAdmin();
-        $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/plain");
-        $this->assertResponseStatus(422);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/plain");
+        $response->assertStatus(422);
 
         File::shouldReceive('isDirectory')->once()->andReturn(true);
 
@@ -56,19 +56,20 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         $mock->shouldReceive('move')->once()->with(config('geo.overlay_storage').'/'.$id, 1);
         $mock->shouldReceive('getClientOriginalName')->andReturn('map.jpg');
+        $mock->shouldReceive('getClientOriginalExtension')->andReturn('map.jpg');
 
-        $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/plain", [], [], ['file' => $mock]);
-        $this->assertResponseStatus(422);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/plain", [], [], ['file' => $mock]);
+        $response->assertStatus(422);
 
         $this->assertFalse(GeoOverlay::exists());
 
-        $this->call('POST', "/api/v1/volumes/{$id}/geo-overlays/plain", [
+        $response = $this->call('POST', "/api/v1/volumes/{$id}/geo-overlays/plain", [
             'top_left_lat' => 1.223344,
             'top_left_lng' => 1.334455,
             'bottom_right_lat' => 1.445566,
             'bottom_right_lng' => 1.667788,
         ], [], ['file' => $mock]);
-        $this->assertResponseOk();
+        $response->assertStatus(200);
 
         $overlay = GeoOverlay::where('volume_id', $id)->first();
         $this->assertNotNull($overlay);
@@ -78,6 +79,6 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->assertEquals($overlay->bottom_right_lng, 1.667788, '', 0.00001);
         $this->assertEquals($overlay->name, 'map.jpg');
 
-        $this->seeJsonEquals($overlay->toArray());
+        $response->assertExactJson($overlay->toArray());
     }
 }
