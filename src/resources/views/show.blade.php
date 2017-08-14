@@ -1,6 +1,6 @@
 @extends('app')
 
-@section('title'){{ $volume->name }}@stop
+@section('title', $volume->name)
 
 @push('styles')
 <link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
