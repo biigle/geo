@@ -12,17 +12,17 @@ class VolumeControllerTest extends ApiTestCase
         $id = $this->volume()->id;
 
         // not logged in
-        $this->get("volumes/{$id}/geo");
-        $this->assertResponseStatus(302);
+        $response = $this->get("volumes/{$id}/geo");
+        $response->assertStatus(302);
 
         // doesn't belong to project
         $this->beUser();
-        $this->get("volumes/{$id}/geo");
-        $this->assertResponseStatus(403);
+        $response = $this->get("volumes/{$id}/geo");
+        $response->assertStatus(403);
 
         $this->beEditor();
-        $this->get("volumes/{$id}/geo");
-        $this->assertResponseStatus(404);
+        $response = $this->get("volumes/{$id}/geo");
+        $response->assertStatus(404);
 
         ImageTest::create([
             'lng' => 5.5,
@@ -31,7 +31,7 @@ class VolumeControllerTest extends ApiTestCase
         ]);
         $this->volume()->flushGeoInfoCache();
 
-        $this->get("volumes/{$id}/geo");
-        $this->assertResponseOk();
+        $response = $this->get("volumes/{$id}/geo");
+        $response->assertStatus(200);
     }
 }

@@ -20,16 +20,16 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->doTestApiRoute('GET', "/api/v1/geo-overlays/{$id}/file");
 
         $this->beUser();
-        $this->get("/api/v1/geo-overlays/{$id}/file");
-        $this->assertResponseStatus(403);
+        $response = $this->get("/api/v1/geo-overlays/{$id}/file");
+        $response->assertStatus(403);
 
         $this->beGuest();
         Response::shouldReceive('download')->once()
             ->with($overlay->path)
             ->andReturn('abc');
-        $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
-            ->see('abc');
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
+            ->assertSeeText('abc');
+        $response->assertStatus(200);
     }
 
     public function testShowFileNotFound()
@@ -44,8 +44,8 @@ class GeoOverlayControllerTest extends ApiTestCase
             ->with($overlay->path)
             ->andThrow(FileNotFoundException::class);
         Response::shouldReceive('json')->passthru();
-        $this->json('GET', "/api/v1/geo-overlays/{$id}/file");
-        $this->assertResponseStatus(404);
+        $response = $this->json('GET', "/api/v1/geo-overlays/{$id}/file");
+        $response->assertStatus(404);
     }
 
     public function testDestroy()
@@ -58,15 +58,15 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->doTestApiRoute('DELETE', "/api/v1/geo-overlays/{$id}");
 
         $this->beEditor();
-        $this->delete("/api/v1/geo-overlays/{$id}");
-        $this->assertResponseStatus(403);
+        $response = $this->delete("/api/v1/geo-overlays/{$id}");
+        $response->assertStatus(403);
 
         $this->beAdmin();
         File::shouldReceive('exists')->once()->with($overlay->path)->andReturn(true);
         File::shouldReceive('delete')->once()->with($overlay->path);
         File::shouldReceive('files')->once()->with($overlay->directory)->andReturn([]);
         File::shouldReceive('deleteDirectory')->once()->with($overlay->directory);
-        $this->delete("/api/v1/geo-overlays/{$id}");
-        $this->assertResponseOk();
+        $response = $this->delete("/api/v1/geo-overlays/{$id}");
+        $response->assertStatus(200);
     }
 }
