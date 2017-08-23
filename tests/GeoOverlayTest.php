@@ -14,10 +14,10 @@ class GeoOverlayTest extends TestCase
         $faker = \Faker\Factory::create();
         $model = new GeoOverlay;
         $model->name = $faker->company();
-        $model->top_left_lng = $faker->randomFloat();
-        $model->top_left_lat = $faker->randomFloat();
-        $model->bottom_right_lng = $faker->randomFloat();
-        $model->bottom_right_lat = $faker->randomFloat();
+        $model->top_left_lng = $faker->randomNumber();
+        $model->top_left_lat = $faker->randomNumber();
+        $model->bottom_right_lng = $faker->randomNumber();
+        $model->bottom_right_lat = $faker->randomNumber();
         $model->volume_id = VolumeTest::create()->id;
         $model->save();
 
