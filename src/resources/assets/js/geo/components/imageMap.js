@@ -41,13 +41,18 @@ biigle.$component('geo.components.imageMap', {
         };
     },
     computed: {
+        imagesWithGps: function () {
+            return this.images.filter(function (image) {
+                return image.lat !== null && image.lng !== null;
+            });
+        },
         features: function () {
             var preselected = {};
             this.preselected.forEach(function (p) {
                 preselected[p] = null;
             });
 
-            return this.images.map(function (image) {
+            return this.imagesWithGps.map(function (image) {
                 return new ol.Feature({
                     id: image.id,
                     // Determine if a feature should be initially selected.
