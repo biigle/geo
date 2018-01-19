@@ -33,6 +33,10 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
     public function testStorePlain()
     {
         $id = $this->volume()->id;
+        // Get current ID so we can predict the next ID later.
+        $overlay = GeoOverlayTest::create();
+        $overlayId = $overlay->id;
+        $overlay->delete();
 
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/plain");
 
@@ -54,7 +58,7 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $mock->shouldReceive('getSize')->andReturn(2000);
         $mock->shouldReceive('getMimeType')->andReturn('image/jpeg');
 
-        $mock->shouldReceive('move')->once()->with(config('geo.overlay_storage').'/'.$id, 1);
+        $mock->shouldReceive('move')->once()->with(config('geo.overlay_storage').'/'.$id, $overlayId + 1);
         $mock->shouldReceive('getClientOriginalName')->andReturn('map.jpg');
         $mock->shouldReceive('getClientOriginalExtension')->andReturn('map.jpg');
 
