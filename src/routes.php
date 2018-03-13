@@ -9,6 +9,11 @@ $router->group([
         'as'   => 'volume-geo',
         'uses' => 'VolumeController@show',
     ]);
+
+    $router->get('projects/{id}/geo', [
+        'as'   => 'project-geo',
+        'uses' => 'ProjectController@show',
+    ]);
 });
 
 $router->group([
@@ -31,5 +36,9 @@ $router->group([
     $router->resource('geo-overlays', 'GeoOverlayController', [
         'only' => ['destroy'],
         'parameters' => ['geo-overlays' => 'id'],
+    ]);
+
+    $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
+        'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);
 });

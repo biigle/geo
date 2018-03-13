@@ -6,6 +6,7 @@ use DB;
 use Biigle\Role;
 use Biigle\Volume;
 use Biigle\LabelTree;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Contracts\Auth\Guard;
 use Biigle\Http\Controllers\Views\Controller;
 
@@ -59,6 +60,13 @@ class VolumeController extends Controller
             })
             ->get();
 
-        return view('geo::show', compact('volume', 'images', 'trees'));
+        $overlays = GeoOverlay::where('volume_id', $id)->get();
+
+        return view('geo::volumes.show', compact(
+            'volume',
+            'images',
+            'trees',
+            'overlays'
+        ));
     }
 }

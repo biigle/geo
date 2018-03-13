@@ -36,12 +36,17 @@ class GeoServiceProvider extends ServiceProvider
             require __DIR__.'/routes.php';
         });
 
-        $modules->addMixin('geo', 'imagesIndex');
-        $modules->addMixin('geo', 'manualTutorial');
-        $modules->addMixin('geo', 'volumesSidebar');
-        $modules->addMixin('geo', 'volumesScripts');
-        $modules->addMixin('geo', 'volumesEditScripts');
-        $modules->addMixin('geo', 'volumesEditRight');
+        $modules->register('geo', [
+            'viewMixins' => [
+                'imagesIndex',
+                'manualTutorial',
+                'volumesSidebar',
+                'volumesScripts',
+                'volumesEditScripts',
+                'volumesEditRight',
+                'projectsShowToolbar',
+            ],
+        ]);
     }
 
     /**

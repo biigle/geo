@@ -71,13 +71,12 @@ biigle.$component('geo.components.imageMap', {
                 return feature.get('id');
             });
         },
-        updateFeatures: function () {
-            this.source.clear();
-            this.source.addFeatures(this.features);
-        }
     },
-    created: function () {
-        biigle.$require('events').$on('imageMap.update', this.updateFeatures);
+    watch: {
+        features: function (features) {
+            this.source.clear();
+            this.source.addFeatures(features);
+        },
     },
     mounted: function () {
         var style = biigle.$require('geo.ol.style');
