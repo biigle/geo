@@ -61,7 +61,7 @@ class GeoOverlay extends Model
                 File::delete($overlay->path);
             }
 
-            if (empty(File::files($overlay->directory))) {
+            if (File::isDirectory($overlay->directory)) {
                 File::deleteDirectory($overlay->directory);
             }
         });

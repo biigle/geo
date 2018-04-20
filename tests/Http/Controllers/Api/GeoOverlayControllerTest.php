@@ -64,7 +64,7 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->beAdmin();
         File::shouldReceive('exists')->once()->with($overlay->path)->andReturn(true);
         File::shouldReceive('delete')->once()->with($overlay->path);
-        File::shouldReceive('files')->once()->with($overlay->directory)->andReturn([]);
+        File::shouldReceive('isDirectory')->once()->with($overlay->directory)->andReturn(true);
         File::shouldReceive('deleteDirectory')->once()->with($overlay->directory);
         $response = $this->delete("/api/v1/geo-overlays/{$id}");
         $response->assertStatus(200);
