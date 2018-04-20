@@ -10,5 +10,12 @@
         "psr-4": {
             "Biigle\\Modules\\Geo\\": "src"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Biigle\\Modules\\Geo\\GeoServiceProvider"
+            ]
+        }
     }
 }
