@@ -130,7 +130,7 @@ biigle.$component('geo.components.imageMap', {
 
             map.addControl(new ol.control.ZoomToExtent({
                 extent: extent,
-                label: '\ue097'
+                label: '\uf066'
             }));
 
             map.addControl(new ol.control.OverviewMap({

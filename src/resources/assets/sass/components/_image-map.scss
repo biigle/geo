@@ -1,8 +1,8 @@
 %custom-icon {
     color: white;
     display: block;
-    font-family: "Glyphicons Halflings";
-    font-weight: normal;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
 }
 
 .image-map {
@@ -12,7 +12,6 @@
 
     .ol-zoom-extent button {
         @extend %custom-icon;
-        padding-top: 1px;
     }
 
     .ol-overviewmap {

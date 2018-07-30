@@ -4,7 +4,7 @@
         Geo overlays
         <span class="pull-right">
             <loader :active="loading"></loader>
-            <button class="btn btn-default btn-xs" title="Add geo overlays" v-on:click="toggleEditing" :class="{active: editing}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+            <button class="btn btn-default btn-xs" title="Add geo overlays" v-on:click="toggleEditing" :class="{active: editing}"><span class="fa fa-plus" aria-hidden="true"></span></button>
         </span>
     </div>
     <div class="panel-body" v-if="editing" v-cloak>
