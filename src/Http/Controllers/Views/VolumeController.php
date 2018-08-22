@@ -2,9 +2,8 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
-use DB;
-use Biigle\Role;
 use Biigle\Volume;
+use Biigle\Project;
 use Biigle\LabelTree;
 use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Contracts\Auth\Guard;
@@ -36,18 +35,9 @@ class VolumeController extends Controller
             // Global admins have no restrictions.
             $projectIds = $volume->projects()->pluck('id');
         } else {
-            // array of all project IDs that the user and the volume have in common
-            // and where the user is editor or admin
-            $projectIds = DB::table('project_user')
-                ->where('user_id', $user->id)
-                ->whereIn('project_id', function ($query) use ($volume) {
-                    $query->select('project_volume.project_id')
-                        ->from('project_volume')
-                        ->join('project_user', 'project_volume.project_id', '=', 'project_user.project_id')
-                        ->where('project_volume.volume_id', $volume->id)
-                        ->whereIn('project_user.project_role_id', [Role::$editor->id, Role::$admin->id]);
-                })
-                ->pluck('project_id');
+            // Array of all project IDs that the user and the volume have in common
+            // and where the user is editor, expert or admin.
+            $projectIds = Project::inCommon($user, $volume->id)->pluck('id');
         }
 
         // all label trees that are used by all projects which are visible to the user
