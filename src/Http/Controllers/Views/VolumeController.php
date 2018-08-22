@@ -32,8 +32,8 @@ class VolumeController extends Controller
 
         $images = $volume->images()->select('id', 'lng', 'lat')->get();
 
-        if ($user->isAdmin) {
-            // admins have no restrictions
+        if ($user->can('sudo')) {
+            // Global admins have no restrictions.
             $projectIds = $volume->projects()->pluck('id');
         } else {
             // array of all project IDs that the user and the volume have in common
