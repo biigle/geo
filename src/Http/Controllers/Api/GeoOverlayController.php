@@ -32,7 +32,7 @@ class GeoOverlayController extends Controller
             return Response::download($overlay->path);
         } catch (FileNotFoundException $e) {
             // source file not readable; nothing we can do about it
-            abort(404, "The geo overlay file does not exist.");
+            abort(404, 'The geo overlay file does not exist.');
         }
     }
 

@@ -52,11 +52,12 @@ class GeoOverlay extends Model
      *
      * @return void
      */
-    protected static function boot() {
+    protected static function boot()
+    {
         parent::boot();
 
         // Delete the overlay image file after the model was deleted.
-        static::deleted(function($overlay) {
+        static::deleted(function ($overlay) {
             if (File::exists($overlay->path)) {
                 File::delete($overlay->path);
             }

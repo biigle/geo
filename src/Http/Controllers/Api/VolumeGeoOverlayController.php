@@ -42,7 +42,7 @@ class VolumeGeoOverlayController extends Controller
     }
 
     /**
-     * Stores a new geo overlay that was uploaded with the plain method
+     * Stores a new geo overlay that was uploaded with the plain method.
      *
      * @api {post} volumes/:id/geo-overlays/plain Upload a plain geo overlay
      * @apiGroup Volumes
