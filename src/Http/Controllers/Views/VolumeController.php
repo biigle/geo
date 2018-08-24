@@ -5,8 +5,8 @@ namespace Biigle\Modules\Geo\Http\Controllers\Views;
 use Biigle\Volume;
 use Biigle\Project;
 use Biigle\LabelTree;
+use Illuminate\Http\Request;
 use Biigle\Modules\Geo\GeoOverlay;
-use Illuminate\Contracts\Auth\Guard;
 use Biigle\Http\Controllers\Views\Controller;
 
 class VolumeController extends Controller
@@ -14,12 +14,12 @@ class VolumeController extends Controller
     /**
      * Shows the volume geo page.
      *
-     * @param Guard $auth
+     * @param Request $request
      * @param int $id volume ID
      *
      * @return \Illuminate\Http\Response
      */
-    public function show(Guard $auth, $id)
+    public function show(Request $request, $id)
     {
         $volume = Volume::select('id', 'name')->findOrFail($id);
         $this->authorize('access', $volume);
@@ -27,7 +27,7 @@ class VolumeController extends Controller
             abort(404);
         }
 
-        $user = $auth->user();
+        $user = $request->user();
 
         $images = $volume->images()->select('id', 'lng', 'lat')->get();
 
