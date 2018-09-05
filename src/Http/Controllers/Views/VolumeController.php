@@ -35,12 +35,11 @@ class VolumeController extends Controller
             // Global admins have no restrictions.
             $projectIds = $volume->projects()->pluck('id');
         } else {
-            // Array of all project IDs that the user and the volume have in common
-            // and where the user is editor, expert or admin.
+            // Array of all project IDs that the user and the volume have in common.
             $projectIds = Project::inCommon($user, $volume->id)->pluck('id');
         }
 
-        // all label trees that are used by all projects which are visible to the user
+        // All label trees that are used by all projects which are visible to the user.
         $trees = LabelTree::with('labels')
             ->select('id', 'name')
             ->whereIn('id', function ($query) use ($projectIds) {
