@@ -83,13 +83,14 @@ class VolumeGeoOverlayController extends Controller
     {
         $volume = Volume::findOrFail($id);
         $this->authorize('update', $volume);
-
-        $this->validate($request, array_merge(GeoOverlay::$createRules, [
+        $this->validate($request, [
+            'name' => 'filled|max:512',
+            'file' => 'required|file|max:10000|mimetypes:image/jpeg,image/png,image/tiff',
             'top_left_lat' => 'required|numeric|max:90|min:-90',
             'top_left_lng' => 'required|numeric|max:180|min:-180',
             'bottom_right_lat' => 'required|numeric|max:90|min:-90',
             'bottom_right_lng' => 'required|numeric|max:180|min:-180',
-        ]));
+        ]);
 
         $file = $request->file('file');
 
