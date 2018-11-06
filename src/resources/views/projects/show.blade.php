@@ -22,8 +22,8 @@
 @endpush
 
 @section('content')
-<main class="geo__container">
-    <section id="project-geo-map" class="geo__map">
+<main class="sidebar-container">
+    <section id="project-geo-map" class="sidebar-container__content">
         <image-map :images="images" :overlays="overlays"></image-map>
     </section>
     <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>

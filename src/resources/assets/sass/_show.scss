@@ -4,19 +4,7 @@
     }
 }
 
-.geo__container {
-    box-sizing: border-box;
-    margin-top: -20px;
-    height: calc(100vh - 51px);
-    width: 100%;
-    display: flex;
-}
-
-.geo__map {
-    position: relative;
-    height: 100%;
-    flex: 1;
-
+.sidebar-container__content {
     .image-map {
         height: 100%;
     }
