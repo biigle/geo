@@ -14,7 +14,7 @@ class VolumeGeoOverlayController extends Controller
      * Shows the geo overlays of the specified volume.
      *
      * @api {get} volumes/:id/geo-overlays Get geo overlays
-     * @apiGroup Volumes
+     * @apiGroup Geo
      * @apiName VolumesumesIndexGeoOverlays
      * @apiPermission projectMember
      *
@@ -45,7 +45,7 @@ class VolumeGeoOverlayController extends Controller
      * Stores a new geo overlay that was uploaded with the plain method.
      *
      * @api {post} volumes/:id/geo-overlays/plain Upload a plain geo overlay
-     * @apiGroup Volumes
+     * @apiGroup Geo
      * @apiName VolumesumesStoreGeoOverlaysPlain
      * @apiPermission projectAdmin
      *

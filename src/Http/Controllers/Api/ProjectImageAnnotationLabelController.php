@@ -11,7 +11,7 @@ class ProjectImageAnnotationLabelController extends Controller
     /**
      * List the IDs of images of a project having one or more annotations with the specified label.
      *
-     * @api {get} projects/:pid/images/filter/annotation-label/:lid Get all images having annotations with a certain label
+     * @api {get} projects/:pid/images/filter/annotation-label/:lid Get images with label
      * @apiGroup Projects
      * @apiName ProjectImagesHasLabel
      * @apiPermission projectMember

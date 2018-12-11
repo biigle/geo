@@ -13,8 +13,8 @@ class GeoOverlayController extends Controller
     /**
      * Shows the specified geo overlay file.
      *
-     * @api {get} geo-overlays/:id/file Get the file
-     * @apiGroup GeoOverlays
+     * @api {get} geo-overlays/:id/file Get a geo overlay file
+     * @apiGroup Geo
      * @apiName ShowGeoOverlayFile
      * @apiPermission projectMember
      *
@@ -40,7 +40,7 @@ class GeoOverlayController extends Controller
      * Deletes the geo overlay.
      *
      * @api {delete} geo-overlays/:id Delete a geo overlay
-     * @apiGroup GeoOverlays
+     * @apiGroup Geo
      * @apiName DestroyGeoOverlay
      * @apiPermission projectAdmin
      *
