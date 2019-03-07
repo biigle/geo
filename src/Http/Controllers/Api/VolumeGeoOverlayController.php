@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Exception;
+use DB;
 use Biigle\Volume;
 use Illuminate\Http\Request;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -92,24 +92,20 @@ class VolumeGeoOverlayController extends Controller
             'bottom_right_lng' => 'required|numeric|max:180|min:-180',
         ]);
 
-        $file = $request->file('file');
+        return DB::transaction(function () use ($request, $id) {
+            $file = $request->file('file');
 
-        $overlay = new GeoOverlay;
-        $overlay->volume_id = $id;
-        $overlay->name = $request->input('name', $file->getClientOriginalName());
-        $overlay->top_left_lat = $request->input('top_left_lat');
-        $overlay->top_left_lng = $request->input('top_left_lng');
-        $overlay->bottom_right_lat = $request->input('bottom_right_lat');
-        $overlay->bottom_right_lng = $request->input('bottom_right_lng');
-        $overlay->save();
-
-        try {
+            $overlay = new GeoOverlay;
+            $overlay->volume_id = $id;
+            $overlay->name = $request->input('name', $file->getClientOriginalName());
+            $overlay->top_left_lat = $request->input('top_left_lat');
+            $overlay->top_left_lng = $request->input('top_left_lng');
+            $overlay->bottom_right_lat = $request->input('bottom_right_lat');
+            $overlay->bottom_right_lng = $request->input('bottom_right_lng');
+            $overlay->save();
             $overlay->storeFile($file);
-        } catch (Exception $e) {
-            $overlay->delete();
-            throw $e;
-        }
 
-        return $overlay;
+            return $overlay;
+        });
     }
 }

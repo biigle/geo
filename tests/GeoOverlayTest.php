@@ -43,23 +43,9 @@ class GeoOverlayTest extends TestCase
         $this->assertNull($model->fresh());
     }
 
-    public function testDirectoryAttribute()
-    {
-        $model = self::create();
-        $path = config('geo.overlay_storage');
-        $this->assertEquals("{$path}/{$model->volume_id}", $model->directory);
-    }
-
-    public function testFilenameAttribute()
-    {
-        $model = self::create();
-        $this->assertEquals("{$model->id}", $model->filename);
-    }
-
     public function testPathAttribute()
     {
         $model = self::create();
-        $path = config('geo.overlay_storage');
-        $this->assertEquals("{$path}/{$model->volume_id}/{$model->id}", $model->path);
+        $this->assertEquals("{$model->volume_id}/{$model->id}", $model->path);
     }
 }

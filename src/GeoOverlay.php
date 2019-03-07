@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Geo;
 
-use File;
+use Storage;
 use Biigle\Volume;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
@@ -46,15 +46,9 @@ class GeoOverlay extends Model
     {
         parent::boot();
 
-        // Delete the overlay image file after the model was deleted.
-        static::deleted(function ($overlay) {
-            if (File::exists($overlay->path)) {
-                File::delete($overlay->path);
-            }
-
-            if (File::isDirectory($overlay->directory)) {
-                File::deleteDirectory($overlay->directory);
-            }
+        // Delete the overlay image file when the model is deleted.
+        static::deleting(function ($overlay) {
+            Storage::disk(config('geo.overlay_storage_disk'))->delete($overlay->path);
         });
     }
 
@@ -69,48 +63,23 @@ class GeoOverlay extends Model
     }
 
     /**
-     * Get the local path to the overlay image directory.
-     *
-     * @return string
-     */
-    public function getDirectoryAttribute()
-    {
-        return config('geo.overlay_storage')."/{$this->volume_id}";
-    }
-
-    /**
-     * Get filename of the overlay.
-     *
-     * @return string
-     */
-    public function getFilenameAttribute()
-    {
-        return strval($this->id);
-    }
-
-    /**
      * Get the local path to the overlay image file.
      *
      * @return string
      */
     public function getPathAttribute()
     {
-        return $this->directory.'/'.$this->filename;
+        return "{$this->volume_id}/{$this->id}";
     }
 
     /**
      * Store the uploaded image file of thes geo overlay.
      *
      * @param UploadedFile $file
-     *
-     * @return Symfony\Component\HttpFoundation\File\File Target file
      */
     public function storeFile(UploadedFile $file)
     {
-        if (!File::isDirectory($this->directory)) {
-            File::makeDirectory($this->directory, 0755, true);
-        }
-
-        return $file->move($this->directory, $this->filename);
+        Storage::disk(config('geo.overlay_storage_disk'))
+            ->putFileAs($this->volume_id, $file, $this->id);
     }
 }

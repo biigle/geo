@@ -2,11 +2,10 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Response;
-use Biigle\Volume;
+use Storage;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use League\Flysystem\FileNotFoundException;
 
 class GeoOverlayController extends Controller
 {
@@ -21,7 +20,7 @@ class GeoOverlayController extends Controller
      * @apiParam {Number} id The geo overlay ID.
      *
      * @param int $id geo overlay id
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function showFile($id)
     {
@@ -29,10 +28,10 @@ class GeoOverlayController extends Controller
         $this->authorize('access', $overlay->volume);
 
         try {
-            return Response::download($overlay->path);
+            return Storage::disk(config('geo.overlay_storage_disk'))
+                ->download($overlay->path);
         } catch (FileNotFoundException $e) {
-            // source file not readable; nothing we can do about it
-            abort(404, 'The geo overlay file does not exist.');
+            abort(404);
         }
     }
 
@@ -47,7 +46,6 @@ class GeoOverlayController extends Controller
      * @apiParam {Number} id The geo overlay ID.
      *
      * @param int $id geo overlay id
-     * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
