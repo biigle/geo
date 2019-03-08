@@ -56,7 +56,7 @@ biigle.$declare('geo.mixins.geoMap', {
             return this.baseOverlays.map(function (overlay) {
                 return new ol.layer.Image({
                     source: new ol.source.ImageStatic({
-                        url: overlayUrl.replace('{id}', overlay.id),
+                        url: overlayUrl.replace(':id', overlay.id),
                         imageExtent: [
                             overlay.top_left_lng,
                             overlay.bottom_right_lat,

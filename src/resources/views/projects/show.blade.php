@@ -17,7 +17,7 @@
     biigle.$declare('geo.project', {!! $project !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});
     biigle.$declare('geo.overlays', {!! $overlays !!});
-    biigle.$declare('geo.overlayUrl', '{!! url('api/v1/geo-overlays/{id}/file') !!}');
+    biigle.$declare('geo.overlayUrl', '{!! url('api/v1/geo-overlays/:id/file') !!}');
 </script>
 @endpush
 
