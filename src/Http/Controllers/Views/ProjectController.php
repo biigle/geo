@@ -36,7 +36,7 @@ class ProjectController extends Controller
             ->select('id', 'lat', 'lng')
             ->get();
 
-        $trees = $project->labelTrees()->with('labels')->get();
+        $trees = $project->labelTrees()->with('labels', 'version')->get();
 
         unset($project->labelTrees);
 
