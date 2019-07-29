@@ -25,7 +25,7 @@
     </p>
     <h3>Geo filter</h3>
     <p>
-        The volume map allows you to filter the images displayed in the volume overview as well. To do this, activate the "geo selection" filter in the <button class="btn btn-default btn-xs"><i class="fa fa-filter"></i></button> filter tab of the volume overview. Then select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <code>Ctrl</code> as well as the left mouse button and move the cursor on the map. Release the mouse button to finish the rectangle. You can also select individual locations with a single click or add locations to an existing selection with <code>Shift</code> and a single click.
+        The volume map allows you to filter the images displayed in the volume overview as well. To do this, activate the "geo selection" filter in the <button class="btn btn-default btn-xs"><i class="fa fa-filter"></i></button> filter tab of the volume overview. Then select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map. Release the mouse button to finish the rectangle. You can also select individual locations with a single click or add locations to an existing selection with <kbd>Shift</kbd> and a single click.
     </p>
     <p class="text-center">
         <a href="{{asset('vendor/geo/images/manual/volume_map_3.png')}}"><img src="{{asset('vendor/geo/images/manual/volume_map_3.png')}}" width="49%"></a>
