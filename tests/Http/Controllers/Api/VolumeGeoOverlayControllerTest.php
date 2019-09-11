@@ -61,7 +61,7 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
                 'bottom_right_lng' => 1.667788,
                 'file' => $file,
             ])
-            ->assertStatus(200);
+            ->assertSuccessful();
 
         $overlay = GeoOverlay::where('volume_id', $id)->first();
         $this->assertNotNull($overlay);
