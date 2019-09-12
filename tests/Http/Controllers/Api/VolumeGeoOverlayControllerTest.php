@@ -65,10 +65,10 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         $overlay = GeoOverlay::where('volume_id', $id)->first();
         $this->assertNotNull($overlay);
-        $this->assertEquals($overlay->top_left_lat, 1.223344, '', 0.00001);
-        $this->assertEquals($overlay->top_left_lng, 1.334455, '', 0.00001);
-        $this->assertEquals($overlay->bottom_right_lat, 1.445566, '', 0.00001);
-        $this->assertEquals($overlay->bottom_right_lng, 1.667788, '', 0.00001);
+        $this->assertEqualsWithDelta($overlay->top_left_lat, 1.223344, 0.00001);
+        $this->assertEqualsWithDelta($overlay->top_left_lng, 1.334455, 0.00001);
+        $this->assertEqualsWithDelta($overlay->bottom_right_lat, 1.445566, 0.00001);
+        $this->assertEqualsWithDelta($overlay->bottom_right_lng, 1.667788, 0.00001);
         $this->assertEquals($overlay->name, 'overlay.png');
         $response->assertExactJson($overlay->toArray());
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
