@@ -1,5 +1,7 @@
 # BIIGLE Geo Module
 
+[![Test status](https://github.com/biigle/geo/workflows/Tests/badge.svg)](https://github.com/biigle/geo/actions?query=workflow%3ATests)
+
 This is the BIIGLE module to explore images on a world map.
 
 ## Installation
