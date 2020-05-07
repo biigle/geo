@@ -40,4 +40,7 @@ $router->group([
     $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
         'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);
+    $router->group(['namespace' => 'Geojson', 'prefix' => 'geojson'], function($router){
+      $router->get('images', ['uses' => 'ImagesController@index']);
+    });
 });
