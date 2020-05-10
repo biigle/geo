@@ -41,6 +41,6 @@ $router->group([
         'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);
     $router->group(['namespace' => 'Geojson', 'prefix' => 'geojson'], function($router){
-      $router->get('images', ['uses' => 'ImagesController@index']);
+      $router->get('volume/{id}/images', ['uses' => 'VolumeImagesController@index']);
     });
 });
