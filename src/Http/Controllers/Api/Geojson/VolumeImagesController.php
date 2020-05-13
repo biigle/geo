@@ -15,7 +15,7 @@ class VolumeImagesController extends Controller
     $images = $volume->images;
 
     $features = collect($images)->map(function($image){
-      $feature = new \GeoJson\Feature\Feature(new \GeoJson\Geometry\Point([$image->lng, $image->lat]));
+      $feature = new \GeoJson\Feature\Feature(new \GeoJson\Geometry\Point([$image->lng, $image->lat]), Array('test'=>"test"));
       return $feature;
     });
 
