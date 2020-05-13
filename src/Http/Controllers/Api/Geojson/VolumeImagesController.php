@@ -13,6 +13,13 @@ class VolumeImagesController extends Controller
     $volume = Volume::findOrFail($id);
     $this->authorize('access', $volume);
     $images = $volume->images;
-    return $images[0];
+
+    $features = collect($images)->map(function($image){
+      $feature = new \GeoJson\Feature\Feature(new \GeoJson\Geometry\Point([$image->lng, $image->lat]));
+      return $feature;
+    });
+
+    $geojson_feature_Collection = new \GeoJson\Feature\FeatureCollection($features->all());
+    return $geojson_feature_Collection;
   }
 }
