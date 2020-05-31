@@ -5,6 +5,8 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api\Geojson;
 use DB;
 use Biigle\Volume;
 use Biigle\Image;
+use GeoJson\Feature\{Feature, FeatureCollection};
+use GeoJson\Geometry\Point;
 use Biigle\Http\Controllers\Api\Controller;
 use League\Flysystem\FileNotFoundException;
 
@@ -27,10 +29,10 @@ class VolumeImagesController extends Controller
       });
 
     $features = $images->get()->map(function($image) use($labels){
-      $feature = new \GeoJson\Feature\Feature(new \GeoJson\Geometry\Point([$image->lng, $image->lat]), $labels[$image->id]->all());
+      $feature = new Feature(new Point([$image->lng, $image->lat]), $labels[$image->id]->all());
       return $feature;
     });
 
-    return new \GeoJson\Feature\FeatureCollection($features->all());;
+    return new FeatureCollection($features->all());;
   }
 }
