@@ -17,19 +17,21 @@ class VolumeImagesController extends Controller
     $volume = Volume::findOrFail($id);
     $this->authorize('access', $volume);
 
-    $images = $volume->images()->select('id', 'lat', 'lng');
-    $labels = $images->join('annotations', 'annotations.image_id', '=', 'images.id')
+    $images = $volume->images()->select('id', 'lat', 'lng', 'filename')->get();
+    $labels = $volume->images()->join('annotations', 'annotations.image_id', '=', 'images.id')
       ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
       ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
       ->select('images.id', 'images.lat', 'images.lng','labels.name')->get()
-      ->groupBy('id')->map(function($item, $key){
-        return $item->groupBy('name')->map(function($v){
-          return $v->count();
-        });
-      });
+      ->groupBy('id');
 
-    $features = $images->get()->map(function($image) use($labels){
-      $feature = new Feature(new Point([$image->lng, $image->lat]), $labels[$image->id]->all());
+    $images->each(function($item, $key) use($labels){
+      $item['label_count'] = $labels->has($item->id) ? $labels[$item->id]->groupBy('name')->map(function($v){
+        return $v->count();
+      }) : collect([]);
+    });
+
+    $features = $images->map(function($image){
+      $feature = new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id'=>$image->id, '_filename'=>$image->filename], $image->label_count->all()));
       return $feature;
     });
 
