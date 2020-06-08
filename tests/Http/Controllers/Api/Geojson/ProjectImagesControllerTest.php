@@ -51,18 +51,18 @@ class ProjectImagesControllerTest extends ApiTestCase
       AnnotationLabelTest::create(['annotation_id' => $annotation->id, 'label_id' => $labels->random()->id]);
     }
 
-    $this->doTestApiRoute('GET', "/api/v1/geojson/project/{$volume->id}/images");
+    $this->doTestApiRoute('GET', "/api/v1/geojson/projects/{$volume->id}/images");
 
     $this->beUser();
-    $response = $this->get("/api/v1/geojson/project/{$volume->id}/images");
+    $response = $this->get("/api/v1/geojson/projects/{$volume->id}/images");
     $response->assertStatus(403);
 
     $this->beEditor();
-    $response = $this->get("/api/v1/geojson/project/{$volume->id}/images");
+    $response = $this->get("/api/v1/geojson/projects/{$volume->id}/images");
     $response->assertStatus(200);
 
     $this->beAdmin();
-    $response = $this->get("/api/v1/geojson/project/{$volume->id}/images");
+    $response = $this->get("/api/v1/geojson/projects/{$volume->id}/images");
     $response->assertStatus(200);
 
     $vol_1_images_id = $volume->images->sort()->pluck('id')->all();
