@@ -12,6 +12,56 @@ use League\Flysystem\FileNotFoundException;
 
 class VolumeImagesController extends Controller
 {
+  /**
+   * Get GeoJson data of all the Images in a Volume.
+   * @api {get} geojson/volumes/:id/images Get GeoJson Data of all Images in a Volume
+   * @apiGroup GeoJson
+   * @apiName VolumeIndexImages
+   * @apiPermission projectMember
+   * @apiDescription Returns an object with Array of GeoJson Feature objects containing
+   * Coordinate(i.e latitude and longitude),
+   * Properties like Image Id(as '_id'), image filename('_filename') and label counts.
+   *
+   * @apiParam {Number} id The volume ID
+   * @apiSuccessExample {json} Success response:
+   *
+   * {
+   *   "type":"FeatureCollection","features":
+   * [
+   *     {
+   *       "type":"Feature",
+   *       "geometry":
+   *       {
+   *         "type":"Point",
+   *         "coordinates":[-88.461126072001,-7.0728840799798]
+   *       },
+   *       "properties":
+   *       {
+   *         "_id":351,
+   *         "_filename":"20150814_050659_IMG_26342.JPG",
+   *         "Sponge":1,
+   *         "Other fauna":2,
+   *         "Stalked crinoid":1
+   *       }
+   *     },
+   *     {
+   *       "type":"Feature",
+   *       "geometry":
+   *       {
+   *         "type":"Point",
+   *         "coordinates":[-88.464543615984,-7.0752754199823]
+   *       },
+   *       "properties":
+   *       {
+   *         "_id":20,
+   *         "_filename":"20150813_225936_IMG_4449.JPG",
+   *       }
+   *     }
+   *   ]
+   * }
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+  */
   public function index($id)
   {
     $volume = Volume::findOrFail($id);
