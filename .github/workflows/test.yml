@@ -56,8 +56,10 @@ jobs:
       run: rm -r vendor/${GITHUB_REPOSITORY}
       working-directory: ../core
 
-    - name: Copy current repository
-      run: cp -r ${GITHUB_WORKSPACE} vendor/biigle
+    - name: Update current repository
+      run: |
+        composer config repositories.current vcs ${GITHUB_WORKSPACE}
+        composer require --ignore-platform-reqs --prefer-source ${GITHUB_REPOSITORY}:dev-${GITHUB_REF##*/}
       working-directory: ../core
 
     - name: Generate key
