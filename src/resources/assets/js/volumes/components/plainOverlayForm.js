@@ -1,10 +1,14 @@
+import Api from '../api/geoOverlays';
+import {handleErrorResponse} from '../import';
+import {LoaderMixin} from '../import';
+
 /**
  * A component for a form to upload a geo overlay in plain format
  *
  * @type {Object}
  */
-biigle.$component('geo.volumes.components.plainOverlayForm', {
-    mixins: [biigle.$require('core.mixins.loader')],
+export default {
+    mixins: [LoaderMixin],
     data() {
         return {
             selectedFile: null,
@@ -14,6 +18,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
             selectedBRLat: '',
             selectedBRLng: '',
             errors: {},
+            volumeId: null,
         };
     },
     computed: {
@@ -46,11 +51,10 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
                 return;
             }
 
-            var data = new FormData(this.$refs.form);
+            let data = new FormData(this.$refs.form);
             this.$emit('loading-start');
             this.startLoading();
-            biigle.$require('api.geoOverlays')
-                .savePlain({volume_id: biigle.$require('volumes.id')}, data)
+            Api.savePlain({volume_id: this.volumeId}, data)
                 .then(this.handleSuccess, this.handleError)
                 .finally(this.finishLoading);
         },
@@ -58,7 +62,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
             if (response.status === 422) {
                 this.errors = response.data;
             } else {
-                biigle.$require('messages.store').handleErrorResponse(response);
+                handleErrorResponse(response);
             }
 
             this.$emit('error');
@@ -83,4 +87,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
             this.errors = {};
         },
     },
-});
+    created() {
+        this.volumeId = biigle.$require('volumes.id');
+    },
+};
