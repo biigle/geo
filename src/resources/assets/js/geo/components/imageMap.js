@@ -1,9 +1,29 @@
+import DragBox from 'ol/interaction/DragBox';
+import Feature from 'ol/Feature';
+import Map from 'ol/Map';
+import OSMSource from 'ol/source/OSM';
+import OverviewMap from 'ol/control/OverviewMap';
+import Point from 'ol/geom/Point';
+import ScaleLine from 'ol/control/ScaleLine';
+import Select from 'ol/interaction/Select';
+import Style from '../ol/style';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import View from 'ol/View';
+import ZoomToExtent from 'ol/control/ZoomToExtent';
+import {defaults as defaultControls} from 'ol/control';
+import {defaults as defaultInteractions} from 'ol/interaction';
+import {Events} from '../import';
+import {fromLonLat} from 'ol/proj';
+import {platformModifierKeyOnly} from 'ol/events/condition';
+
 /**
  * An element displaying the position of a single image on a map.
  *
  * @type {Object}
  */
-biigle.$component('geo.components.imageMap', {
+export default {
     template: '<div class="image-map"></div>',
     props: {
         images: {
@@ -12,7 +32,7 @@ biigle.$component('geo.components.imageMap', {
         },
         preselected: {
             type: Array,
-            default: function () {
+            default() {
                 return [];
             },
         },
@@ -30,83 +50,75 @@ biigle.$component('geo.components.imageMap', {
         // Must be objects of type ol.layer
         overlays: {
             type: Array,
-            default: function () {
+            default() {
                 return [];
             },
         },
     },
-    data: function () {
+    data() {
         return {
-            source: new ol.source.Vector()
+            //
         };
     },
     computed: {
-        imagesWithGps: function () {
+        imagesWithGps() {
             return this.images.filter(function (image) {
                 return image.lat !== null && image.lng !== null;
             });
         },
-        features: function () {
-            var preselected = {};
+        features() {
+            let preselected = {};
             this.preselected.forEach(function (p) {
                 preselected[p] = null;
             });
 
             return this.imagesWithGps.map(function (image) {
-                return new ol.Feature({
+                return new Feature({
                     id: image.id,
                     // Determine if a feature should be initially selected.
                     preselected: preselected.hasOwnProperty(image.id),
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                        image.lng,
-                        image.lat
-                    ])),
+                    geometry: new Point(fromLonLat([image.lng, image.lat])),
                 });
             });
         }
     },
     methods: {
-        parseSelectedFeatures: function (features) {
-            return features.getArray().map(function (feature) {
-                return feature.get('id');
-            });
+        parseSelectedFeatures(features) {
+            return features.getArray().map((feature) => feature.get('id'));
         },
     },
     watch: {
-        features: function (features) {
+        features(features) {
             this.source.clear();
             this.source.addFeatures(features);
         },
     },
-    mounted: function () {
-        var style = biigle.$require('geo.ol.style');
-        var events = biigle.$require('events');
-        var self = this;
-
-        // var source = new ol.source.Vector({features: features});
+    created() {
+        // Set this directly so it is not made reactive.
+        this.source = new VectorSource();
+    },
+    mounted() {
         this.source.addFeatures(this.features);
-        var extent = this.source.getExtent();
+        let extent = this.source.getExtent();
 
-        var tileLayer = new ol.layer.Tile({
-          source: new ol.source.OSM()
-        });
+        let tileLayer = new TileLayer({source: new OSMSource()});
 
-        var vectorLayer = new ol.layer.Vector({
+        let vectorLayer = new VectorLayer({
             source: this.source,
-            style: style.default,
+            style: Style.default,
             updateWhileAnimating: true,
-            updateWhileInteracting: true
+            updateWhileInteracting: true,
         });
 
-        var layers = [tileLayer];
+        let layers = [tileLayer];
         Array.prototype.push.apply(layers, this.overlays);
         layers.push(vectorLayer);
 
-        var map = new ol.Map({
+        let map = new Map({
             target: this.$el,
             layers: layers,
-            view: new ol.View(),
-            interactions: ol.interaction.defaults({
+            view: new View(),
+            interactions: defaultInteractions({
                 altShiftDragRotate: false,
                 doubleClickZoom: this.interactive,
                 keyboard: this.interactive,
@@ -116,7 +128,7 @@ biigle.$component('geo.components.imageMap', {
                 pinchRotate: false,
                 pinchZoom: this.interactive,
             }),
-            controls: ol.control.defaults({zoom: this.interactive}),
+            controls: defaultControls({zoom: this.interactive}),
         });
 
         map.getView().fit(extent, map.getSize());
@@ -126,48 +138,44 @@ biigle.$component('geo.components.imageMap', {
         }
 
         if (this.interactive) {
-            map.addControl(new ol.control.ScaleLine());
+            map.addControl(new ScaleLine());
 
-            map.addControl(new ol.control.ZoomToExtent({
+            map.addControl(new ZoomToExtent({
                 extent: extent,
                 label: '\uf066'
             }));
 
-            map.addControl(new ol.control.OverviewMap({
+            map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
                 layers: [tileLayer],
-                view: new ol.View({zoom: 1, maxZoom: 1})
+                view: new View({zoom: 1, maxZoom: 1})
             }));
         }
 
         if (this.selectable) {
-            var selectInteraction = new ol.interaction.Select({
-                style: style.selected,
-                features: this.features.filter(function (feature) {
-                    return feature.get('preselected');
-                })
+            let selectInteraction = new Select({
+                style: Style.selected,
+                features: this.features.filter((feature) => feature.get('preselected')),
             });
-            var selectedFeatures = selectInteraction.getFeatures();
+            let selectedFeatures = selectInteraction.getFeatures();
             map.addInteraction(selectInteraction);
-            selectInteraction.on('select', function (e) {
-                self.$emit('select', self.parseSelectedFeatures(selectedFeatures));
+            selectInteraction.on('select', (e) => {
+                this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
             });
 
-            var dragBox = new ol.interaction.DragBox({
-                condition: ol.events.condition.platformModifierKeyOnly
-            });
+            let dragBox = new DragBox({condition: platformModifierKeyOnly});
             map.addInteraction(dragBox);
-            dragBox.on('boxend', function () {
+            dragBox.on('boxend', () => {
                 selectedFeatures.clear();
-                self.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
+                this.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
                     selectedFeatures.push(feature);
                 });
-                self.$emit('select', self.parseSelectedFeatures(selectedFeatures));
+                this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
             });
         }
 
-        events.$on('sidebar.toggle', function () {
+        Events.$on('sidebar.toggle', function () {
             map.updateSize();
         });
 
@@ -177,5 +185,5 @@ biigle.$component('geo.components.imageMap', {
         this.$nextTick(function () {
             map.updateSize();
         });
-    }
-});
+    },
+};

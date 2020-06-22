@@ -5,7 +5,7 @@
  */
 biigle.$component('geo.volumes.components.plainOverlayForm', {
     mixins: [biigle.$require('core.mixins.loader')],
-    data: function () {
+    data() {
         return {
             selectedFile: null,
             selectedName: '',
@@ -17,10 +17,10 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
         };
     },
     computed: {
-        fileTooBig: function () {
+        fileTooBig() {
             return this.selectedFile && this.selectedFile.size > 10000000;
         },
-        canSubmit: function () {
+        canSubmit() {
             return this.selectedFile &&
                 !this.fileTooBig &&
                 this.selectedTLLat !== '' &&
@@ -31,7 +31,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
         },
     },
     methods: {
-        selectFile: function (e) {
+        selectFile(e) {
             this.selectedFile = e.target.files[0];
             if (!this.selectedName) {
                 this.selectedName = this.selectedFile.name;
@@ -41,7 +41,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
                 this.errors.file = ['The overlay file must not be larger than 10 MByte.'];
             }
         },
-        submit: function () {
+        submit() {
             if (!this.canSubmit) {
                 return;
             }
@@ -54,7 +54,7 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
                 .then(this.handleSuccess, this.handleError)
                 .finally(this.finishLoading);
         },
-        handleError: function (response) {
+        handleError(response) {
             if (response.status === 422) {
                 this.errors = response.data;
             } else {
@@ -63,17 +63,17 @@ biigle.$component('geo.volumes.components.plainOverlayForm', {
 
             this.$emit('error');
         },
-        hasError: function (name) {
+        hasError(name) {
             return this.errors.hasOwnProperty(name);
         },
-        getError: function (name) {
+        getError(name) {
             return this.hasError(name) ? this.errors[name].join(' ') : '';
         },
-        handleSuccess: function (response) {
+        handleSuccess(response) {
             this.$emit('success', response.data);
             this.reset();
         },
-        reset: function () {
+        reset() {
             this.selectedFile = null;
             this.selectedName = '';
             this.selectedTLLat = '';

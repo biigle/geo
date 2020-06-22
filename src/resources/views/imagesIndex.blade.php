@@ -1,15 +1,13 @@
 @if ($image->lng !== null && $image->lat !== null)
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
-    biigle.geo.image = {!! $image !!};
+    biigle.$declare('geo.image', {!! $image !!});
 </script>
 @endpush
 
 @push('styles')
-<link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/geo/styles/ol.css') }}">
 <link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
 @endpush
 

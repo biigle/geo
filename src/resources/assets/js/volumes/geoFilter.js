@@ -8,17 +8,17 @@ if (Array.isArray(biigle.$require('volumes.stores.filters'))) {
         help: "All images that were (not) selected on the world map.",
         listComponent: {
             mixins: [biigle.$require('volumes.components.filterListComponent')],
-            data: function () {
+            data() {
                 return {name: 'geo selection'};
             },
-            created: function () {
+            created() {
                 var self = this;
                 window.addEventListener('storage', function () {
                     self.$emit('refresh', self.rule);
                 });
             },
         },
-        getSequence: function (volumeId) {
+        getSequence(volumeId) {
             var key = 'biigle.geo.imageSequence.' + volumeId;
 
             return new Vue.Promise(function (resolve, reject) {

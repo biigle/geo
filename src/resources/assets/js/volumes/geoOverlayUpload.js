@@ -8,15 +8,15 @@ biigle.$viewModel('volume-geo-overlay-upload', function (element) {
     var overlayItem = {
         props: ['overlay'],
         computed: {
-            classObject: function () {
+            classObject() {
                 return {'list-group-item-success': this.overlay.isNew};
             },
-            title: function () {
+            title() {
                 return 'Delete overlay ' + this.overlay.name;
             },
         },
         methods: {
-            remove: function () {
+            remove() {
                 if (confirm('Are you sure you want to delete the overlay ' + this.overlay.name + '?')) {
                     this.$emit('remove', this.overlay);
                 }
@@ -40,20 +40,20 @@ biigle.$viewModel('volume-geo-overlay-upload', function (element) {
             overlays: biigle.$require('volumes.geoOverlays'),
         },
         computed: {
-            classObject: function () {
+            classObject() {
                 return {'panel-warning panel--editing': this.editing};
             },
-            hasOverlays: function () {
+            hasOverlays() {
                 return this.overlays.length > 0;
             },
         },
         methods: {
-            addOverlay: function (overlay) {
+            addOverlay(overlay) {
                 overlay.isNew = true;
                 this.overlays.unshift(overlay);
                 this.finishLoading();
             },
-            handleRemove: function (overlay) {
+            handleRemove(overlay) {
                 this.startLoading();
                 var self = this;
                 resource.delete({id: overlay.id})
@@ -61,7 +61,7 @@ biigle.$viewModel('volume-geo-overlay-upload', function (element) {
                     .catch(messages.handleErrorResponse)
                     .finally(this.finishLoading);
             },
-            overlayRemoved: function (overlay) {
+            overlayRemoved(overlay) {
                 var overlays = this.overlays;
                 for (var i = overlays.length - 1; i >= 0; i--) {
                     if (overlays[i].id === overlay.id) {
