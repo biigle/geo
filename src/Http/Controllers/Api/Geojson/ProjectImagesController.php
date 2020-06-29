@@ -75,15 +75,14 @@ class ProjectImagesController extends Controller
       ->select('images.id', 'images.lat', 'images.lng', 'images.filename','labels.name')->get()
       ->groupBy('id');
     $images = $images->distinct('id')->get();
-    $images->each(function($item, $key) use($labels){
+    $images->each(function ($item, $key) use ($labels) {
       $item['label_count'] = $labels->has($item->id) ? $labels[$item->id]->groupBy('name')->map(function($v){
         return $v->count();
       }) : collect([]);
     });
 
-    $features = $images->map(function($image){
-      $feature = new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id'=>$image->id, '_filename'=>$image->filename], $image->label_count->all()));
-      return $feature;
+    $features = $images->map(function ($image) {
+      return new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id' => $image->id, '_filename' => $image->filename], $image->label_count->all()));
     });
 
     return new FeatureCollection($features->all());

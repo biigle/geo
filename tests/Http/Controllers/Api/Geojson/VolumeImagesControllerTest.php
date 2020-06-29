@@ -19,13 +19,12 @@ class VolumeImagesControllerTest extends ApiTestCase
     $faker = Faker::create();
     $volume = $this->volume();
     $volume_2 = VolumeTest::create();
-    $label_names = ["sponge", "jellyfish", "starfish"];
-    $labels = collect($label_names)->map(function($name)
+    $labelNames = ["sponge", "jellyfish", "starfish"];
+    $labels = collect($labelNames)->map(function($name)
     {
       return LabelTest::create(["name"=>$name]);
     });
-    for($i=0;$i<5;$i++)
-    {
+    for($i=0;$i<5;$i++) {
       $image = ImageTest::create(['volume_id' => $volume->id,
                                   'filename'=>"$i.jpg",
                                   'lat'=>$faker->latitude(-90,90),
@@ -34,8 +33,7 @@ class VolumeImagesControllerTest extends ApiTestCase
       AnnotationLabelTest::create(['annotation_id' => $annotation->id, 'label_id' => $labels->random()->id]);
     }
 
-    for($i=0;$i<5;$i++)
-    {
+    for($i=0;$i<5;$i++) {
       $image = ImageTest::create(['volume_id' => $volume_2->id,
                                   'filename'=>"{$i}0.jpg",
                                   'lat'=>$faker->latitude(-90,90),
@@ -65,9 +63,8 @@ class VolumeImagesControllerTest extends ApiTestCase
       return $a->properties->_id;
     }, json_decode($response->getContent())->features);
     sort($resp_images_id);
-    $this->assertTrue($vol_1_images_id === $resp_images_id);
+    $this->assertEquals($vol_1_images_id === $resp_images_id);
 
     $this->assertFalse($vol_2_images_id === $resp_images_id);
   }
 }
-?>

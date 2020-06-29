@@ -26,13 +26,12 @@ class ProjectImagesControllerTest extends ApiTestCase
     $secondProject->volumes()->save($volume);
 
 
-    $label_names = ["sponge", "jellyfish", "starfish"];
-    $labels = collect($label_names)->map(function($name)
+    $labelNames = ["sponge", "jellyfish", "starfish"];
+    $labels = collect($labelNames)->map(function($name)
     {
       return LabelTest::create(["name"=>$name]);
     });
-    for($i=0;$i<5;$i++)
-    {
+    for($i=0;$i<5;$i++) {
       $image = ImageTest::create(['volume_id' => $volume->id,
                                   'filename'=>"$i.jpg",
                                   'lat'=>$faker->latitude(-90,90),
@@ -41,8 +40,7 @@ class ProjectImagesControllerTest extends ApiTestCase
       AnnotationLabelTest::create(['annotation_id' => $annotation->id, 'label_id' => $labels->random()->id]);
     }
 
-    for($i=0;$i<5;$i++)
-    {
+    for($i=0;$i<5;$i++) {
       $image = ImageTest::create(['volume_id' => $volume_2->id,
                                   'filename'=>"{$i}0.jpg",
                                   'lat'=>$faker->latitude(-90,90),

@@ -81,8 +81,7 @@ class VolumeImagesController extends Controller
     });
 
     $features = $images->map(function($image){
-      $feature = new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id'=>$image->id, '_filename'=>$image->filename], $image->label_count->all()));
-      return $feature;
+      return new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id' => $image->id, '_filename' => $image->filename], $image->label_count->all()));
     });
 
     return new FeatureCollection($features->all());
