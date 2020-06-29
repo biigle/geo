@@ -2,28 +2,29 @@
 namespace Biigle\Modules\Geo\Http\Controllers\Api\Geojson;
 
 use DB;
+use Biigle\Project;
 use Biigle\Image;
 use GeoJson\Feature\{Feature, FeatureCollection};
 use GeoJson\Geometry\Point;
 use Biigle\Http\Controllers\Api\Controller;
 use League\Flysystem\FileNotFoundException;
 
-class ImageAnnotationsController extends Controller{
+class ProjectImagesAnnotationsController extends Controller{
 
   public function index($id)
   {
-    $image = Image::findOrFail($id);
-    $this->authorize('access', $image);
+    $project = Project::findOrFail($id);
+    $this->authorize('access', $project);
 
-    $metadata = $image->metadata;
-    $image_width_m = 2 * (float)$image->metadata['distance_to_ground'];
-    $result = $image->annotations->map(function($annotation) use($image, $metadata,$image_width_m){
-      $annotation_points = array_slice($annotation->points, 0, 2);
+    $images = Image::wherein("volume_id", $project->volumes->pluck('id')->all())->join('annotations', 'annotations.image_id', '=', 'images.id');
+    $results = $images->get()->map(function ($image) {
+      $metadata = $image->metadata;
+      $image_width_m = 2 * (float)$metadata['distance_to_ground'];
+      $annotation_points = array_slice(json_decode($image->points), 0, 2);
       $image_center = [($image->width)/2, ($image->height)/2];
 
       # Finding Annotation Point with respect to center of the image.
       $annotation_point = [($annotation_points[0] - $image_center[0]), ($image_center[1] - $annotation_points[1])];
-
       # X and Y Coordinate Rotations According to Yaw
       $rotated_X = $annotation_point[0] * cos((Float)$metadata['yaw']) + $annotation_point[1] * sin((Float)$metadata['yaw']);
       $rotated_Y = $annotation_point[0] * sin((Float)$metadata['yaw']) + $annotation_point[1] * cos((Float)$metadata['yaw']);
@@ -32,8 +33,6 @@ class ImageAnnotationsController extends Controller{
 
       # Coordinate Offset in Meters
       $coordinate_offset_meters = array_map(function($point) use($scaling_factor){return $point * $scaling_factor;}, [$rotated_X, $rotated_Y]);
-      // $coordinate_offset_meters = array_map(function($point) use($scaling_factor){return $point * $scaling_factor;}, $annotation_point);
-
       #radius of Earth
       $R = 6378137;
 
@@ -44,11 +43,11 @@ class ImageAnnotationsController extends Controller{
       # Shift the latitude and longitude to annotation point.
       $new_lat = $image->lat + $lat_radian * 180/pi();
       $new_lng = $image->lng + $lng_radian * 180/pi();
-      return new Feature(new Point([$new_lng, $new_lat]), array_merge(['_id' => $image->id,
-      'annotation_id' => $annotation->id, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
+      return new Feature(new Point([$new_lng, $new_lat]), array_merge(['_id' => $image->image_id,
+      'annotation_id' => $image->id, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
       "image_coordinate" => "lat: {$image->lat}, lng: {$image->lng}", '_filename' => $image->filename]));
     });
-    return new FeatureCollection($result->all());
+    return new FeatureCollection($results->all());
   }
 }
 ?>

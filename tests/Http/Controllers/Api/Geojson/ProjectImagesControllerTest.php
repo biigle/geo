@@ -70,7 +70,7 @@ class ProjectImagesControllerTest extends ApiTestCase
       return $a->properties->_id;
     }, json_decode($response->getContent())->features);
     sort($resp_images_id);
-    $this->assertTrue($vol_1_images_id === $resp_images_id);
+    $this->assertEquals($vol_1_images_id, $resp_images_id);
 
     $this->assertFalse($vol_2_images_id === $resp_images_id);
   }
