@@ -25,9 +25,14 @@ class ProjectImagesAnnotationsController extends Controller{
 
       # Finding Annotation Point with respect to center of the image.
       $annotation_point = [($annotation_points[0] - $image_center[0]), ($image_center[1] - $annotation_points[1])];
+
+      // Yaw specifies the clockwise rotation in degrees but the formula below expects
+      // the counterclockwise angle in radians.
+      $yaw = deg2rad(-floatval($metadata['yaw']));
+
       # X and Y Coordinate Rotations According to Yaw
-      $rotated_X = $annotation_point[0] * cos((Float)$metadata['yaw']) + $annotation_point[1] * sin((Float)$metadata['yaw']);
-      $rotated_Y = $annotation_point[0] * sin((Float)$metadata['yaw']) + $annotation_point[1] * cos((Float)$metadata['yaw']);
+      $rotated_X = $annotation_point[0] * cos($yaw) - $annotation_point[1] * sin($yaw);
+      $rotated_Y = $annotation_point[0] * sin($yaw) + $annotation_point[1] * cos($yaw);
 
       $scaling_factor = $image_width_m/$image->width;
 
@@ -38,7 +43,7 @@ class ProjectImagesAnnotationsController extends Controller{
 
       # Coordinate Offset in Radian
       $lat_radian = $coordinate_offset_meters[1]/$R;
-      $lng_radian =  $coordinate_offset_meters[0]/($R*cos((pi()*$image->lng)/180));
+      $lng_radian =  $coordinate_offset_meters[0]/($R*cos((pi()*$image->lat)/180));
 
       # Shift the latitude and longitude to annotation point.
       $new_lat = $image->lat + $lat_radian * 180/pi();
