@@ -1,3 +1,8 @@
+<template>
+    <div class="image-map"></div>
+</template>
+
+<script>
 import DragBox from 'ol/interaction/DragBox';
 import Feature from 'ol/Feature';
 import Map from 'ol/Map';
@@ -24,7 +29,6 @@ import {platformModifierKeyOnly} from 'ol/events/condition';
  * @type {Object}
  */
 export default {
-    template: '<div class="image-map"></div>',
     props: {
         images: {
             type: Array,
@@ -187,3 +191,4 @@ export default {
         });
     },
 };
+</script>
