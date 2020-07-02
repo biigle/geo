@@ -160,7 +160,7 @@ export default {
             });
             let selectedFeatures = selectInteraction.getFeatures();
             map.addInteraction(selectInteraction);
-            selectInteraction.on('select', (e) => {
+            selectInteraction.on('select', () => {
                 this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
             });
 

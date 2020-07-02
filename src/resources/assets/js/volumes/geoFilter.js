@@ -24,10 +24,9 @@ if (Array.isArray(VolumeFilters)) {
         },
         getSequence(volumeId) {
             let key = 'biigle.geo.imageSequence.' + volumeId;
+            let data = JSON.parse(localStorage.getItem(key)) || [];
 
-            return new Vue.Promise(function (resolve, reject) {
-                resolve({data: JSON.parse(localStorage.getItem(key)) || []});
-            });
+            return new Vue.Promise.resolve({data});
         },
     });
 }
