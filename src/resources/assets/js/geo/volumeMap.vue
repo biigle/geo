@@ -1,3 +1,4 @@
+<script>
 import Api from './api/volumeImageWithLabel';
 import GeoMap from './mixins/geoMap';
 
@@ -7,8 +8,10 @@ import GeoMap from './mixins/geoMap';
 
 export default {
     mixins: [GeoMap],
-    data: {
-        volumeId: null,
+    data() {
+        return {
+            volumeId: null,
+        };
     },
     computed: {
         selectedImages() {
@@ -36,3 +39,4 @@ export default {
         this.volumeId = biigle.$require('geo.volume.id');
     },
 };
+</script>

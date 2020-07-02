@@ -1,11 +1,14 @@
+<script>
 import ImageMap from './components/imageMap';
 
 /**
  * Panel to display an image location.
  */
 export default {
-    data: {
-        images: [],
+    data() {
+        return {
+            images: [],
+        };
     },
     components: {
         imageMap: ImageMap,
@@ -15,3 +18,4 @@ export default {
         this.images = [image];
     },
 };
+</script>

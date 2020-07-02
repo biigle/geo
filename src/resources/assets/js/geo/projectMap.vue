@@ -1,3 +1,4 @@
+<script>
 import Api from './api/projectImageWithLabel';
 import GeoMap from './mixins/geoMap';
 
@@ -6,8 +7,10 @@ import GeoMap from './mixins/geoMap';
  */
 export default {
     mixins: [GeoMap],
-    data: {
-        projectId: null,
+    data() {
+        return {
+            projectId: null,
+        };
     },
     methods: {
         getImageFilterApi(id) {
@@ -18,3 +21,4 @@ export default {
         this.projectId = biigle.$require('geo.project.id');
     },
 };
+</script>

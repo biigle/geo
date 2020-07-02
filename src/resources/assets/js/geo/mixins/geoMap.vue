@@ -1,3 +1,4 @@
+<script>
 import ImageLayer from 'ol/layer/Image';
 import ImageMap from '../components/imageMap';
 import ImageStaticSource from 'ol/source/ImageStatic';
@@ -11,13 +12,15 @@ export default {
     components: {
         imageMap: ImageMap,
     },
-    data: {
+    data: function() {
+return {
         selectedLabels: [],
         filteredImageCache: {},
         allImages: [],
         baseOverlays: [],
         overlayUrl: '',
-    },
+    };
+},
     computed: {
         filteredImages() {
             let images = [];
@@ -117,3 +120,4 @@ export default {
         Events.$on('label.cleared', this.handleClearedLabels);
     },
 };
+</script>

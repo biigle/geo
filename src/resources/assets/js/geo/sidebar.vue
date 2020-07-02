@@ -1,3 +1,4 @@
+<script>
 import {Events} from './import';
 import {LabelTrees} from './import';
 import {SidebarTab} from './import';
@@ -7,8 +8,10 @@ import {Sidebar} from './import';
  * The sidebar of the geo show view
  */
 export default {
-    data: {
-        labelTrees: [],
+    data() {
+        return {
+            labelTrees: [],
+        };
     },
     components: {
         sidebar: Sidebar,
@@ -37,3 +40,4 @@ export default {
         this.labelTrees = biigle.$require('geo.labelTrees');
     },
 };
+</script>

@@ -1,12 +1,15 @@
+<script>
 import {Events} from './import';
 
 /**
  * Dynamic information in the navbar of the geo show view
  */
 export default {
-    data: {
-        images: [],
-        loading: false,
+    data() {
+        return {
+            images: [],
+            loading: false,
+        };
     },
     computed: {
         number() {
@@ -29,3 +32,4 @@ export default {
         });
     },
 };
+</script>
