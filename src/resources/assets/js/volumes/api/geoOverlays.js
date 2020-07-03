@@ -9,9 +9,9 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('api.geoOverlays', Vue.resource('api/v1/geo-overlays{/id}', {}, {
+export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
     savePlain: {
         method: 'POST',
         url: 'api/v1/volumes{/volume_id}/geo-overlays/plain',
     },
-}));
+});
