@@ -17,8 +17,12 @@ class ImageAnnotationsController extends Controller{
 
     $metadata = $image->metadata;
     $image_width_m = 2 * (float)$image->metadata['distance_to_ground'];
-    $result = $image->annotations->map(function($annotation) use($image, $metadata,$image_width_m){
-      $annotation_points = array_slice($annotation->points, 0, 2);
+    $labels = Image::Join('annotations', 'annotations.image_id', '=', 'images.id')
+                    ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+                    ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
+                    ->where("image_id", $id);
+    $result = $labels->get()->map(function($label) use($image, $metadata,$image_width_m){
+      $annotation_points = array_slice(json_decode($label->points), 0, 2);
       $image_center = [($image->width)/2, ($image->height)/2];
 
       # Finding Annotation Point with respect to center of the image.
@@ -48,8 +52,8 @@ class ImageAnnotationsController extends Controller{
       # Shift the latitude and longitude to annotation point.
       $new_lat = $image->lat + $lat_radian * 180/pi();
       $new_lng = $image->lng + $lng_radian * 180/pi();
-      return new Feature(new Point([$new_lng, $new_lat]), array_merge(['_id' => $image->id,
-      'annotation_id' => $annotation->id, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
+      return new Feature(new Point([$new_lng, $new_lat]), array_merge(["_id" => $image->id,
+      "label ID" => $label->id, "Label Name"=>$label->name, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
       "image_coordinate" => "lat: {$image->lat}, lng: {$image->lng}", '_filename' => $image->filename]));
     });
     return new FeatureCollection($result->all());
