@@ -52,7 +52,7 @@ class ImageAnnotationsController extends Controller{
       # Shift the latitude and longitude to annotation point.
       $new_lat = $image->lat + $lat_radian * 180/pi();
       $new_lng = $image->lng + $lng_radian * 180/pi();
-      return new Feature(new Point([$new_lng, $new_lat]), array_merge(["_id" => $image->id,
+      return new Feature(new Point([$new_lng, $new_lat]), array_merge(["_id" => $image->image_id,
       "label ID" => $label->id, "Label Name"=>$label->name, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
       "image_coordinate" => "lat: {$image->lat}, lng: {$image->lng}", '_filename' => $image->filename]));
     });

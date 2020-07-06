@@ -16,7 +16,10 @@ class ProjectImagesAnnotationsController extends Controller{
     $project = Project::findOrFail($id);
     $this->authorize('access', $project);
 
-    $images = Image::wherein("volume_id", $project->volumes->pluck('id')->all())->join('annotations', 'annotations.image_id', '=', 'images.id');
+    $images = Image::wherein("volume_id", $project->volumes->pluck('id')->all())
+                      ->join('annotations', 'annotations.image_id', '=', 'images.id')
+                      ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+                      ->join('labels', 'labels.id', '=', 'annotation_labels.label_id');
     $results = $images->get()->map(function ($image) {
       $metadata = $image->metadata;
       $image_width_m = 2 * (float)$metadata['distance_to_ground'];
@@ -49,7 +52,7 @@ class ProjectImagesAnnotationsController extends Controller{
       $new_lat = $image->lat + $lat_radian * 180/pi();
       $new_lng = $image->lng + $lng_radian * 180/pi();
       return new Feature(new Point([$new_lng, $new_lat]), array_merge(['_id' => $image->image_id,
-      'annotation_id' => $image->id, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
+      'Label ID' => $image->id, "Label Name"=>$image->name, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
       "image_coordinate" => "lat: {$image->lat}, lng: {$image->lng}", '_filename' => $image->filename]));
     });
     return new FeatureCollection($results->all());
