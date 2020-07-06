@@ -45,5 +45,6 @@ $router->group([
       $router->get('projects/{id}/images', ['uses' => 'ProjectImagesController@index']);
       $router->get('images/{id}/annotations', ['uses' => 'ImageAnnotationsController@index']);
       $router->get('projects/{id}/images/annotations', ['uses' => 'ProjectImagesAnnotationsController@index']);
+      $router->get('volumes/{id}/images/annotations', ['uses' => 'VolumeImagesAnnotationsController@index']);
     });
 });
