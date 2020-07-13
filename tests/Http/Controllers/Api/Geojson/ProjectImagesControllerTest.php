@@ -32,19 +32,21 @@ class ProjectImagesControllerTest extends ApiTestCase
       return LabelTest::create(["name"=>$name]);
     });
     for($i=0;$i<5;$i++) {
-      $image = ImageTest::create(['volume_id' => $volume->id,
-                                  'filename'=>"$i.jpg",
-                                  'lat'=>$faker->latitude(-90,90),
-                                  'lng'=>$faker->longitude(-180, 180)]);
+      $image = ImageTest::create([
+        'volume_id' => $volume->id,
+        'filename'=>"$i.jpg",
+        'lat'=>$faker->latitude(-90,90),
+        'lng'=>$faker->longitude(-180, 180)]);
       $annotation = AnnotationTest::create(['image_id' => $image->id]);
       AnnotationLabelTest::create(['annotation_id' => $annotation->id, 'label_id' => $labels->random()->id]);
     }
 
     for($i=0;$i<5;$i++) {
-      $image = ImageTest::create(['volume_id' => $volume_2->id,
-                                  'filename'=>"{$i}0.jpg",
-                                  'lat'=>$faker->latitude(-90,90),
-                                  'lng'=>$faker->longitude(-180, 180)]);
+      $image = ImageTest::create([
+        'volume_id' => $volume_2->id,
+        'filename'=>"{$i}0.jpg",
+        'lat'=>$faker->latitude(-90,90),
+        'lng'=>$faker->longitude(-180, 180)]);
       $annotation = AnnotationTest::create(['image_id' => $image->id]);
       AnnotationLabelTest::create(['annotation_id' => $annotation->id, 'label_id' => $labels->random()->id]);
     }
@@ -75,4 +77,3 @@ class ProjectImagesControllerTest extends ApiTestCase
     $this->assertFalse($vol_2_images_id === $resp_images_id);
   }
 }
-?>

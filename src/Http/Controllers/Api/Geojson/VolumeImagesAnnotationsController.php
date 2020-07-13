@@ -9,10 +9,60 @@ use Biigle\Http\Controllers\Api\Controller;
 use GeoJson\Feature\FeatureCollection;
 use League\Flysystem\FileNotFoundException;
 
-class VolumeImagesAnnotationsController extends Controller
-{
-  public function index($id)
-  {
+class VolumeImagesAnnotationsController extends Controller {
+
+  /**
+   * Get GeoJson data all Labels of Images within a specified Volume.
+   * @api {get} geojson/volumes/{id}/annotations Get GeoJson data all Labels.
+   * @apiGroup GeoJson
+   * @apiName IndexVolumeImageLabels
+   * @apiPermission projectMember
+   * @apiDescription Returns an object with Array of GeoJson Feature objects containing
+   * Coordinate(i.e latitude and longitude),
+   *
+   * @apiParam {Number} id The Image ID
+   * @apiSuccessExample {json} Success response:
+   *
+   * {
+   *    "type":"FeatureCollection",
+   *    "features":
+   *    [
+   *      {
+   *        "type":"Feature",
+   *        "geometry": {
+   *          "type":"Point",
+   *          "coordinates":[-88.46245997506956,-7.0754471074970064]},
+   *        "properties":
+   *        {
+   *          "_id":1,
+   *          "label ID":2,
+   *          "Label Name":"Coral",
+   *          "annotation coordinates":"lat: -7.075447107497, lng:-88.46245997507",
+   *          "image_coordinate":"lat: -7.0754151300236, lng: -88.462423984086",
+   *          "_filename":"20150813_224051_IMG_3331.JPG"
+   *        }
+   *      },
+   *      {
+   *        "type":"Feature",
+   *        "geometry": {
+   *          "type":"Point",
+   *          "coordinates":[-88.46245997506956,-7.0754471074970064]},
+   *        "properties":
+   *        {
+   *          "_id":1,
+   *          "label ID":18,
+   *          "Label Name":"Sponge",
+   *          "annotation coordinates":"lat: -7.075447107497, lng:-88.46245997507",
+   *          "image_coordinate":"lat: -7.0754151300236, lng: -88.462423984086",
+   *          "_filename":"20150813_224051_IMG_3331.JPG"
+   *        }
+   *      }
+   *    ]
+   * }
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+  */
+  public function index($id) {
     $volume = Volume::findOrFail($id);
     $this->authorize('access', $volume);
 
