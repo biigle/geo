@@ -83,4 +83,3 @@ class ImageAnnotationsController extends Controller {
     }
   }
 }
-?>
