@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use DB;
-use Biigle\Volume;
-use Illuminate\Http\Request;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Volume;
+use DB;
+use Illuminate\Http\Request;
 
 class VolumeGeoOverlayController extends Controller
 {

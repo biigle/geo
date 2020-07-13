@@ -3,10 +3,10 @@
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Tests\LabelTest;
-use Biigle\Tests\ImageTest;
-use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
 
 class ProjectImageAnnotationLabelControllerTest extends ApiTestCase
 {

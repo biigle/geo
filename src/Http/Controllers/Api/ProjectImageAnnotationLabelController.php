@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Project;
 use Biigle\Annotation;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Project;
 
 class ProjectImageAnnotationLabelController extends Controller
 {

@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Storage;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Geo\GeoOverlay;
 use League\Flysystem\FileNotFoundException;
+use Storage;
 
 class GeoOverlayController extends Controller
 {

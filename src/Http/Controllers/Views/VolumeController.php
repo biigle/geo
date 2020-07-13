@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
-use Biigle\Volume;
-use Biigle\Project;
-use Biigle\LabelTree;
-use Illuminate\Http\Request;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Views\Controller;
+use Biigle\LabelTree;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Project;
+use Biigle\Volume;
+use Illuminate\Http\Request;
 
 class VolumeController extends Controller
 {

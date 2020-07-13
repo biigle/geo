@@ -2,9 +2,9 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
-use Storage;
 use ApiTestCase;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
+use Storage;
 
 class GeoOverlayControllerTest extends ApiTestCase
 {

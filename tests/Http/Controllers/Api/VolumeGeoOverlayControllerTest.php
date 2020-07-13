@@ -2,11 +2,11 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
-use Storage;
 use ApiTestCase;
-use Illuminate\Http\UploadedFile;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
+use Illuminate\Http\UploadedFile;
+use Storage;
 
 class VolumeGeoOverlayControllerTest extends ApiTestCase
 {

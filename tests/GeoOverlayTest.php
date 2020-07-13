@@ -2,10 +2,10 @@
 
 namespace Biigle\Tests\Modules\Geo;
 
-use TestCase;
-use Biigle\Volume;
-use Biigle\Tests\VolumeTest;
 use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Tests\VolumeTest;
+use Biigle\Volume;
+use TestCase;
 
 class GeoOverlayTest extends TestCase
 {
