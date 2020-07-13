@@ -36,7 +36,9 @@
         $scaling_factor = $image_width_m/$label->width;
 
         # Coordinate Offset in Meters
-        $coordinate_offset_meters = array_map(function($point) use($scaling_factor){return $point * $scaling_factor;}, [$rotated_X, $rotated_Y]);
+        $coordinate_offset_meters = array_map(function($point) use($scaling_factor) {
+          return $point * $scaling_factor;
+        }, [$rotated_X, $rotated_Y]);
 
         #radius of Earth
         $R = 6378137;

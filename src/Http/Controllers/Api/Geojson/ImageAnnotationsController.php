@@ -65,7 +65,7 @@ class ImageAnnotationsController extends Controller {
     $image = Image::findOrFail($id);
     $this->authorize('access', $image);
     $metadata = $image->metadata;
-    if(isset($image->lat, $image->lng, $metadata->yaw, $metadata->distance_to_ground))
+    if(isset($image->lat, $image->lng, $metadata["yaw"], $metadata["distance_to_ground"])){
       $labels = Image::Join('annotations', 'annotations.image_id', '=', 'images.id')
                       ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
                       ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
@@ -77,8 +77,9 @@ class ImageAnnotationsController extends Controller {
       $labelCoordinates = new LabelCoordinates($labels->get());
       $results = $labelCoordinates->compute();
       return new FeatureCollection($results->all());
+    }
     else {
-      abort(404)
+      abort(404);
     }
   }
 }
