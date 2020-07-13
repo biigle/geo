@@ -68,7 +68,11 @@ class VolumeImagesAnnotationsController extends Controller {
 
     $labels = $volume->images()->join('annotations', 'annotations.image_id', '=', 'images.id')
                       ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-                      ->join('labels', 'labels.id', '=', 'annotation_labels.label_id');
+                      ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
+                      ->select('images.id as image_id','images.filename',
+                      'images.attrs', 'images.lat','images.lng',
+                      'annotations.points','annotation_labels.id as annotation_label_id',
+                      'labels.name as label_name');
     $labelCoordinates = new LabelCoordinates($labels->get());
     $results = $labelCoordinates->compute();
     return new FeatureCollection($results->all());

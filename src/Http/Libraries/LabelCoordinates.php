@@ -49,12 +49,10 @@
         $new_lat = $label->lat + $lat_radian * 180/pi();
         $new_lng = $label->lng + $lng_radian * 180/pi();
 
-        return new Feature(new Point([$new_lng, $new_lat]), array_merge(["_id" => $label->image_id,
-        "label ID" => $label->id, "Label Name"=>$label->name, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
-        "image_coordinate" => "lat: {$label->lat}, lng: {$label->lng}", '_filename' => $label->filename]));
+        return new Feature(new Point([$new_lng, $new_lat]), array_merge(["Annotation Label ID" => $label->annotation_label_id,
+        "Image ID" => $label->image_id, "Label Name"=>$label->label_name, "annotation coordinates" => "lat: {$new_lat}, lng:{$new_lng}",
+        "image_coordinate" => "lat: {$label->lat}, lng: {$label->lng}", 'Image filename' => $label->filename]));
       });
       return $result;
     }
   }
-
-?>
