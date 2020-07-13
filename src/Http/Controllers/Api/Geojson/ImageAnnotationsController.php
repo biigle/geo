@@ -64,18 +64,22 @@ class ImageAnnotationsController extends Controller {
   public function index($id) {
     $image = Image::findOrFail($id);
     $this->authorize('access', $image);
-
-    $labels = Image::Join('annotations', 'annotations.image_id', '=', 'images.id')
-                    ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-                    ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
-                    ->select('images.id as image_id','images.filename',
-                    'images.attrs', 'images.lat','images.lng',
-                    'annotations.points','annotation_labels.id as annotation_label_id',
-                    'labels.name as label_name')
-                    ->where("image_id", $id);
-    $labelCoordinates = new LabelCoordinates($labels->get());
-    $results = $labelCoordinates->compute();
-    return new FeatureCollection($results->all());
+    $metadata = $image->metadata;
+    if(isset($image->lat, $image->lng, $metadata->yaw, $metadata->distance_to_ground))
+      $labels = Image::Join('annotations', 'annotations.image_id', '=', 'images.id')
+                      ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+                      ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
+                      ->select('images.id as image_id','images.filename',
+                      'images.attrs', 'images.lat','images.lng',
+                      'annotations.points','annotation_labels.id as annotation_label_id',
+                      'labels.name as label_name')
+                      ->where("image_id", $id);
+      $labelCoordinates = new LabelCoordinates($labels->get());
+      $results = $labelCoordinates->compute();
+      return new FeatureCollection($results->all());
+    else {
+      abort(404)
+    }
   }
 }
 ?>
