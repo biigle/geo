@@ -3,8 +3,8 @@
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
 
@@ -15,14 +15,14 @@ class ProjectImageAnnotationLabelControllerTest extends ApiTestCase
         $pid = $this->project()->id;
 
         $image = ImageTest::create(['volume_id' => $this->volume()->id]);
-        $annotation = AnnotationTest::create(['image_id' => $image->id]);
+        $annotation = ImageAnnotationTest::create(['image_id' => $image->id]);
         $label = LabelTest::create();
-        AnnotationLabelTest::create([
+        ImageAnnotationLabelTest::create([
             'annotation_id' => $annotation->id,
             'label_id' => $label->id,
         ]);
         // image ID should be returned only once, no matter how often the label is present
-        AnnotationLabelTest::create([
+        ImageAnnotationLabelTest::create([
             'annotation_id' => $annotation->id,
             'label_id' => $label->id,
         ]);
@@ -34,8 +34,8 @@ class ProjectImageAnnotationLabelControllerTest extends ApiTestCase
             'volume_id' => $this->volume()->id,
             'filename' => 'b.jpg',
         ]);
-        $annotation = AnnotationTest::create(['image_id' => $image2->id]);
-        AnnotationLabelTest::create([
+        $annotation = ImageAnnotationTest::create(['image_id' => $image2->id]);
+        ImageAnnotationLabelTest::create([
             'annotation_id' => $annotation->id,
             'user_id' => $this->admin()->id,
         ]);
