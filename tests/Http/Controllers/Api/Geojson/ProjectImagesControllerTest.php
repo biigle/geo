@@ -27,8 +27,7 @@ class ProjectImagesControllerTest extends ApiTestCase
 
 
     $labelNames = ["sponge", "jellyfish", "starfish"];
-    $labels = collect($labelNames)->map(function($name)
-    {
+    $labels = collect($labelNames)->map(function($name) {
       return LabelTest::create(["name"=>$name]);
     });
     for($i=0;$i<5;$i++) {
