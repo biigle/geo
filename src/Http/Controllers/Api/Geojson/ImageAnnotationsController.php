@@ -79,7 +79,7 @@ class ImageAnnotationsController extends Controller {
       return new FeatureCollection($results->all());
     }
     else {
-      abort(404);
+      abort(404, "One or more attributes (latitude, longitude, yaw, distance to ground) are missing for Image ID={$id}");
     }
   }
 }
