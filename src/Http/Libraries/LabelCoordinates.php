@@ -48,13 +48,13 @@
         $newLat = $label->lat + $latRadian * 180/pi();
         $newLng = $label->lng + $lngRadian * 180/pi();
 
-        return new Feature(new Point([$newLng, $newLat]), array_merge([
+        return new Feature(new Point([$newLng, $newLat]), [
           "Annotation Label ID" => $label->annotation_label_id,
           "image_id" => $label->image_id,
           "Label Name"=>$label->label_name,
           "annotation coordinates" => "lat: {$newLat}, lng:{$newLng}",
           "image_coordinate" => "lat: {$label->lat}, lng: {$label->lng}",
-          'Image filename' => $label->filename]));
+          'Image filename' => $label->filename]);
       });
       return $result;
     }
