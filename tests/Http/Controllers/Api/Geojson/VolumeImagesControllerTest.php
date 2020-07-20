@@ -7,6 +7,7 @@ use Faker\Factory as Faker;
 use Biigle\{Label, Image, Annotation, AnnotationLabel};
 use GeoJson\GeoJson as GeoJson;
 use Biigle\Tests\VolumeTest;
+use Biigle\Tests\ProjectTest;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\AnnotationTest;
@@ -17,8 +18,12 @@ class VolumeImagesControllerTest extends ApiTestCase
   public function testIndex()
   {
     $faker = Faker::create();
+    $thirdProject = ProjectTest::create(['creator_id' => $this->editor()->id]);
+
     $volume = $this->volume();
     $volume_2 = VolumeTest::create();
+    $volume_3 = VolumeTest::create();
+    $thirdProject->volumes()->save($volume_3);
     $labelNames = ["sponge", "jellyfish", "starfish"];
     $labels = collect($labelNames)->map(function($name)
     {
@@ -49,6 +54,10 @@ class VolumeImagesControllerTest extends ApiTestCase
     $this->beUser();
     $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/images");
     $response->assertStatus(403);
+
+    $this->beEditor();
+    $response = $this->get("/api/v1/geojson/volumes/{$volume_3->id}/images");
+    $response->assertStatus(404);
 
     $this->beEditor();
     $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/images");

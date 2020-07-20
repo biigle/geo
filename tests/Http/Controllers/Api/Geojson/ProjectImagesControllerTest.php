@@ -20,10 +20,13 @@ class ProjectImagesControllerTest extends ApiTestCase
     $faker = Faker::create();
     $firstProject = $this->project();
     $secondProject = ProjectTest::create();
+    $thirdProject = ProjectTest::create(['creator_id' => $this->editor()->id]);
 
     $volume = $this->volume();
     $volume_2 = VolumeTest::create();
+    $volume_3 = VolumeTest::create();
     $secondProject->volumes()->save($volume);
+    $thirdProject->volumes()->save($volume_3);
 
 
     $labelNames = ["sponge", "jellyfish", "starfish"];
@@ -55,6 +58,10 @@ class ProjectImagesControllerTest extends ApiTestCase
     $this->beUser();
     $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");
     $response->assertStatus(403);
+
+    $this->beEditor();
+    $response = $this->get("/api/v1/geojson/projects/{$thirdProject->id}/images");
+    $response->assertStatus(404);
 
     $this->beEditor();
     $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");

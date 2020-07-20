@@ -73,14 +73,19 @@ class VolumeImagesAnnotationsController extends Controller {
                       'images.attrs', 'images.lat','images.lng',
                       'annotations.points','annotation_labels.id as annotation_label_id',
                       'labels.name as label_name');
-    $labels = $labels->where(function($query) {
-      $columns = ["images.lat", "images.lng", "images.attrs->metadata->distance_to_ground","images.attrs->metadata->yaw"];
-      foreach($columns as $column) {
-        $query->whereNotNull($column);
-      }
-    });
-    $labelCoordinates = new LabelCoordinates($labels->get());
-    $results = $labelCoordinates->compute();
-    return new FeatureCollection($results->all());
+    if ($labels->exists()) {
+      $labels = $labels->where(function($query) {
+        $columns = ["images.lat", "images.lng", "images.attrs->metadata->distance_to_ground","images.attrs->metadata->yaw"];
+        foreach($columns as $column) {
+          $query->whereNotNull($column);
+        }
+      });
+      $labelCoordinates = new LabelCoordinates($labels->get());
+      $results = $labelCoordinates->compute();
+      return new FeatureCollection($results->all());
+    }
+    else {
+      abort(404, "There are no images in volume with ID={$id}");
+    }
   }
 }

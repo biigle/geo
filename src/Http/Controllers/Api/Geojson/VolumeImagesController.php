@@ -67,23 +67,29 @@ class VolumeImagesController extends Controller
     $volume = Volume::findOrFail($id);
     $this->authorize('access', $volume);
 
-    $images = $volume->images()->select('id', 'lat', 'lng', 'filename')->get();
-    $labels = $volume->images()->join('annotations', 'annotations.image_id', '=', 'images.id')
-      ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-      ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
-      ->select('images.id', 'images.lat', 'images.lng','labels.name')->get()
-      ->groupBy('id');
+    $images = $volume->images()->select('id', 'lat', 'lng', 'filename');
+    if ($images->exists()) {
+      $images = $images->get();
+      $labels = $volume->images()->join('annotations', 'annotations.image_id', '=', 'images.id')
+        ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+        ->join('labels', 'labels.id', '=', 'annotation_labels.label_id')
+        ->select('images.id', 'images.lat', 'images.lng','labels.name')->get()
+        ->groupBy('id');
 
-    $images->each(function($item, $key) use($labels){
-      $item['label_count'] = $labels->has($item->id) ? $labels[$item->id]->groupBy('name')->map(function($v){
-        return $v->count();
-      }) : collect([]);
-    });
+      $images->each(function($item, $key) use($labels){
+        $item['label_count'] = $labels->has($item->id) ? $labels[$item->id]->groupBy('name')->map(function($v){
+          return $v->count();
+        }) : collect([]);
+      });
 
-    $features = $images->map(function($image){
-      return new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id' => $image->id, '_filename' => $image->filename], $image->label_count->all()));
-    });
+      $features = $images->map(function($image){
+        return new Feature(new Point([$image->lng, $image->lat]), array_merge(['_id' => $image->id, '_filename' => $image->filename], $image->label_count->all()));
+      });
 
-    return new FeatureCollection($features->all());
+      return new FeatureCollection($features->all());
+    }
+    else {
+      abort(404, "There are no images in Volume with ID={$id}");
+    }
   }
 }
