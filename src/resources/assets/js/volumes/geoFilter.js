@@ -7,6 +7,7 @@ import {FilterList} from './import';
 if (Array.isArray(VolumeFilters)) {
     VolumeFilters.push({
         id: 'geo',
+        types: ['image'],
         label: 'geo selection',
         help: "All images that were (not) selected on the world map.",
         listComponent: {
