@@ -1,14 +1,14 @@
 @extends('manual.base')
 
-@section('manual-title') Volume map @stop
+@section('manual-title') Image volume map @stop
 
 @section('manual-content')
 <div class="row">
     <p class="lead">
-        The volume map shows the locations of images on a world map.
+        The image volume map shows the locations of images on a world map.
     </p>
     <p>
-        If images of a volume contain the geo location in their <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">metadata</a>, they can be disblayed on the volume map. For these volumes the <button class="btn btn-default btn-xs"><i class="fa fa-globe"></i></button> button appears in the sidebar of the volume overview. Click this button to view the volume map.
+        If images of a volume contain the geo location in their <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">metadata</a>, they can be disblayed on the volume map. For these volumes the <button class="btn btn-default btn-xs"><i class="fa fa-globe"></i></button> button appears in the sidebar of the volume overview. Click this button to view the image volume map. The volume map is not available for video volumes.
     </p>
     <p class="text-center">
         <a href="{{asset('vendor/geo/images/manual/volume_map_1.png')}}"><img src="{{asset('vendor/geo/images/manual/volume_map_1.png')}}" width="90%"></a>
