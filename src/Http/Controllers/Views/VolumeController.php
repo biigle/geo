@@ -8,6 +8,7 @@ use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Project;
 use Biigle\Volume;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class VolumeController extends Controller
 {
@@ -23,8 +24,8 @@ class VolumeController extends Controller
     {
         $volume = Volume::select('id', 'name')->findOrFail($id);
         $this->authorize('access', $volume);
-        if (!$volume->hasGeoInfo()) {
-            abort(404);
+        if ($volume->isVideoVolume() || !$volume->hasGeoInfo()) {
+            abort(Response::HTTP_NOT_FOUND);
         }
 
         $user = $request->user();

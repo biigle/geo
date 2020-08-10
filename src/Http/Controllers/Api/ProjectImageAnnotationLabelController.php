@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Annotation;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\ImageAnnotation;
 use Biigle\Project;
 
 class ProjectImageAnnotationLabelController extends Controller
@@ -35,9 +35,9 @@ class ProjectImageAnnotationLabelController extends Controller
         $project = Project::findOrFail($pid);
         $this->authorize('access', $project);
 
-        return Annotation::join('annotation_labels', 'annotations.id', '=', 'annotation_labels.annotation_id')
-                ->join('images', 'annotations.image_id', '=', 'images.id')
-                ->where('annotation_labels.label_id', $lid)
+        return ImageAnnotation::join('image_annotation_labels', 'image_annotations.id', '=', 'image_annotation_labels.annotation_id')
+                ->join('images', 'image_annotations.image_id', '=', 'images.id')
+                ->where('image_annotation_labels.label_id', $lid)
                 ->whereIn('images.volume_id', function ($query) use ($pid) {
                     return $query->select('volume_id')
                         ->from('project_volume')

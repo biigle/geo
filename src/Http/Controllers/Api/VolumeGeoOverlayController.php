@@ -4,9 +4,10 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Modules\Geo\Http\Requests\StorePlainGeoOverlay;
 use Biigle\Volume;
 use DB;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -37,6 +38,10 @@ class VolumeGeoOverlayController extends Controller
     {
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);
+
+        if ($volume->isVideoVolume()) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
 
         return GeoOverlay::where('volume_id', $id)->get();
     }
@@ -76,27 +81,16 @@ class VolumeGeoOverlayController extends Controller
      *     "bottom_right_lng": 8.4931067,
      * }
      *
-     * @param Request $request
+     * @param StorePlainGeoOverlay $request
      * @param int $id Volume ID
      */
-    public function storePlain(Request $request, $id)
+    public function storePlain(StorePlainGeoOverlay $request)
     {
-        $volume = Volume::findOrFail($id);
-        $this->authorize('update', $volume);
-        $this->validate($request, [
-            'name' => 'filled|max:512',
-            'file' => 'required|file|max:10000|mimetypes:image/jpeg,image/png,image/tiff',
-            'top_left_lat' => 'required|numeric|max:90|min:-90',
-            'top_left_lng' => 'required|numeric|max:180|min:-180',
-            'bottom_right_lat' => 'required|numeric|max:90|min:-90',
-            'bottom_right_lng' => 'required|numeric|max:180|min:-180',
-        ]);
-
-        return DB::transaction(function () use ($request, $id) {
+        return DB::transaction(function () use ($request) {
             $file = $request->file('file');
 
             $overlay = new GeoOverlay;
-            $overlay->volume_id = $id;
+            $overlay->volume_id = $request->volume->id;
             $overlay->name = $request->input('name', $file->getClientOriginalName());
             $overlay->top_left_lat = $request->input('top_left_lat');
             $overlay->top_left_lng = $request->input('top_left_lng');

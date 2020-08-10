@@ -1,4 +1,4 @@
-@if ($volume->hasGeoInfo())
+@if ($volume->isImageVolume() && $volume->hasGeoInfo())
 <div id="volume-geo-overlay-upload" class="panel panel-default" :class="classObject">
     <div class="panel-heading">
         Geo overlays
