@@ -30,7 +30,7 @@
         <li>select “Protocol, HTTP(s), cloud, etc” for Source Type.</li>
         <li> Leave the Encoding to “Automatic”</li>
         <li>In Protocol Type select “GeoJSON”</li>
-        <li> Added Volume Images API URI <a href="#">http://biigle.de/api/v1/geojson/volumes/1/images</a></li>
+        <li> Added Volume Images API URI "http://biigle.de/api/v1/geojson/volumes/1/images</li>
       </ul>
     </p>
     <p class="text-center">
@@ -40,7 +40,7 @@
       <ul>
         <li>The “Name” field is optional.</li>
         <li>In the Username field type Biigle account email address. Note: replace “@” in the email with “%40”.</li>
-        <li>Then, Generate a new token from http://biigle.de/settings/tokens and add the token in the Password field.</li>
+        <li>Then, Generate a new Biigle API token from Settings -> <a href="http://biigle.de/settings/tokens">Token page</a> and add the token in the Password field.</li>
         <li>Click Save.</li>
       </ul>
     </p>
