@@ -53,7 +53,7 @@ return {
             return this.allImages;
         },
         overlays() {
-            return this.baseOverlays.map(function (overlay) {
+            return this.baseOverlays.map((overlay) => {
                 return new ImageLayer({
                     source: new ImageStaticSource({
                         url: this.overlayUrl.replace(':id', overlay.id),
