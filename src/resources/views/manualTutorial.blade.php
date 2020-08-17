@@ -14,10 +14,10 @@
 </p>
 
 <h4>
-    <a href="#">Importing Annotations data points</a>
+    <a href="{{route('manual-tutorials', ['geo','qgis-import-annotations-poisition'])}}">Importing Annotations Position</a>
 </h4>
 <p>
-
+  BIIGLE API endpoint for getting position of every single annotations of an image or images withing a Project or Volume.
 </p>
 
 <h3>
