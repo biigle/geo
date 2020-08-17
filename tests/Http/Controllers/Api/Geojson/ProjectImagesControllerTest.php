@@ -67,6 +67,14 @@ class ProjectImagesControllerTest extends ApiTestCase
     $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");
     $response->assertStatus(200);
 
+    $this->beGuest();
+    $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");
+    $response->assertStatus(200);
+
+    $this->beExpert();
+    $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");
+    $response->assertStatus(200);
+
     $this->beAdmin();
     $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/images");
     $response->assertStatus(200);

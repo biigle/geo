@@ -67,6 +67,14 @@ class VolumeImagesControllerTest extends ApiTestCase
     $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/images");
     $response->assertStatus(200);
 
+    $this->beGuest();
+    $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/images");
+    $response->assertStatus(200);
+
+    $this->beExpert();
+    $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/images");
+    $response->assertStatus(200);
+
     $vol_1_images_id = $volume->images->sort()->pluck('id')->all();
     $vol_2_images_id = $volume_2->images->sort()->pluck('id')->all();
     $resp_images_id = array_map(function($a)

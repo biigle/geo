@@ -113,6 +113,14 @@ class VolumeImagesAnnotationsControllerTest extends ApiTestCase {
     $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/annotations");
     $response->assertStatus(200);
 
+    $this->beGuest();
+    $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/annotations");
+    $response->assertStatus(200);
+
+    $this->beExpert();
+    $response = $this->get("/api/v1/geojson/volumes/{$volume->id}/annotations");
+    $response->assertStatus(200);
+
     $vol_1_images_id = $volume->images()->where(function($query) {
       $columns = ["lat", "lng", "attrs->metadata->distance_to_ground","attrs->metadata->yaw"];
       foreach($columns as $column) {

@@ -105,6 +105,14 @@ class ProjectImagesAnnotationsControllerTest extends ApiTestCase {
     $response = $this->get("/api/v1/geojson/projects/{$thirdProject->id}/annotations");
     $response->assertStatus(404);
 
+    $this->beGuest();
+    $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/annotations");
+    $response->assertStatus(200);
+
+    $this->beExpert();
+    $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/annotations");
+    $response->assertStatus(200);
+
     $this->beEditor();
     $response = $this->get("/api/v1/geojson/projects/{$firstProject->id}/annotations");
     $response->assertStatus(200);
