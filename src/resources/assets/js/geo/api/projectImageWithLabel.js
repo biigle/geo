@@ -9,6 +9,4 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('geo.api.projectImageWithLabel', Vue.resource(
-    'api/v1/projects{/pid}/images/filter/annotation-label{/lid}', {}
-));
+export default Vue.resource('api/v1/projects{/pid}/images/filter/annotation-label{/lid}', {});

@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
-use Biigle\Image;
-use Biigle\Project;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Views\Controller;
+use Biigle\Image;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Project;
 
 class ProjectController extends Controller
 {

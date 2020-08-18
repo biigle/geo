@@ -15,8 +15,6 @@
         }
     ],
     "require": {
-        "biigle/volumes": "^2.0 | dev-master",
-        "biigle/label-trees": "^1.3 | dev-master",
         "jmikola/geojson": "^1.0"
     },
     "autoload": {

@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Geo\Console\Commands;
 
-use Illuminate\Console\Command;
 use Biigle\Modules\Geo\GeoServiceProvider as ServiceProvider;
+use Illuminate\Console\Command;
 
 class Config extends Command
 {

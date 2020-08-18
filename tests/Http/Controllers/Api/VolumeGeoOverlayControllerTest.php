@@ -2,11 +2,12 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
-use Storage;
 use ApiTestCase;
-use Illuminate\Http\UploadedFile;
+use Biigle\MediaType;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
+use Illuminate\Http\UploadedFile;
+use Storage;
 
 class VolumeGeoOverlayControllerTest extends ApiTestCase
 {
@@ -27,6 +28,19 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $response = $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
             ->assertJsonFragment([$overlay->toArray()]);
         $response->assertStatus(200);
+    }
+
+    public function testIndexVideoVolume()
+    {
+        $overlay = GeoOverlayTest::create();
+        $overlay->volume_id = $this->volume([
+            'media_type_id' => MediaType::videoId(),
+        ])->id;
+        $overlay->save();
+        $id = $overlay->volume_id;
+
+        $this->beGuest();
+        $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")->assertStatus(404);
     }
 
     public function testStorePlain()
@@ -72,5 +86,20 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->assertEquals($overlay->name, 'overlay.png');
         $response->assertExactJson($overlay->toArray());
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
+    }
+
+    public function testStoreVideoVolume()
+    {
+        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $file = UploadedFile::fake()->create('overlay.png');
+        $this->beAdmin();
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/plain", [
+                'top_left_lat' => 1.223344,
+                'top_left_lng' => 1.334455,
+                'bottom_right_lat' => 1.445566,
+                'bottom_right_lng' => 1.667788,
+                'file' => $file,
+            ])
+            ->assertStatus(422);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Geo;
 
-use Storage;
 use Biigle\Volume;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
+use Storage;
 
 class GeoOverlay extends Model
 {

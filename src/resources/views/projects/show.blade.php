@@ -3,14 +3,10 @@
 @section('title', $project->name)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/geo/styles/ol.css') }}">
 <link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
-<script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
     biigle.$declare('geo.images', {!! $images !!});

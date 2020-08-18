@@ -9,6 +9,4 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('geo.api.volumeImageWithLabel', Vue.resource(
-    'api/v1/volumes{/vid}/images/filter/annotation-label{/lid}', {}
-));
+export default Vue.resource('api/v1/volumes{/vid}/images/filter/annotation-label{/lid}', {});

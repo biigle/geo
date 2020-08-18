@@ -17,8 +17,8 @@
     .ol-overviewmap {
         top: .5em;
         right: .5em;
-        bottom: auto;
-        left: auto;
+        bottom: auto !important;
+        left: auto !important;
         border-radius: 4px;
         background-color: rgba(255, 255, 255, .4);
 

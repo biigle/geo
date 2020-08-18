@@ -3,14 +3,10 @@
 @section('title', $volume->name)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/geo/styles/ol.css') }}">
 <link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
-<script src="{{ cachebust_asset('vendor/geo/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
 <script type="text/javascript">
     biigle.$declare('geo.images', {!! $images !!});
@@ -36,6 +32,6 @@
 
 @section('navbar')
 <div id="geo-navbar" class="navbar-text navbar-volumes-breadcrumbs">
-    @include('volumes::partials.projectsBreadcrumb', ['projects' => $volume->projects]) / <a href="{{route('volume', $volume->id)}}">{{$volume->name}}</a> / <strong>Map</strong> @include('volumes::partials.annotationSessionIndicator') <span v-if="loading" class="loader loader--active"></span><span v-else v-cloak>(<span v-text="number"></span> images)</span>
+    @include('volumes.partials.projectsBreadcrumb', ['projects' => $volume->projects]) / <a href="{{route('volume', $volume->id)}}">{{$volume->name}}</a> / <strong>Map</strong> @include('volumes.partials.annotationSessionIndicator') <span v-if="loading" class="loader loader--active"></span><span v-else v-cloak>(<span v-text="number"></span> images)</span>
 </div>
 @endsection
