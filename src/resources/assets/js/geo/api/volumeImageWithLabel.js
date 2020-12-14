@@ -9,4 +9,4 @@
  *
  * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/volumes{/vid}/images/filter/annotation-label{/lid}', {});
+export default Vue.resource('api/v1/volumes{/vid}/files/filter/annotation-label{/lid}', {});
