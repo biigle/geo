@@ -12,15 +12,13 @@
     biigle.$declare('geo.images', {!! $images !!});
     biigle.$declare('geo.volume', {!! $volume !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});
-    biigle.$declare('geo.overlays', {!! $overlays !!});
-    biigle.$declare('geo.overlayUrl', '{!! url('api/v1/geo-overlays/:id/file') !!}');
 </script>
 @endpush
 
 @section('content')
 <main class="sidebar-container">
     <section id="volume-geo-map" class="sidebar-container__content">
-        <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays"></image-map>
+        <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
     </section>
     <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>
         <sidebar-tab name="labels" icon="tags" title="Filter images by label">

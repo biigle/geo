@@ -13,14 +13,12 @@ export default {
         imageMap: ImageMap,
     },
     data: function() {
-return {
-        selectedLabels: [],
-        filteredImageCache: {},
-        allImages: [],
-        baseOverlays: [],
-        overlayUrl: '',
-    };
-},
+        return {
+            selectedLabels: [],
+            filteredImageCache: {},
+            allImages: [],
+        };
+    },
     computed: {
         filteredImages() {
             let images = [];
@@ -51,22 +49,6 @@ return {
             }
 
             return this.allImages;
-        },
-        overlays() {
-            return this.baseOverlays.map((overlay) => {
-                return new ImageLayer({
-                    source: new ImageStaticSource({
-                        url: this.overlayUrl.replace(':id', overlay.id),
-                        imageExtent: [
-                            overlay.top_left_lng,
-                            overlay.bottom_right_lat,
-                            overlay.bottom_right_lng,
-                            overlay.top_left_lat,
-                        ],
-                        projection: 'EPSG:4326',
-                    }),
-                });
-            });
         },
     },
     methods: {
@@ -112,8 +94,6 @@ return {
     },
     created() {
         this.allImages = biigle.$require('geo.images');
-        this.baseOverlays = biigle.$require('geo.overlays');
-        this.overlayUrl = biigle.$require('geo.overlayUrl');
 
         Events.$on('label.selected', this.handleSelectedLabel);
         Events.$on('label.deselected', this.handleDeselectedLabel);

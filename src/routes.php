@@ -20,23 +20,6 @@ $router->group([
     'prefix' => 'api/v1',
     'middleware' => 'auth:web,api',
 ], function ($router) {
-    $router->get('volumes/{id}/geo-overlays', [
-        'uses' => 'VolumeGeoOverlayController@index',
-    ]);
-
-    $router->post('volumes/{id}/geo-overlays/plain', [
-        'uses' => 'VolumeGeoOverlayController@storePlain',
-    ]);
-
-    $router->get('geo-overlays/{id}/file', [
-        'uses' => 'GeoOverlayController@showFile',
-    ]);
-
-    $router->resource('geo-overlays', 'GeoOverlayController', [
-        'only' => ['destroy'],
-        'parameters' => ['geo-overlays' => 'id'],
-    ]);
-
     $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
         'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);

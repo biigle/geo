@@ -42,8 +42,6 @@ class GeoServiceProvider extends ServiceProvider
                 'manualTutorial',
                 'volumesSidebar',
                 'volumesScripts',
-                'volumesEditScripts',
-                'volumesEditRight',
                 'projectsShowTabs',
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
@@ -57,17 +55,10 @@ class GeoServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/config/geo.php', 'geo');
-
         $this->app->singleton('command.geo.publish', function ($app) {
             return new \Biigle\Modules\Geo\Console\Commands\Publish();
         });
         $this->commands('command.geo.publish');
-
-        $this->app->singleton('command.geo.config', function ($app) {
-            return new \Biigle\Modules\Geo\Console\Commands\Config();
-        });
-        $this->commands('command.geo.config');
     }
 
     /**
@@ -79,7 +70,6 @@ class GeoServiceProvider extends ServiceProvider
     {
         return [
             'command.geo.publish',
-            'command.geo.config',
         ];
     }
 }

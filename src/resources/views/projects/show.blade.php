@@ -12,15 +12,13 @@
     biigle.$declare('geo.images', {!! $images !!});
     biigle.$declare('geo.project', {!! $project !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});
-    biigle.$declare('geo.overlays', {!! $overlays !!});
-    biigle.$declare('geo.overlayUrl', '{!! url('api/v1/geo-overlays/:id/file') !!}');
 </script>
 @endpush
 
 @section('content')
 <main class="sidebar-container">
     <section id="project-geo-map" class="sidebar-container__content">
-        <image-map :images="images" :overlays="overlays"></image-map>
+        <image-map :images="images"></image-map>
     </section>
     <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>
         <sidebar-tab name="labels" icon="tags" title="Filter images by label">

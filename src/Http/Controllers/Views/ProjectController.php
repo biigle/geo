@@ -4,7 +4,6 @@ namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
 use Biigle\Http\Controllers\Views\Controller;
 use Biigle\Image;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Project;
 
 class ProjectController extends Controller
@@ -40,13 +39,10 @@ class ProjectController extends Controller
 
         unset($project->labelTrees);
 
-        $overlays = GeoOverlay::whereIn('volume_id', $volumeIdQuery)->get();
-
         return view('geo::projects.show', compact(
             'project',
             'images',
-            'trees',
-            'overlays'
+            'trees'
         ));
     }
 }

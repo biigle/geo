@@ -51,13 +51,6 @@ export default {
             type: Boolean,
             default: false
         },
-        // Must be objects of type ol.layer
-        overlays: {
-            type: Array,
-            default() {
-                return [];
-            },
-        },
     },
     data() {
         return {
@@ -114,13 +107,9 @@ export default {
             updateWhileInteracting: true,
         });
 
-        let layers = [tileLayer];
-        Array.prototype.push.apply(layers, this.overlays);
-        layers.push(vectorLayer);
-
         let map = new Map({
             target: this.$el,
-            layers: layers,
+            layers: [tileLayer, vectorLayer],
             view: new View(),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,

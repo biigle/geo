@@ -4,7 +4,6 @@ namespace Biigle\Modules\Geo\Http\Controllers\Views;
 
 use Biigle\Http\Controllers\Views\Controller;
 use Biigle\LabelTree;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Project;
 use Biigle\Volume;
 use Illuminate\Http\Request;
@@ -50,13 +49,10 @@ class VolumeController extends Controller
             })
             ->get();
 
-        $overlays = GeoOverlay::where('volume_id', $id)->get();
-
         return view('geo::volumes.show', compact(
             'volume',
             'images',
-            'trees',
-            'overlays'
+            'trees'
         ));
     }
 }
