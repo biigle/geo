@@ -1,7 +1,5 @@
 <script>
-import ImageLayer from 'ol/layer/Image';
 import ImageMap from '../components/imageMap';
-import ImageStaticSource from 'ol/source/ImageStatic';
 import {Events} from '../import';
 import {handleErrorResponse} from '../import';
 
