@@ -18,7 +18,7 @@ $router->group([
 $router->group([
     'namespace' => 'Api',
     'prefix' => 'api/v1',
-    'middleware' => 'auth:web,api',
+    'middleware' => ['api', 'auth:web,api'],
 ], function ($router) {
     $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
         'uses' => 'ProjectImageAnnotationLabelController@index',
