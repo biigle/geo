@@ -19,7 +19,7 @@ class GeoServiceProvider extends ServiceProvider
     public function boot(Modules $modules, Router $router)
     {
         $this->loadViewsFrom(__DIR__.'/resources/views', 'geo');
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Database/migrations');
 
         $this->publishes([
             __DIR__.'/public/assets' => public_path('vendor/geo'),
