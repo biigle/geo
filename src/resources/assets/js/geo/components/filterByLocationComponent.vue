@@ -42,7 +42,6 @@ export default {
         },
         retrieveFiles(response) {
             this.images = Object.keys(response.data);
-            console.log("images: ", this.images);
         },
         submit() {
             this.$emit('select', this.selectedItem);
