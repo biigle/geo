@@ -84,7 +84,10 @@ export default {
         trigger: function() {
             this.showModal = true;
         },
-    }
+        images() {
+            console.log("access to: ", biigle);
+        }
+    },
 }
 </script>
 
