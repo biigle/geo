@@ -1,6 +1,6 @@
 <template>
     <div class="filter-select">
-        <geo-map-modal id="gmm" :text="text" :trigger="trigger" :images="images" v-on:on="submit"></geo-map-modal>
+        <geo-map-modal id="gmm" :text="text" :trigger="trigger" :items="items" v-on:on="submit"></geo-map-modal>
         <button type="submit" class="btn btn-default pull-right" @click="trigger = !trigger">Add rule</button>
     </div>
 </template>
@@ -25,10 +25,9 @@ export default {
     },
     data() {
         return {
-            images: [],
-            items: [],
             selectedItem: null,
             trigger: false,
+            items: [],
         };
     },
     computed: {
@@ -40,20 +39,16 @@ export default {
         select(item) {
             this.selectedItem = item;
         },
+        gotItems(response) {
+            this.items = response.body;
+            console.log("filterByLoc items: ", this.items);
+        },
         // retrieveFiles(response) {
         //     this.images = Object.keys(response.data);
         // },
-        gotItems(response) {
-            this.items = response.data;
-        },
         submit() {
             this.$emit('select', this.selectedItem);
         },
-    },
-    watch: {
-        items(newVal) {
-            console.log("items: ", newVal);
-        }
     }
 };
 </script>

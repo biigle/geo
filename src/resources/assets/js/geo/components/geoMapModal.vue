@@ -39,7 +39,7 @@ export default {
             type: Boolean,
             required: true,
         },
-        images: {
+        items: {
             type: Array,
             required: true,
         }
@@ -79,13 +79,17 @@ export default {
             return Api.get({vid: this.volumeId, lid: id}, {});
         },
     },
+    created() {
+        console.log("geoMapModal: ", this.items);
+    },
     watch: {
         // show the modal upon trigger-event
         trigger: function() {
             this.showModal = true;
         },
-        images() {
-            console.log("access to: ", biigle);
+        // upon change in items, call getOrigin and overwrite "allImages"-variable with content of items
+        items(newObj) {
+            this.getOrigin(newObj);
         }
     },
 }
