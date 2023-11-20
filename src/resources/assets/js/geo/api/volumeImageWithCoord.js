@@ -9,4 +9,4 @@
  *
  * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/volumes{/id}/files/filter/file-coordinates', {});
+export default Vue.resource('api/v1/volumes{/id}/coordinates', {});
