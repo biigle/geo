@@ -12,7 +12,7 @@
         <p>{{ text }}</p>
         <div class="map-container">
             <div class="sidebar-container__content">
-                <image-map :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+                <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
             </div>
         </div>
     </modal>
@@ -21,11 +21,13 @@
 <script>
 import Modal from 'uiv/dist/Modal';
 import ImageMap from './imageMap';
-import Api from '../api/volumeImageWithLabel';
-import GeoMap from '../mixins/geoMap';
+import LabelApi from '../api/volumeImageWithLabel';
+import CoordApi from '../api/volumeImageWithCoord';
+import {LoaderMixin} from '../../volumes/import';
+
 
 export default {
-    mixins: [GeoMap],
+    mixins: [LoaderMixin],
     components: {
         modal: Modal,
         imageMap: ImageMap,
@@ -39,14 +41,15 @@ export default {
             type: Boolean,
             required: true,
         },
-        items: {
-            type: Array,
+        volumeId: {
+            type: Number,
             required: true,
         }
     },
     data() {
         return {
             showModal: false,
+            images: [],
         }
     },
     computed: {
@@ -76,21 +79,25 @@ export default {
             }
         },
         getImageFilterApi(id) {
-            return Api.get({vid: this.volumeId, lid: id}, {});
+            return LabelApi.get({vid: this.volumeId, lid: id}, {});
         },
-    },
-    created() {
-        console.log("geoMapModal: ", this.items);
     },
     watch: {
         // show the modal upon trigger-event
         trigger: function() {
+            this.startLoading();
             this.showModal = true;
+            // get all image + coordinate information from volume-images
+            CoordApi.get({id: this.volumeId}, {})
+                .then(
+                    (response) => {
+                        this.images = response.body;
+                        this.finishLoading();
+                },
+                (response) => {
+                    return this.handleErrorResponse(response);
+                });
         },
-        // upon change in items, call getOrigin and overwrite "allImages"-variable with content of items
-        items(newObj) {
-            this.getOrigin(newObj);
-        }
     },
 }
 </script>

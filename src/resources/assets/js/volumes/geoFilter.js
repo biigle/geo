@@ -1,8 +1,6 @@
 import {VolumeFilters} from './import';
 import {FilterList} from './import';
 import FilterSelect from '../geo/components/filterByLocationComponent';
-import Api from '../geo/api/volumeImageWithCoord';
-
 /**
  * Geo filter for the volume overview filters.
  */
@@ -60,14 +58,6 @@ if (Array.isArray(VolumeFilters)) {
                     text: "this is an example text",
                 };
             },
-            created() {
-                // get all image + coordinate information from volume-images 
-                Api.get({id: this.volumeId}, {})
-                    .then(
-                        (response) => {
-                            this.gotItems(response);
-                    });
-            }
         },
         getSequence(volumeId) {
             let key = 'biigle.geo.imageSequence.' + volumeId;
