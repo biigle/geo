@@ -1,9 +1,7 @@
 import {VolumeFilters} from './import';
 import {FilterList} from './import';
-import {VolumesApi} from './import';
 import FilterSelect from '../geo/components/filterByLocationComponent';
-import {handleErrorResponse} from '../../../../../../../../resources/assets/js/core/messages/store';
-
+import Api from '../geo/api/volumeImageWithCoord';
 
 /**
  * Geo filter for the volume overview filters.
@@ -59,27 +57,23 @@ if (Array.isArray(VolumeFilters)) {
             },
             data() {
                 return {
-                    placeholder: 'Label name',
                     text: "this is an example text",
                 };
             },
             created() {
-                VolumesApi.queryFilenames({id: this.volumeId})
-                    .then(this.retrieveFiles, handleErrorResponse);
-            },
+                // get all image + coordinate information from volume-images 
+                Api.get({id: this.volumeId}, {})
+                    .then(
+                        (response) => {
+                            this.gotItems(response);
+                    });
+            }
         },
         getSequence(volumeId) {
             let key = 'biigle.geo.imageSequence.' + volumeId;
             let data = JSON.parse(localStorage.getItem(key)) || [];
 
             return new Vue.Promise.resolve({data});
-        },
-        // // add imageIds as variable
-        // getSequence(volumeId) {
-        //     let key = 'biigle.geo.imageSequence.' + volumeId;
-        //     let data = JSON.parse(localStorage.getItem(key)) || [];
-
-        //     return new Vue.Promise.resolve({data});
-        // },
+        }
     });
 }
