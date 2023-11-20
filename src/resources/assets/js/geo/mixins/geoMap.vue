@@ -84,10 +84,6 @@ export default {
         handleClearedLabels() {
             this.selectedLabels.splice(0);
         },
-        // gets called only via "filter by location" 
-        getOrigin(items) {
-            this.items = items;
-        }
     },
     watch: {
         images(images) {
@@ -95,14 +91,7 @@ export default {
         }
     },
     created() {
-        console.log("geoMap items: ", this.items);
-        // based on where the mixin was called from, either use declared image-variable (biigle.$require()), or
-        // if called from within the geoMapModal, use items-variable instead
-        if(typeof(this.items) === 'undefined') {
-            this.allImages = biigle.$require('geo.images');
-        } else {
-            this.allImages = this.items;
-        }
+        this.allImages = biigle.$require('geo.images');
 
         Events.$on('label.selected', this.handleSelectedLabel);
         Events.$on('label.deselected', this.handleDeselectedLabel);
