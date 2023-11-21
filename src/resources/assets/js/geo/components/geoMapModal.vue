@@ -101,14 +101,12 @@ export default {
     },
 }
 </script>
-
-<!-- <style>
+<!-- 
+<style scoped>
 .map-container {
-    color: rgba(255, 0, 0, 0.507);
-    height: 100px;
+    border: 1px solid rgba(255, 0, 0);
     width: 100%;
     display: flex;
     flex-direction: row;
-    position: absolute;
 }
 </style> -->
