@@ -1,7 +1,7 @@
 <template>
     <modal 
         v-model="showModal" 
-        title="Modal Title" 
+        title="Map Filter" 
         ok-text="Add rule"
         cancel-text="Cancel"
         ok-type="default"
@@ -9,7 +9,7 @@
         size="lg"
         v-on:hide="callback"
       >
-        <p>{{ text }}</p>
+        <p v-html="text"></p>
         <div class="map-container">
             <div class="sidebar-container__content">
                 <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
