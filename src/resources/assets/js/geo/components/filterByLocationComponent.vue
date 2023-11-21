@@ -1,7 +1,7 @@
 <template>
     <div class="filter-select">
         <geo-map-modal id="gmm" :text="text" :trigger="trigger" :volumeId="volumeId" v-on:on="submit"></geo-map-modal>
-        <button type="submit" class="btn btn-default pull-right" @click="trigger = !trigger">Add rule</button>
+        <button type="submit" class="btn btn-default pull-right position" @click="trigger = !trigger">Add rule</button>
     </div>
 </template>
 
@@ -44,3 +44,15 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+.filter-select {
+    display: block;
+    margin-top: -15px;
+}
+
+.filter-select > .position {
+    position: relative;
+    margin-top: 15px;
+}
+</style>
