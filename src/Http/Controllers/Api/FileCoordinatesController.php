@@ -10,9 +10,9 @@ class FileCoordinatesController extends Controller
     /**
      * Get all files of a volume together with coordinate-values.
      *
-     * @api {get} volumes/:id/file-coordinates Get files with coordinates
+     * @api {get} volumes/:id/coordinates Get files with coordinates
      * @apiGroup Volumes
-     * @apiName VolumeIndexFilenames
+     * @apiName VolumeIndexCoordinates
      * @apiPermission projectMember
      * @apiDescription Returns IDs of files with lng and lat coordinates.
      *
@@ -26,9 +26,9 @@ class FileCoordinatesController extends Controller
      *           'lng': -88.464813199987
      *         },
      *    "1": {
-     *           'id' => 2,
-     *           'lat' => -7.0777,
-     *           'lng' => -66.666
+     *           'id': 2,
+     *           'lat': -7.0777,
+     *           'lng': -66.666
      *          }
      * }
      *
