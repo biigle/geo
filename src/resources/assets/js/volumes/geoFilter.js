@@ -6,32 +6,6 @@ import FilterSelect from '../geo/components/filterByLocationComponent';
  */
 if (Array.isArray(VolumeFilters)) {
     VolumeFilters.push({
-        id: 'geo',
-        types: ['image'],
-        label: 'geo selection',
-        help: "All images that were (not) selected on the world map.",
-        listComponent: {
-            mixins: [FilterList],
-            data() {
-                return {
-                    name: 'geo selection',
-                };
-            },
-            created() {
-                window.addEventListener('storage', () => {
-                    this.$emit('refresh', this.rule);
-                });
-            },
-        },
-        getSequence(volumeId) {
-            let key = 'biigle.geo.imageSequence.' + volumeId;
-            let data = JSON.parse(localStorage.getItem(key)) || [];
-
-            return new Vue.Promise.resolve({data});
-        },
-    });
-
-    VolumeFilters.push({
         id: 'location',
         types: ['image'],
         label: 'filter by location',
@@ -55,7 +29,7 @@ if (Array.isArray(VolumeFilters)) {
             },
             data() {
                 return {
-                    text: "this is an example text",
+                    text: "<em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.",
                 };
             },
         },
