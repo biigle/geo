@@ -34,9 +34,16 @@ class FileCoordinatesControllerTest extends ApiTestCase
         $this->beGuest();
         $this->get("/api/v1/volumes/{$id}/coordinates")
             ->assertExactJson([
-                $image1->id => 1,
-                $image2->id => 2,
-                $image1->lng => -88.464813199987,
+                [
+                    'id' => 1, 
+                    'lat' => -7.0772818384026,
+                    'lng' => -88.464813199987
+                ],
+                [
+                    'id' => 2,
+                    'lat' => -7.0777,
+                    'lng' => -66.666
+                ]
             ])
             ->assertStatus(200);
 }

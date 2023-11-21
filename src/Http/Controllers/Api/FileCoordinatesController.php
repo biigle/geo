@@ -18,11 +18,18 @@ class FileCoordinatesController extends Controller
      *
      * @apiParam {Number} id The volume ID
      * 
-     * TODO: add example
      * @apiSuccessExample {json} Success response:
      * {
-     *    "123": {},
-     *    "321": "other-image.jpg"
+     *    "0": {
+     *           'id': 1, 
+     *           'lat': -7.0772818384026,
+     *           'lng': -88.464813199987
+     *         },
+     *    "1": {
+     *           'id' => 2,
+     *           'lat' => -7.0777,
+     *           'lng' => -66.666
+     *          }
      * }
      *
      * @param  int  $id
