@@ -43,7 +43,8 @@ class GeoServiceProvider extends ServiceProvider
                 'volumesSidebar',
                 'volumesScripts',
                 'projectsShowTabs',
-                'volumesEditRight'
+                'volumesEditRight',
+                'volumesEditScripts'
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
         ]);
