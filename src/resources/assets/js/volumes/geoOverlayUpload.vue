@@ -10,8 +10,8 @@ import Api from './api/geoOverlays';
 import {EditorMixin} from './import';
 import {handleErrorResponse} from './import';
 import {LoaderMixin} from './import';
-import Tabs from 'uiv/dist/tabs';
-import Tab from 'uiv/dist/tab';
+import Tabs from 'uiv/dist/Tabs';
+import Tab from 'uiv/dist/Tab';
 
 
 /**
