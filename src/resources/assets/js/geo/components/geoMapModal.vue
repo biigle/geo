@@ -101,12 +101,3 @@ export default {
     },
 }
 </script>
-<!-- 
-<style scoped>
-.map-container {
-    border: 1px solid rgba(255, 0, 0);
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-}
-</style> -->
