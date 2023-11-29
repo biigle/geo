@@ -14,6 +14,12 @@
                     @include('geo::volumes.edit.plainOverlayForm')
                 </plain-overlay-form>
             </tab> --}}
+            <tab title="geoTiff" :disabled="loading">
+                <p>Upload a geo overlay in .geoTiff format</p>
+            </tab>
+            <tab title="WMS" :disabled="loading">
+                <p>Embed a geo overlay from a web-map-service</p>
+            </tab>
         </tabs>
     </div>
     <ul class="list-group" v-cloak>

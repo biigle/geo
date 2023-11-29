@@ -1,9 +1,3 @@
-<template>
-    <div>
-        
-    </div>
-</template>
-
 <script>
 import Api from './api/geoOverlays';
 // import PlainOverlayForm from './components/plainOverlayForm';
