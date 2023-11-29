@@ -1,6 +1,6 @@
 <?php
 
-namespace BiigleModules\Geo\Http\Controllers\Api;
+namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
 use Illuminate\Http\Request;
