@@ -4,6 +4,7 @@ import FilterSelect from '../geo/components/filterByLocationComponent';
 /**
  * Geo filter for the volume overview filters.
  */
+
 if (Array.isArray(VolumeFilters)) {
     VolumeFilters.push({
         id: 'location',
@@ -18,7 +19,12 @@ if (Array.isArray(VolumeFilters)) {
                 };
             },
             created() {
+                // only triggered when called from different session/window
                 window.addEventListener('storage', () => {
+                    this.$emit('refresh', this.rule);
+                });
+                // trigger rule-refresh, see FilterSelect-Component of this filter
+                window.addEventListener('storageUpdate', () => {
                     this.$emit('refresh', this.rule);
                 });
             },
@@ -34,8 +40,8 @@ if (Array.isArray(VolumeFilters)) {
             },
         },
         getSequence(volumeId) {
-            let key = 'biigle.geo.imageSequence.' + volumeId;
-            let data = JSON.parse(localStorage.getItem(key)) || [];
+            let key = 'biigle.geo.filter.imageSequence.' + volumeId;
+            let data = JSON.parse(sessionStorage.getItem(key)) || [];
 
             return new Vue.Promise.resolve({data});
         }
