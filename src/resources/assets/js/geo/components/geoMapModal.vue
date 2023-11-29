@@ -56,10 +56,10 @@ export default {
         selectedImages() {
             // These will be the selected images of previous sessions.
             // Vue will not be able to reactively update this property.
-            return JSON.parse(localStorage.getItem(this.key)) || [];
+            return JSON.parse(sessionStorage.getItem(this.key)) || [];
         },
         key() {
-            return 'biigle.geo.imageSequence.' + this.volumeId;
+            return 'biigle.geo.filter.imageSequence.' + this.volumeId;
         },
     },
     methods: {
@@ -73,9 +73,9 @@ export default {
         },
         handleSelectedImages(ids) {
             if (ids.length > 0) {
-                localStorage.setItem(this.key, JSON.stringify(ids));
+                sessionStorage.setItem(this.key, JSON.stringify(ids));
             } else {
-                localStorage.removeItem(this.key);
+                sessionStorage.removeItem(this.key);
             }
         },
         getImageFilterApi(id) {
