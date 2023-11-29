@@ -7,7 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Biigle\Volume;
 use Storage;
 
-class geoOverlay extends Model
+class GeoOverlay extends Model
 {
     /**
      * Don't maintain timestamps for this model.
