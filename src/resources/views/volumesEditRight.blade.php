@@ -14,13 +14,13 @@
                     @include('geo::volumes.edit.plainOverlayForm')
                 </plain-overlay-form>
             </tab> --}}
-            <tab title="geoTiff" :disabled="loading">
+            <tab title="geoTIFF" :disabled="loading">
                 <geotiff-overlay-form inline-template>
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
             </tab>
             <tab title="WMS" :disabled="loading">
-                <p>Embed a geo overlay from a web-map-service</p>
+                <p>Embed a geo overlay from a web-map-service link</p>
             </tab>
         </tabs>
     </div>
