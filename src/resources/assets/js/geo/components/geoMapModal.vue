@@ -1,6 +1,6 @@
 <template>
     <modal 
-        v-model="showModal" 
+        v-model="show"
         title="Map Filter" 
         ok-text="Add rule"
         cancel-text="Cancel"
@@ -37,7 +37,7 @@ export default {
             type: String,
             required: true,
         },
-        trigger: {
+        showModal: {
             type: Boolean,
             required: true,
         },
@@ -48,7 +48,7 @@ export default {
     },
     data() {
         return {
-            showModal: false,
+            show: false,
             images: [],
         }
     },
@@ -68,7 +68,7 @@ export default {
             if (msg == 'ok') {
                 this.$emit('on');
             } else {
-                return null;
+                this.$emit("close-modal");
             }
         },
         handleSelectedImages(ids) {
@@ -82,22 +82,20 @@ export default {
             return LabelApi.get({vid: this.volumeId, lid: id}, {});
         },
     },
-    watch: {
+    created() {
         // show the modal upon trigger-event
-        trigger: function() {
-            this.startLoading();
-            this.showModal = true;
-            // get all image + coordinate information from volume-images
-            CoordApi.get({id: this.volumeId}, {})
-                .then(
-                    (response) => {
-                        this.images = response.body;
-                        this.finishLoading();
-                },
+        this.startLoading();
+        this.show = true;
+        // get all image + coordinate information from volume-images
+        CoordApi.get({id: this.volumeId}, {})
+            .then(
                 (response) => {
-                    return this.handleErrorResponse(response);
-                });
-        },
+                    this.images = response.body;
+                    this.finishLoading();
+            },
+            (response) => {
+                return this.handleErrorResponse(response);
+            });
     },
 }
 </script>
