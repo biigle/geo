@@ -1,11 +1,11 @@
 /**
- * Resource for volume images having annotations with a certain label.
+ * Resource for volume images with coordinates.
  *
  * var resource = biigle.$require('geo.api.imageWithLabel');
  *
  * Get image IDs:
  *
- * resource.query({vid: volumeId, lid: labelId}, {}).then(...)
+ * resource.query({id: volumeId}).then(...)
  *
  * @type {Vue.resource}
  */
