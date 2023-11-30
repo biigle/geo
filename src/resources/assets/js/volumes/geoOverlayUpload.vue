@@ -1,6 +1,6 @@
 <script>
 import Api from './api/geoOverlays';
-// import PlainOverlayForm from './components/plainOverlayForm';
+import GeotiffOverlayForm from './components/geotiffOverlayForm';
 import {EditorMixin} from './import';
 import {handleErrorResponse} from './import';
 import {LoaderMixin} from './import';
@@ -42,7 +42,7 @@ export default {
         tabs: Tabs,
         tab: Tab,
         overlayItem: overlayItem,
-        // plainOverlayForm: PlainOverlayForm,
+        geotiffOverlayForm: GeotiffOverlayForm,
     },
     data: {
         overlays: [],

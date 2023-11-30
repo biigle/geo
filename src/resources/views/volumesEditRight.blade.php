@@ -15,7 +15,9 @@
                 </plain-overlay-form>
             </tab> --}}
             <tab title="geoTiff" :disabled="loading">
-                <p>Upload a geo overlay in .geoTiff format</p>
+                <geotiff-overlay-form inline-template>
+                    @include('geo::volumes.edit.geotiffOverlayForm')
+                </geotiff-overlay-form>
             </tab>
             <tab title="WMS" :disabled="loading">
                 <p>Embed a geo overlay from a web-map-service</p>
