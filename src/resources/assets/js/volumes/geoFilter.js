@@ -9,13 +9,13 @@ if (Array.isArray(VolumeFilters)) {
     VolumeFilters.push({
         id: 'location',
         types: ['image'],
-        label: 'filter by location',
+        label: 'geo selection',
         help: "All images that were (not) selected on the world map.",
         listComponent: {
             mixins: [FilterList],
             data() {
                 return {
-                    name: 'filter by location',
+                    name: 'geo selection',
                 };
             },
             created() {
