@@ -18,16 +18,6 @@ if (Array.isArray(VolumeFilters)) {
                     name: 'geo selection',
                 };
             },
-            created() {
-                // only triggered when called from different session/window
-                window.addEventListener('storage', () => {
-                    this.$emit('refresh', this.rule);
-                });
-                // trigger rule-refresh, see FilterSelect-Component of this filter
-                window.addEventListener('storageUpdate', () => {
-                    this.$emit('refresh', this.rule);
-                });
-            },
         },
         selectComponent: {
             mixins: [FilterSelect],

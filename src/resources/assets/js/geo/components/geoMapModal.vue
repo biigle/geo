@@ -65,7 +65,7 @@ export default {
         // trigger addRule() on parent
         callback(msg) {
             if (msg == 'ok') {
-                this.$emit('on');
+                this.$emit('on', this.key);
             } else {
                 this.$emit("close-modal");
             }

@@ -37,12 +37,16 @@ export default {
         };
     },
     methods: {
-        submit() {
+        createName(ids) {
+            let typeForm = ids.length === 1 ? " image" : " images";
+            return "".concat("(", ids.length, typeForm, ")");
+        },
+        submit(key) {
             this.hideModal();
-            // always trigger rule-refresh in geoFIlter.js (in case the rule has already been applied)
-            // not regarding whether sessionStorage-data has been changed or not 
-            window.dispatchEvent(customEvent);
-            // selectedItem is always null, so geoFilter-rule can only be added once
+            // pass the array of selected IDs as "selectedItem.ids".
+            let ids = JSON.parse(sessionStorage.getItem(key));
+            let name = this.createName(ids);
+            this.selectedItem = {"ids": ids, "name": name}; 
             this.$emit('select', this.selectedItem);
         },
         hideModal() {
