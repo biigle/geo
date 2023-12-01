@@ -1,13 +1,8 @@
 <template>
     <modal 
         v-model="show"
-        title="Map Filter" 
-        ok-text="Add rule"
-        cancel-text="Cancel"
-        ok-type="default"
-        cancel-type="default"
+        title="Map Filter"
         size="lg"
-        v-on:hide="callback"
       >
         <p v-html="text"></p>
         <div class="map-container">
@@ -15,6 +10,10 @@
                 <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
             </div>
         </div>
+        <div slot="footer">
+            <button class="btn btn-default" @click="callback(false)">Cancel</button>
+            <button class="btn btn-default" @click="callback(true)" :disabled="disabled">Add rule</button>
+      </div>
     </modal>
 </template>
 
@@ -49,6 +48,7 @@ export default {
         return {
             show: false,
             images: [],
+            disabled: true,
         }
     },
     computed: {
@@ -64,7 +64,7 @@ export default {
     methods: {
         // trigger addRule() on parent
         callback(msg) {
-            if (msg == 'ok') {
+            if (msg) {
                 this.$emit('on', this.key);
             } else {
                 this.$emit("close-modal");
@@ -72,13 +72,19 @@ export default {
         },
         handleSelectedImages(ids) {
             if (ids.length > 0) {
-                sessionStorage.setItem(this.key, JSON.stringify(ids));
+                sessionStorage.setItem(this.key, JSON.stringify(ids.sort()));
+                this.disabled = false;
             } else {
                 sessionStorage.removeItem(this.key);
+                this.disabled = true;
             }
         },
     },
     created() {
+        // check whether preselected images exist
+        if(this.selectedImages.length > 0) {
+            this.disabled = false;
+        }
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;
