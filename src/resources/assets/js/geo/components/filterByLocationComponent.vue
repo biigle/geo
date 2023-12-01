@@ -8,13 +8,6 @@
 <script>
 import GeoMapModal from './geoMapModal.vue';
 
-// create custom event to update rule upon changes in sessionStorage
-const customEvent = new Event('storageUpdate', {
-    bubbles: true,
-    cancelable: true,
-    composed: false
-  });
-
 /**
  * Base component for a filter select element
  *
