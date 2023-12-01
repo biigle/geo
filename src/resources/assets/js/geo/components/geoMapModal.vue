@@ -21,7 +21,6 @@
 <script>
 import Modal from 'uiv/dist/Modal';
 import ImageMap from './imageMap';
-import LabelApi from '../api/volumeImageWithLabel';
 import CoordApi from '../api/volumeImageWithCoord';
 import {LoaderMixin} from '../../volumes/import';
 
@@ -77,9 +76,6 @@ export default {
             } else {
                 sessionStorage.removeItem(this.key);
             }
-        },
-        getImageFilterApi(id) {
-            return LabelApi.get({vid: this.volumeId, lid: id}, {});
         },
     },
     created() {
