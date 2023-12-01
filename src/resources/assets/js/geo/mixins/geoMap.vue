@@ -88,7 +88,7 @@ export default {
     watch: {
         images(images) {
             Events.$emit('imageMap.update', images);
-        }
+        },
     },
     created() {
         this.allImages = biigle.$require('geo.images');
