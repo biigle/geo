@@ -30,16 +30,13 @@ export default {
         };
     },
     methods: {
-        createName(ids) {
-            let typeForm = ids.length === 1 ? " image" : " images";
-            return "".concat("(", ids.length, typeForm, ")");
-        },
         submit(key) {
             this.hideModal();
-            // pass the array of selected IDs as "selectedItem.ids".
-            let ids = JSON.parse(sessionStorage.getItem(key));
-            let name = this.createName(ids);
-            this.selectedItem = {"ids": ids, "name": name}; 
+            // pass the array of selected IDs as JSON-string in order to work properly in the hasRule()-check later on.
+            // hasRule() function checks whether rule-attributes diverge between existing and new rules
+            // e.g. newRule.data === oldRule.data (does not assert equality for array- or object-comparison)
+            let ids = JSON.parse(sessionStorage.getItem(key)) || [];
+            this.selectedItem = JSON.stringify(ids);
             this.$emit('select', this.selectedItem);
         },
         hideModal() {
