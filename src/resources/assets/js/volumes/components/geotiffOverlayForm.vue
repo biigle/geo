@@ -10,6 +10,7 @@ export default {
     ],
     data() {
         return {
+            selectedFile: null,
         };
     },
     methods: {
@@ -19,9 +20,8 @@ export default {
 
         uploadGeoTiff(event) {
             this.startLoading();
-            let data = new FormData();
-            data.append('metadata_csv', event.target.files[0]);
-            console.log("event: ", event);
+            this.selectedFile = event.target.files[0];
+            console.log("data: ", this.selectedFile);
             // this.upload(data)
             //     .then(this.handleSuccess, this.handleError)
             //     .finally(this.finishLoading);
