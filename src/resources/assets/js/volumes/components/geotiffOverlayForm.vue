@@ -2,7 +2,8 @@
 import Api from '../api/geoOverlays';
 import {handleErrorResponse} from '../import';
 import {LoaderMixin} from '../import';
-import GeoTIFF, {fromBlob} from 'geotiff';
+import {fromBlob} from 'geotiff';
+import transformation from 'transform-coordinates';
 
 
 export default {
@@ -22,6 +23,23 @@ export default {
             this.$refs.geoTiffInput.click();
         },
 
+        // converting from any coordinate system into WGS 84
+        transformCRS(geoKeys) {
+            let code = this.findCRSCode(geoKeys);
+            console.log("code: ", `EPSG:${code}`);
+            return transformation(`EPSG:${code.toString()}`, 'EPSG:4326'); // from whatever CRS to WGS 84
+        },
+
+        // get the CRS-code required to find the CRS-string from epsg-index,
+        // which in turn is needed by proj4 to convert the coordinate-system   
+        findCRSCode(geoKeys) {
+            const code = geoKeys.ProjectedCSTypeGeoKey || geoKeys.GeographicTypeGeoKey;
+                if (typeof code === 'undefined') {
+                    return new Error('No ProjectedCSTypeGeoKey or GeographicTypeGeoKey provided');
+                }
+                return code;
+        },
+
         async uploadGeoTiff(event) {
             this.startLoading();
             let tiff = await fromBlob(event.target.files[0]);
@@ -32,7 +50,11 @@ export default {
             console.log("geoTiffImage: ", geoTiffImage);
             console.log("bbox: ", bbox);
             console.log("geoKeys: ", await geoTiffImage.getGeoKeys());
-            console.log("gdal-info: ", await geoTiffImage.getGDALMetadata());
+            // transform from any Coordinate Reference System to WGS84
+            let transform = this.transformCRS(geoTiffImage.geoKeys);
+            let top_left = transform.forward({'x': bbox[0], 'y': bbox[1]});
+            // let bottom_right = transform.forward({x: bbox[2], y: bbox[3]});
+            console.log("top_left: ", top_left);
             let data = new FormData();
             data.append('image', geoTiffImage);
             data.append('top_left_lat', bbox[1]);
