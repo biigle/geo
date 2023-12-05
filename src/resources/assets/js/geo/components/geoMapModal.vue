@@ -71,15 +71,9 @@ export default {
         this.startLoading();
         this.show = true;
         // get all image + coordinate information from volume-images
-        CoordApi.get({id: this.volumeId}, {})
-            .then(
-                (response) => {
-                    this.images = response.body;
-                    this.finishLoading();
-            },
-            (response) => {
-                return this.handleErrorResponse(response);
-            });
+        CoordApi.get({id: this.volumeId})
+            .then(response => this.images = response.body, this.handleErrorResponse)
+            .finally(this.finishLoading);
     },
 }
 </script>
