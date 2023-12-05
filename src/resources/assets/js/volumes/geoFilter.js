@@ -25,7 +25,6 @@ if (Array.isArray(VolumeFilters)) {
             },
             data() {
                 return {
-                    text: "<em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.",
                 };
             },
         },

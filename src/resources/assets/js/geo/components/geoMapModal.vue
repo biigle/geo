@@ -4,12 +4,14 @@
         title="Map Filter"
         size="lg"
       >
-        <p v-html="text"></p>
-        <div class="map-container">
-            <div class="sidebar-container__content">
-                <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+      <div class="map-container">
+          <div class="sidebar-container__content">
+              <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
             </div>
         </div>
+        <p class="text-muted">
+            <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
+        </p>
         <div slot="footer">
             <button class="btn btn-default" @click="callback(false)">Cancel</button>
             <button class="btn btn-default" @click="callback(true)" :disabled="disabled">Add rule</button>
@@ -101,3 +103,9 @@ export default {
     },
 }
 </script>
+
+<style scoped>
+p {
+    padding-top: 10px;
+}
+</style>
