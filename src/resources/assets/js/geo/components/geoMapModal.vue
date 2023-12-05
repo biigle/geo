@@ -1,27 +1,28 @@
 <template>
     <modal 
-        v-model="showModal" 
-        title="Map Filter" 
-        ok-text="Add rule"
-        cancel-text="Cancel"
-        ok-type="default"
-        cancel-type="default"
+        v-model="show"
+        title="Map Filter"
         size="lg"
-        v-on:hide="callback"
+        :backdrop="false"
       >
-        <p v-html="text"></p>
-        <div class="map-container">
-            <div class="sidebar-container__content">
-                <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+      <div class="map-container">
+          <div class="sidebar-container__content">
+              <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
             </div>
         </div>
+        <p class="text-muted">
+            <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
+        </p>
+        <div slot="footer">
+            <button class="btn btn-default" @click="callback(false)">Cancel</button>
+            <button class="btn btn-default" @click="callback(true)" :disabled="disabled">Add rule</button>
+      </div>
     </modal>
 </template>
 
 <script>
 import Modal from 'uiv/dist/Modal';
 import ImageMap from './imageMap';
-import LabelApi from '../api/volumeImageWithLabel';
 import CoordApi from '../api/volumeImageWithCoord';
 import {LoaderMixin} from '../../volumes/import';
 
@@ -33,14 +34,6 @@ export default {
         imageMap: ImageMap,
     },
     props: {
-        text: {
-            type: String,
-            required: true,
-        },
-        trigger: {
-            type: Boolean,
-            required: true,
-        },
         volumeId: {
             type: Number,
             required: true,
@@ -48,56 +41,45 @@ export default {
     },
     data() {
         return {
-            showModal: false,
+            show: false,
             images: [],
+            disabled: true,
+            imageIds: [],
         }
-    },
-    computed: {
-        selectedImages() {
-            // These will be the selected images of previous sessions.
-            // Vue will not be able to reactively update this property.
-            return JSON.parse(sessionStorage.getItem(this.key)) || [];
-        },
-        key() {
-            return 'biigle.geo.filter.imageSequence.' + this.volumeId;
-        },
     },
     methods: {
         // trigger addRule() on parent
         callback(msg) {
-            if (msg == 'ok') {
-                this.$emit('on');
+            if (msg) {
+                this.$emit('on', this.imageIds);
             } else {
-                return null;
+                this.$emit("close-modal");
             }
         },
         handleSelectedImages(ids) {
             if (ids.length > 0) {
-                sessionStorage.setItem(this.key, JSON.stringify(ids));
+                this.imageIds = [...ids.sort()];
+                this.disabled = false;
             } else {
-                sessionStorage.removeItem(this.key);
+                this.imageIds = [];
+                this.disabled = true;
             }
         },
-        getImageFilterApi(id) {
-            return LabelApi.get({vid: this.volumeId, lid: id}, {});
-        },
     },
-    watch: {
+    created() {
         // show the modal upon trigger-event
-        trigger: function() {
-            this.startLoading();
-            this.showModal = true;
-            // get all image + coordinate information from volume-images
-            CoordApi.get({id: this.volumeId}, {})
-                .then(
-                    (response) => {
-                        this.images = response.body;
-                        this.finishLoading();
-                },
-                (response) => {
-                    return this.handleErrorResponse(response);
-                });
-        },
+        this.startLoading();
+        this.show = true;
+        // get all image + coordinate information from volume-images
+        CoordApi.get({id: this.volumeId})
+            .then(response => this.images = response.body, this.handleErrorResponse)
+            .finally(this.finishLoading);
     },
 }
 </script>
+
+<style scoped>
+p {
+    padding-top: 10px;
+}
+</style>

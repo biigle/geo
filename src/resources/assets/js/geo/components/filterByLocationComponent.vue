@@ -1,19 +1,12 @@
 <template>
     <div class="filter-select">
-        <geo-map-modal id="gmm" :text="text" :trigger="trigger" :volumeId="volumeId" v-on:on="submit"></geo-map-modal>
-        <button type="submit" class="btn btn-default pull-right position" @click="trigger = !trigger">Add rule</button>
+        <geo-map-modal v-if="showModal" :volumeId="volumeId" v-on:on="submit" v-on:close-modal="hideModal"></geo-map-modal>
+        <button type="submit" class="btn btn-default pull-right position" @click="showModal = true">Add rule</button>
     </div>
 </template>
 
 <script>
 import GeoMapModal from './geoMapModal.vue';
-
-// create custom event to update rule upon changes in sessionStorage
-const customEvent = new Event('storageUpdate', {
-    bubbles: true,
-    cancelable: true,
-    composed: false
-  });
 
 /**
  * Base component for a filter select element
@@ -32,18 +25,22 @@ export default {
     },
     data() {
         return {
-            selectedItem: null,
-            trigger: false,
+            selectedItem: [],
+            showModal: false,
         };
     },
     methods: {
-        submit() {
-            // always trigger rule-refresh in geoFIlter.js (in case the rule has already been applied)
-            // not regarding whether sessionStorage-data has been changed or not 
-            window.dispatchEvent(customEvent);
-            // selectedItem is always null, so geoFilter-rule can only be added once
+        submit(ids) {
+            this.hideModal();
+            // pass the array of selected IDs as JSON-string in order to work properly in the hasRule()-check later on.
+            // hasRule() function checks whether rule-attributes diverge between existing and new rules
+            // e.g. newRule.data === oldRule.data (does not assert equality for array- or object-comparison)
+            this.selectedItem = ids;
             this.$emit('select', this.selectedItem);
         },
+        hideModal() {
+            this.showModal = false;
+        }
     }
 };
 </script>
