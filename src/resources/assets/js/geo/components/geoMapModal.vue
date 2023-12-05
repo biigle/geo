@@ -3,6 +3,7 @@
         v-model="show"
         title="Map Filter"
         size="lg"
+        :backdrop="false"
       >
       <div class="map-container">
           <div class="sidebar-container__content">

@@ -30,7 +30,6 @@ if (Array.isArray(VolumeFilters)) {
             },
         },
         getSequence(volumeId, data) {
-            console.log("inspect selItem: ", data);
             return new Vue.Promise.resolve({data});
         }
     });
