@@ -1,6 +1,7 @@
 import {VolumeFilters} from './import';
-import FilterList from '../geo/components/filterListComponent';
+import {FilterList} from './import';
 import FilterSelect from '../geo/components/filterByLocationComponent';
+
 /**
  * Geo filter for the volume overview filters.
  */
@@ -28,10 +29,8 @@ if (Array.isArray(VolumeFilters)) {
                 };
             },
         },
-        getSequence(volumeId) {
-            let key = 'biigle.geo.filter.imageSequence.' + volumeId;
-            let data = JSON.parse(sessionStorage.getItem(key)) || [];
-
+        getSequence(volumeId, data) {
+            console.log("inspect selItem: ", data);
             return new Vue.Promise.resolve({data});
         }
     });
