@@ -6,7 +6,7 @@
       >
       <div class="map-container">
           <div class="sidebar-container__content">
-              <image-map v-if="images.length" :images="images" :preselected="selectedImages" :selectable="true" v-on:select="handleSelectedImages"></image-map>
+              <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
             </div>
         </div>
         <p class="text-muted">
@@ -33,10 +33,6 @@ export default {
         imageMap: ImageMap,
     },
     props: {
-        text: {
-            type: String,
-            required: true,
-        },
         volumeId: {
             type: Number,
             required: true,
@@ -47,42 +43,29 @@ export default {
             show: false,
             images: [],
             disabled: true,
+            imageIds: [],
         }
-    },
-    computed: {
-        selectedImages() {
-            // These will be the selected images of previous sessions.
-            // Vue will not be able to reactively update this property.
-            return JSON.parse(sessionStorage.getItem(this.key)) || [];
-        },
-        key() {
-            return 'biigle.geo.filter.imageSequence.' + this.volumeId;
-        },
     },
     methods: {
         // trigger addRule() on parent
         callback(msg) {
             if (msg) {
-                this.$emit('on', this.key);
+                this.$emit('on', this.imageIds);
             } else {
                 this.$emit("close-modal");
             }
         },
         handleSelectedImages(ids) {
             if (ids.length > 0) {
-                sessionStorage.setItem(this.key, JSON.stringify(ids.sort()));
+                this.imageIds = [...ids.sort()];
                 this.disabled = false;
             } else {
-                sessionStorage.removeItem(this.key);
+                this.imageIds = [];
                 this.disabled = true;
             }
         },
     },
     created() {
-        // check whether preselected images exist
-        if(this.selectedImages.length > 0) {
-            this.disabled = false;
-        }
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;
