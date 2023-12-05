@@ -37,10 +37,6 @@ export default {
             type: String,
             required: true,
         },
-        showModal: {
-            type: Boolean,
-            required: true,
-        },
         volumeId: {
             type: Number,
             required: true,
