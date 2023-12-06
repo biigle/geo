@@ -32,9 +32,6 @@ export default {
     methods: {
         submit(ids) {
             this.hideModal();
-            // pass the array of selected IDs as JSON-string in order to work properly in the hasRule()-check later on.
-            // hasRule() function checks whether rule-attributes diverge between existing and new rules
-            // e.g. newRule.data === oldRule.data (does not assert equality for array- or object-comparison)
             this.selectedItem = ids;
             this.$emit('select', this.selectedItem);
         },
