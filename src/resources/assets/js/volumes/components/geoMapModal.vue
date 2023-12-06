@@ -4,6 +4,7 @@
         title="Map Filter"
         size="lg"
         :backdrop="false"
+        @hide="callback"
       >
         <div class="sidebar-container__content">
             <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
@@ -12,8 +13,8 @@
             <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
         </p>
         <div slot="footer">
-            <button class="btn btn-default" @click="callback(false)">Cancel</button>
-            <button class="btn btn-default" @click="callback(true)" :disabled="disabled">Add rule</button>
+            <button class="btn btn-default" @click="callback('dismiss')" >Cancel</button>
+            <button class="btn btn-default" @click="callback('ok')" :disabled="disabled">Add rule</button>
       </div>
     </modal>
 </template>
@@ -23,7 +24,6 @@ import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
 import {LoaderMixin} from '../import';
-import Keyboard from '../keyboard';
 
 export default {
     mixins: [LoaderMixin],
@@ -46,9 +46,9 @@ export default {
         }
     },
     methods: {
-        // trigger addRule() on parent
-        callback(submit) {
-            if (submit) {
+        callback(msg) {
+            if (msg === "ok") {
+                // trigger addRule() on parent
                 this.$emit('on', this.imageIds);
             } else {
                 this.$emit("close-modal");
@@ -72,9 +72,6 @@ export default {
         CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
-        
-        // Handle Esc-key press
-        Keyboard.on('Escape', this.callback, false);
     },
 }
 </script>
