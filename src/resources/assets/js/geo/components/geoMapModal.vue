@@ -5,10 +5,8 @@
         size="lg"
         :backdrop="false"
       >
-      <div class="map-container">
-          <div class="sidebar-container__content">
-              <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
-            </div>
+        <div class="sidebar-container__content">
+            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
         </div>
         <p class="text-muted">
             <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
@@ -25,7 +23,6 @@ import Modal from 'uiv/dist/Modal';
 import ImageMap from './imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
 import {LoaderMixin} from '../../volumes/import';
-
 
 export default {
     mixins: [LoaderMixin],
@@ -78,7 +75,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
+// import css styles for ol-dragbox
+@import '/assets/styles/main.css';
+
 p {
     padding-top: 10px;
 }
