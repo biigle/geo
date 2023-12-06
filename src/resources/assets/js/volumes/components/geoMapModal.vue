@@ -23,6 +23,7 @@ import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
 import {LoaderMixin} from '../import';
+import Keyboard from '../keyboard';
 
 export default {
     mixins: [LoaderMixin],
@@ -46,8 +47,8 @@ export default {
     },
     methods: {
         // trigger addRule() on parent
-        callback(msg) {
-            if (msg) {
+        callback(submit) {
+            if (submit) {
                 this.$emit('on', this.imageIds);
             } else {
                 this.$emit("close-modal");
@@ -71,6 +72,9 @@ export default {
         CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
+        
+        // Handle Esc-key press
+        Keyboard.on('Escape', this.callback, false);
     },
 }
 </script>
