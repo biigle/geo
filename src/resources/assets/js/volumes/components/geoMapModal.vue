@@ -20,9 +20,9 @@
 
 <script>
 import Modal from 'uiv/dist/Modal';
-import ImageMap from './imageMap';
+import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
-import {LoaderMixin} from '../../volumes/import';
+import {LoaderMixin} from '../import';
 
 export default {
     mixins: [LoaderMixin],
