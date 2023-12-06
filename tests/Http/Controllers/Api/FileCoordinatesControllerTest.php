@@ -4,12 +4,14 @@ namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Tests\ImageTest;
+use Biigle\Tests\VolumeTest;
 
 class FileCoordinatesControllerTest extends ApiTestCase
 {
     public function testIndexImage()
     {
         $id = $this->volume()->id;
+        $secondVolume = VolumeTest::create();
 
         $image1 = ImageTest::create([
             'volume_id' => $id,
@@ -18,8 +20,9 @@ class FileCoordinatesControllerTest extends ApiTestCase
             'lng' => -88.464813199987,
             'lat' => -7.0772818384026,
         ]);
-        $image2 = ImageTest::create([
-            'volume_id' => $id,
+
+        $secondImage = ImageTest::create([
+            'volume_id' => $secondVolume->id,
             'filename' => '2.jpg',
             'id' => 2,
             'lng' => -66.666,
@@ -38,13 +41,21 @@ class FileCoordinatesControllerTest extends ApiTestCase
                     'id' => 1, 
                     'lat' => -7.0772818384026,
                     'lng' => -88.464813199987
-                ],
-                [
-                    'id' => 2,
-                    'lat' => -7.0777,
-                    'lng' => -66.666
                 ]
             ])
             ->assertStatus(200);
-}
+
+        // test whether images not belonging to a volume aren't included in the response
+        $this->assertEquals(1, $this->volume()->images()->count());
+
+        $this->get("/api/v1/volumes/{$id}/coordinates")
+            ->assertJsonMissingExact([
+                [
+                    'id' => 2,
+                    'lat' => -7.0777,
+                    'lng' => -66.666,
+                ]
+            ])
+            ->assertStatus(200);
+    }
 }
