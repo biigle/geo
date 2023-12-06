@@ -1,6 +1,6 @@
 import {VolumeFilters} from './import';
 import {FilterList} from './import';
-import FilterSelect from '../geo/components/filterByLocationComponent';
+import FilterSelect from '../volumes/components/filterByLocationComponent';
 
 /**
  * Geo filter for the volume overview filters.
