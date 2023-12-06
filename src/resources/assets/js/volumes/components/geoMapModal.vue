@@ -76,11 +76,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-// import css styles for ol-dragbox
-@import '/assets/styles/main.css';
-
-p {
-    padding-top: 10px;
-}
+<style scoped>
+    p {
+        padding-top: 10px;
+    }
 </style>
