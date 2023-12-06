@@ -11,24 +11,15 @@ export default {
     data() {
         return {
             volumeId: null,
+            fileIds: [],
         };
-    },
-    computed: {
-        selectedImages() {
-            // These will be the selected images of previous sessions.
-            // Vue will not be able to reactively update this property.
-            return JSON.parse(localStorage.getItem(this.key)) || [];
-        },
-        key() {
-            return 'biigle.geo.imageSequence.' + this.volumeId;
-        },
     },
     methods: {
         handleSelectedImages(ids) {
             if (ids.length > 0) {
-                localStorage.setItem(this.key, JSON.stringify(ids));
+                this.fileIds = ids;
             } else {
-                localStorage.removeItem(this.key);
+                this.fileIds = [];
             }
         },
         getImageFilterApi(id) {
