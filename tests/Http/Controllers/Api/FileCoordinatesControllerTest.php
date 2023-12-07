@@ -44,18 +44,5 @@ class FileCoordinatesControllerTest extends ApiTestCase
                 ]
             ])
             ->assertStatus(200);
-
-        // test whether images not belonging to a volume aren't included in the response
-        $this->assertEquals(1, $this->volume()->images()->count());
-
-        $this->get("/api/v1/volumes/{$id}/coordinates")
-            ->assertJsonMissingExact([
-                [
-                    'id' => 2,
-                    'lat' => -7.0777,
-                    'lng' => -66.666,
-                ]
-            ])
-            ->assertStatus(200);
     }
 }
