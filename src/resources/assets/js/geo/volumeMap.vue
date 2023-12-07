@@ -11,17 +11,9 @@ export default {
     data() {
         return {
             volumeId: null,
-            fileIds: [],
         };
     },
     methods: {
-        handleSelectedImages(ids) {
-            if (ids.length > 0) {
-                this.fileIds = ids;
-            } else {
-                this.fileIds = [];
-            }
-        },
         getImageFilterApi(id) {
             return Api.get({vid: this.volumeId, lid: id}, {});
         },
