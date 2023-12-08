@@ -23,4 +23,7 @@ $router->group([
     $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
         'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);
+    $router->get('volumes/{id}/coordinates', [
+        'uses' => 'FileCoordinatesController@index',
+    ]);
 });
