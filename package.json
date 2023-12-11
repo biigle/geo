@@ -25,8 +25,6 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
-    "geotiff": "^2.1.0",
-    "ol": "^5.3.3",
-    "transform-coordinates": "^1.0.0"
+    "ol": "^5.3.3"
   }
 }
