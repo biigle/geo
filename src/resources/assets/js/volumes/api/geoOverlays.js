@@ -10,8 +10,8 @@
  * @type {Vue.resource}
  */
 export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
-    savePlain: {
+    saveGeoTiff: {
         method: 'POST',
-        url: 'api/v1/volumes{/volume_id}/geo-overlays/plain',
+        url: 'api/v1/volumes{/id}/geo-overlays/geotiff',
     },
 });

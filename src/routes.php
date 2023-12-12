@@ -28,7 +28,7 @@ $router->group([
         'uses' => 'FileCoordinatesController@index',
     ]);
 
-    $router->post('volumes/{id}/geo-overlays/plain', [
-        'uses' => 'VolumeGeoOverlayController@storePlain',
+    $router->post('volumes/{id}/geo-overlays/geotiff', [
+        'uses' => 'VolumeGeoOverlayController@storeGeoTiff',
     ]);
 });

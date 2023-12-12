@@ -5,7 +5,9 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -82,22 +84,22 @@ class VolumeGeoOverlayController extends Controller
      * @param StorePlainGeoOverlay $request
      * @param int $id Volume ID
      */
-    public function storePlain(StorePlainGeoOverlay $request)
+    public function storeGeoTiff(Request $request)
     {
-        return DB::transaction(function () use ($request) {
-            $file = $request->file('file');
+        // return DB::transaction(function () use ($request) {
+            $file = $request->file('metadata_geotiff');
+            dd($file);
+            // $overlay = new GeoOverlay;
+            // $overlay->volume_id = $request->volume->id;
+            // $overlay->name = $request->input('name', $file->getClientOriginalName());
+            // $overlay->top_left_lat = $request->input('top_left_lat');
+            // $overlay->top_left_lng = $request->input('top_left_lng');
+            // $overlay->bottom_right_lat = $request->input('bottom_right_lat');
+            // $overlay->bottom_right_lng = $request->input('bottom_right_lng');
+            // $overlay->save();
+            // $overlay->storeFile($file);
 
-            $overlay = new GeoOverlay;
-            $overlay->volume_id = $request->volume->id;
-            $overlay->name = $request->input('name', $file->getClientOriginalName());
-            $overlay->top_left_lat = $request->input('top_left_lat');
-            $overlay->top_left_lng = $request->input('top_left_lng');
-            $overlay->bottom_right_lat = $request->input('bottom_right_lat');
-            $overlay->bottom_right_lng = $request->input('bottom_right_lng');
-            $overlay->save();
-            $overlay->storeFile($file);
-
-            return $overlay;
-        });
+            // return $overlay;
+        // });
     }
 }

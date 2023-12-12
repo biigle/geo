@@ -15,7 +15,7 @@
                 </plain-overlay-form>
             </tab> --}}
             <tab title="geoTIFF" :disabled="loading">
-                <geotiff-overlay-form inline-template>
+                <geotiff-overlay-form inline-template :volume-id="{{$volume->id}}">
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
             </tab>

@@ -8,6 +8,12 @@ export default {
     mixins: [
         LoaderMixin,
     ],
+    props: {
+        volumeId: {
+            type: Number,
+            required: true,
+        },
+    },
     data() {
         return {
             selectedTLLat: '',
@@ -20,13 +26,16 @@ export default {
         submitGeoTiff() {
             this.$refs.geoTiffInput.click();
         },
-
-        async uploadGeoTiff(event) {
+        upload(data) {
+            return Api.saveGeoTiff({id: this.volumeId}, data);
+        },
+        uploadGeoTiff(event) {
             this.startLoading();
-            let data = event.target.files[0];
-            // this.upload(data)
-            //     .then(this.handleSuccess, this.handleError)
-            //     .finally(this.finishLoading);
+            let data = new FormData();
+            data.append('metadata_geotiff', event.target.files[0]);
+            this.upload(data)
+                .then(this.handleSuccess, this.handleError)
+                .finally(this.finishLoading);
         },
     }
 }
