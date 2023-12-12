@@ -28,7 +28,20 @@ $router->group([
         'uses' => 'FileCoordinatesController@index',
     ]);
 
+    $router->get('volumes/{id}/geo-overlays', [
+        'uses' => 'VolumeGeoOverlayController@index',
+    ]);
+    
     $router->post('volumes/{id}/geo-overlays/geotiff', [
         'uses' => 'VolumeGeoOverlayController@storeGeoTiff',
     ]);
+
+    // $router->get('geo-overlays/{id}/file', [
+    //     'uses' => 'GeoOverlayController@showFile',
+    // ]);
+
+    // $router->resource('geo-overlays', 'GeoOverlayController', [
+    //     'only' => ['destroy'],
+    //     'parameters' => ['geo-overlays' => 'id'],
+    // ]);
 });
