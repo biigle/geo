@@ -44,8 +44,10 @@ export default {
         overlayItem: overlayItem,
         geotiffOverlayForm: GeotiffOverlayForm,
     },
-    data: {
-        overlays: [],
+    data() {
+        return {
+            overlays: [],
+        }
     },
     computed: {
         classObject() {

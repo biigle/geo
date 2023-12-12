@@ -1,6 +1,5 @@
 <script>
 import Api from '../api/geoOverlays';
-import {handleErrorResponse} from '../import';
 import {LoaderMixin} from '../import';
 
 

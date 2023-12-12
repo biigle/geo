@@ -9,7 +9,7 @@ use Storage;
 
 class GeoOverlayController extends Controller
 {
-        /**
+    /**
      * Shows the specified geo overlay file.
      *
      * @api {get} geo-overlays/:id/file Get a geo overlay file
