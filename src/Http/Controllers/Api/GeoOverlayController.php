@@ -3,63 +3,55 @@
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Illuminate\Http\Request;
+use Biigle\Modules\Geo\GeoOverlay;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Storage;
 
 class GeoOverlayController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+        /**
+     * Shows the specified geo overlay file.
+     *
+     * @api {get} geo-overlays/:id/file Get a geo overlay file
+     * @apiGroup Geo
+     * @apiName ShowGeoOverlayFile
+     * @apiPermission projectMember
+     *
+     * @apiParam {Number} id The geo overlay ID.
+     *
+     * @param int $id geo overlay id
+     * @return mixed
      */
-    public function index()
+    public function showFile($id)
     {
-        //
+        $overlay = GeoOverlay::findOrFail($id);
+        $this->authorize('access', $overlay->volume);
+
+        try {
+            return Storage::disk(config('geo.overlay_storage_disk'))
+                ->download($overlay->path);
+        } catch (FileNotFoundException $e) {
+            abort(404);
+        }
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Deletes the geo overlay.
+     *
+     * @api {delete} geo-overlays/:id Delete a geo overlay
+     * @apiGroup Geo
+     * @apiName DestroyGeoOverlay
+     * @apiPermission projectAdmin
+     *
+     * @apiParam {Number} id The geo overlay ID.
+     *
+     * @param int $id geo overlay id
      */
-    public function create()
+    public function destroy($id)
     {
-        //
-    }
+        $overlay = GeoOverlay::findOrFail($id);
+        $this->authorize('update', $overlay->volume);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request)
-    {
-        //
+        $overlay->delete();
     }
 }
