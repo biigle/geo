@@ -89,7 +89,8 @@ class VolumeGeoOverlayController extends Controller
     {
         // return DB::transaction(function () use ($request) {
             $file = $request->file('metadata_geotiff');
-            dd($file);
+            $exif = exif_read_data($file);
+            dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
             // $overlay->name = $request->input('name', $file->getClientOriginalName());
