@@ -88,8 +88,23 @@ class VolumeGeoOverlayController extends Controller
     public function storeGeoTiff(Request $request)
     {
         // return DB::transaction(function () use ($request) {
+            $undefinedTag = 'UndefinedTag:';
             $file = $request->file('metadata_geotiff');
             $exif = exif_read_data($file);
+
+            foreach($exif as $key=>$value) {
+                if(str_contains($key, $undefinedTag)) {
+                    $hexaKey = str_replace($undefinedTag, '', $key);
+                    echo "key: " . hexdec($hexaKey). "<br>";
+                    echo "tagName: " . (exif_tagname(hexdec($hexaKey)) == '' ? 'no tagName' : exif_tagname(hexdec($hexaKey))) . "<br>";
+                    // // save array-value
+                    // $tempValue = $exif[$key];
+                    // // remove old entry
+                    // unset($exif[$key]);
+                    // // create new entry with actual Tag-name
+                    // $exif[$tagName] = $tempValue;
+                }
+            }
             dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
