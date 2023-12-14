@@ -18,5 +18,8 @@
         "psr-4": {
             "Biigle\\Modules\\Geo\\": "src"
         }
+    },
+    "require": {
+        "miljar/php-exif": "*"
     }
 }
