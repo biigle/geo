@@ -8,6 +8,7 @@ use Biigle\Volume;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use PHPExif\Reader\Reader;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -88,23 +89,16 @@ class VolumeGeoOverlayController extends Controller
     public function storeGeoTiff(Request $request)
     {
         // return DB::transaction(function () use ($request) {
-            $undefinedTag = 'UndefinedTag:';
             $file = $request->file('metadata_geotiff');
-            $exif = exif_read_data($file);
+            // reader with Native adapter
+            $reader = Reader::factory(Reader::TYPE_EXIFTOOL);
 
-            foreach($exif as $key=>$value) {
-                if(str_contains($key, $undefinedTag)) {
-                    $hexaKey = str_replace($undefinedTag, '', $key);
-                    echo "key: " . hexdec($hexaKey). "<br>";
-                    echo "tagName: " . (exif_tagname(hexdec($hexaKey)) == '' ? 'no tagName' : exif_tagname(hexdec($hexaKey))) . "<br>";
-                    // // save array-value
-                    // $tempValue = $exif[$key];
-                    // // remove old entry
-                    // unset($exif[$key]);
-                    // // create new entry with actual Tag-name
-                    // $exif[$tagName] = $tempValue;
-                }
-            }
+            // reader with Exiftool adapter
+            //$reader = \PHPExif\Reader::factory(\PHPExif\Reader::TYPE_EXIFTOOL);
+
+            $exif = $reader->getExifFromFile($file);
+
+            echo 'Title: ' . $exif->getTitle() . PHP_EOL;
             dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
