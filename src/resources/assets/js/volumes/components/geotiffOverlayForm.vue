@@ -19,9 +19,25 @@ export default {
             selectedTLLng: '',
             selectedBRLat: '',
             selectedBRLng: '',
+            error: false,
+            success: false,
         };
     },
     methods: {
+        handleSuccess() {
+            this.error = false;
+            this.success = true;
+        },
+        handleError(response) {
+            let knownError = response.body.errors && (response.body.errors.geotiff);
+            if (knownError) {
+                if (Array.isArray(knownError)) {
+                    this.error = knownError[0];
+                } else {
+                    this.error = knownError;
+                }
+            }
+        },
         submitGeoTiff() {
             this.$refs.geoTiffInput.click();
         },
@@ -31,7 +47,7 @@ export default {
         uploadGeoTiff(event) {
             this.startLoading();
             let data = new FormData();
-            data.append('metadata_geotiff', event.target.files[0]);
+            data.append('geotiff', event.target.files[0]);
             this.upload(data)
                 .then(this.handleSuccess, this.handleError)
                 .finally(this.finishLoading);
