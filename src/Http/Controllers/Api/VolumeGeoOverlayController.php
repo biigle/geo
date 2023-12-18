@@ -90,13 +90,20 @@ class VolumeGeoOverlayController extends Controller
      */
     public function storeGeoTiff(Request $request)
     {
+        // validation logic
+        $validated = $request->validate([
+            'geotiff' => 'required|file|mimetypes:image/tiff',
+        ]);
+
         // return DB::transaction(function () use ($request) {
-            $file = $request->file('metadata_geotiff');
+            $file = $request->file('geotiff');
             // reader with Exiftool adapter
             $reader = Reader::factory(ReaderType::EXIFTOOL);
             $exif = $reader->read($file);
 
-            echo 'GPS: ' . $exif->getGPS() . PHP_EOL;
+
+            echo 'Longitude: ' . $exif->getLongitude() . PHP_EOL;
+            echo 'Latitude: ' . $exif->getLatitude() . PHP_EOL;
             dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
