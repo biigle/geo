@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use PHPExif\Reader\Reader;
+use PHPExif\Adapter\Exiftool;
+use PHPExif\Enum\ReaderType;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -90,13 +92,20 @@ class VolumeGeoOverlayController extends Controller
     {
         // return DB::transaction(function () use ($request) {
             $file = $request->file('metadata_geotiff');
-            // reader with Native adapter
-            $reader = Reader::factory(Reader::TYPE_EXIFTOOL);
+
+            // reader with custom Exiftool adapter
+            // $adapter = new Exiftool(
+            //     array(
+            //         'toolPath'  => 'vendor/phpexiftool/exiftool',
+            //     )
+            // );
+            // // reader with custom adapter
+            // $reader = new Reader($adapter);
 
             // reader with Exiftool adapter
-            //$reader = \PHPExif\Reader::factory(\PHPExif\Reader::TYPE_EXIFTOOL);
+            $reader = Reader::factory(ReaderType::EXIFTOOL);
 
-            $exif = $reader->getExifFromFile($file);
+            $exif = $reader->read($file);
 
             echo 'Title: ' . $exif->getTitle() . PHP_EOL;
             dd($exif);

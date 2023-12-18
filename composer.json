@@ -20,6 +20,6 @@
         }
     },
     "require": {
-        "miljar/php-exif": "*"
+        "lychee-org/php-exif": "^1.0"
     }
 }
