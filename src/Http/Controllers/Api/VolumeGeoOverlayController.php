@@ -92,22 +92,11 @@ class VolumeGeoOverlayController extends Controller
     {
         // return DB::transaction(function () use ($request) {
             $file = $request->file('metadata_geotiff');
-
-            // reader with custom Exiftool adapter
-            // $adapter = new Exiftool(
-            //     array(
-            //         'toolPath'  => 'vendor/phpexiftool/exiftool',
-            //     )
-            // );
-            // // reader with custom adapter
-            // $reader = new Reader($adapter);
-
             // reader with Exiftool adapter
             $reader = Reader::factory(ReaderType::EXIFTOOL);
-
             $exif = $reader->read($file);
 
-            echo 'Title: ' . $exif->getTitle() . PHP_EOL;
+            echo 'GPS: ' . $exif->getGPS() . PHP_EOL;
             dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
