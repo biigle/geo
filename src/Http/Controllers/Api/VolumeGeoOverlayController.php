@@ -99,10 +99,47 @@ class VolumeGeoOverlayController extends Controller
             $file = $request->file('geotiff');
             // reader with Exiftool adapter
             $reader = Reader::factory(ReaderType::EXIFTOOL);
-            $exif = $reader->read($file);
+            $exif = $reader->read($file)->getRawData();
 
 
-            echo 'Longitude: ' . $exif->getLongitude() . PHP_EOL;
+            //  1 = 'pixelIsArea', 2 = 'pixelIsPoint', 32767 = 'user-defined'
+            $rasterType = $exif['GeoTiff:GTRasterType'];
+            //find out which coord-system we're dealing with
+            $modelTypeKey = $exif['GeoTiff:GTModelType'];
+            switch($modelTypeKey) {
+                case 1:
+                    $modelType = 'projected';
+                    break;
+                case 2:
+                    $modelType = 'geographic';
+                    break;
+                case 3:
+                    $modelType = 'geocentric';
+                    break;
+                case 32767:
+                    $modelType = 'user-defined';
+                    break;
+                default:
+                    $modelType = null;
+            }
+        
+            //TODO: Read the ModelTiePoint Coordinates and project to correct CRS (WGS84)
+            // find  "top_left_lat": 52.03737667,
+            //  "top_left_lng": 8.49285457,
+            //  "bottom_right_lat": 52.03719188,
+            //  "bottom_right_lng": 8.4931067,
+
+            // determine the projected coordinate system in use
+            if($modelType === 'projected') {
+                if($exif['GeoTiff:ProjectedCSType']) {
+                    //TODO: check if projection is already WGS 84
+                    // else --> use proj4 and transform to correct one
+                }
+            }
+        
+
+
+            echo 'ModelType: ' . $modelType . PHP_EOL;
             echo 'Latitude: ' . $exif->getLatitude() . PHP_EOL;
             dd($exif);
             // $overlay = new GeoOverlay;
