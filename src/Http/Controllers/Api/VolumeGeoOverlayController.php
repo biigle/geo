@@ -7,10 +7,9 @@ use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use PHPExif\Reader\Reader;
-use PHPExif\Adapter\Exiftool;
 use PHPExif\Enum\ReaderType;
+use Illuminate\Validation\ValidationException;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -122,25 +121,59 @@ class VolumeGeoOverlayController extends Controller
                 default:
                     $modelType = null;
             }
-        
-            //TODO: Read the ModelTiePoint Coordinates and project to correct CRS (WGS84)
-            // find  "top_left_lat": 52.03737667,
-            //  "top_left_lng": 8.49285457,
-            //  "bottom_right_lat": 52.03719188,
-            //  "bottom_right_lng": 8.4931067,
+
+            $width = $exif['IFD0:ImageWidth'];
+            $height = $exif['IFD0:ImageHeight'];
+            // modelTiePointTag = (I,J,K,X,Y,Z)
+            $modelTiePoints = array_map('intval', explode(" ", $exif['IFD0:ModelTiePoint']));
+            // for top-left corner, extract the ModelTiePoint Coordinates (in raster space)
+            $top_left = [$modelTiePoints[0], $modelTiePoints[1]];
+            $bottom_left = [$top_left[0], $height];
+            $top_right = [$width, $top_left[1]];
+            $bottom_right = [$width, $height];
+            // define the corners
+            $corners = [$top_left, $bottom_left, $top_right, $bottom_right];
+
+            // Convert corners from raster-space to model-space
+            // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-transformations
+            if($exif['IFD0:PixelScale']) {
+                // ModelPixelScale = (Sx, Sy, Sz) 
+                $pixelScale = array_map('intval', explode(" ", $exif['IFD0:PixelScale']));
+                // Tx = X - I/Sx
+                $Tx = $modelTiePoints[3] - ($modelTiePoints[0] / $pixelScale[0]);
+                // Ty = Y + J/Sy
+                $Ty = $modelTiePoints[4] - ($modelTiePoints[1] / $pixelScale[1]);
+                // Tz = Z - K/Sz (if not 0)
+                $Tz = $pixelScale[2] === 0 ? 0 : ($modelTiePoints[5] - ($modelTiePoints[2] / $pixelScale[1]));
+                 
+                $projected = $this->rasterToModelTransform($corners, $pixelScale[0], $pixelScale[1], $Tx, $Ty, $Tz);
+
+            } elseif($exif['IFDO:ModelTransformation']) {
+                // another way of transforming
+            }
+
 
             // determine the projected coordinate system in use
             if($modelType === 'projected') {
+                // project to correct CRS (WGS84)
                 if($exif['GeoTiff:ProjectedCSType']) {
+                    echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
                     //TODO: check if projection is already WGS 84
                     // else --> use proj4 and transform to correct one
                 }
+            } else {
+                throw ValidationException::withMessages(
+                    [
+                        'modelType' => ["The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!"],
+                    ]
+                );
             }
-        
 
 
-            echo 'ModelType: ' . $modelType . PHP_EOL;
-            echo 'Latitude: ' . $exif->getLatitude() . PHP_EOL;
+            echo 'ModelType: ' . $modelType . '<br>';
+            echo 'corners: ' . json_encode($corners) . '<br>';
+            echo 'projected: ' . json_encode($projected) . '<br>';
+
             dd($exif);
             // $overlay = new GeoOverlay;
             // $overlay->volume_id = $request->volume->id;
@@ -155,4 +188,31 @@ class VolumeGeoOverlayController extends Controller
             // return $overlay;
         // });
     }
+
+    /**
+     * Transform a raster-coordinate into a model-space coordinate.
+     *
+     * @param $modelTiePoints
+     * @param $pixelScale
+     *
+     * @return boolean
+     */
+    protected function rasterToModelTransform($corners, $Sx, $Sy, $Tx, $Ty, $Tz)
+    {
+        $projected = [];
+        // transformation matrix for relationship between raster and model space
+        // | Sx * I + Tx |
+        // | Sy * J + Ty |
+        // | Sz * k + Tz |
+        foreach($corners as $c) {
+            $projected_c = [
+                ($Sx * $c[0]) + $Tx,
+                ($Sy * $c[1]) + $Ty,
+            ];
+            // push to result-array
+            $projected[] = $projected_c;
+        }
+        return $projected;
+    }
 }
+
