@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
+use DivisionByZeroError;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use PHPExif\Reader\Reader;
@@ -125,7 +126,7 @@ class VolumeGeoOverlayController extends Controller
             $width = $exif['IFD0:ImageWidth'];
             $height = $exif['IFD0:ImageHeight'];
             // modelTiePointTag = (I,J,K,X,Y,Z)
-            $modelTiePoints = array_map('intval', explode(" ", $exif['IFD0:ModelTiePoint']));
+            $modelTiePoints = array_map('floatval', explode(" ", $exif['IFD0:ModelTiePoint']));
             // for top-left corner, extract the ModelTiePoint Coordinates (in raster space)
             $top_left = [$modelTiePoints[0], $modelTiePoints[1]];
             $bottom_left = [$top_left[0], $height];
@@ -135,21 +136,40 @@ class VolumeGeoOverlayController extends Controller
             $corners = [$top_left, $bottom_left, $top_right, $bottom_right];
 
             // Convert corners from raster-space to model-space
-            // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-transformations
-            if($exif['IFD0:PixelScale']) {
-                // ModelPixelScale = (Sx, Sy, Sz) 
-                $pixelScale = array_map('intval', explode(" ", $exif['IFD0:PixelScale']));
-                // Tx = X - I/Sx
-                $Tx = $modelTiePoints[3] - ($modelTiePoints[0] / $pixelScale[0]);
-                // Ty = Y + J/Sy
-                $Ty = $modelTiePoints[4] - ($modelTiePoints[1] / $pixelScale[1]);
+            // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-
+            if(array_key_exists('IFD0:PixelScale', $exif)) {
+                // ModelPixelScale = (Sx, Sy, Sz)
+                $pixelScale = array_map('floatval', explode(" ", $exif['IFD0:PixelScale']));
+                // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
+                if(($pixelScale[0] === 0 || $pixelScale[1] === 0) && !array_key_exists('IFD0:ModelTransformation', $exif)) {
+                    throw ValidationException::withMessages(
+                        [
+                            'affineTransformation' => ['The GeoTIFF file does not have an affine transformation.'],
+                        ]
+                    );
+                }
+
+                try {
+                    // Tx = X - I/Sx
+                    $Tx = $modelTiePoints[3] - ($modelTiePoints[0] / $pixelScale[0]);
+                     // Ty = Y + J/Sy
+                    $Ty = $modelTiePoints[4] - ($modelTiePoints[1] / $pixelScale[1]);
+                } catch(DivisionByZeroError $e) {
+                    throw $e;
+                }
                 // Tz = Z - K/Sz (if not 0)
                 $Tz = $pixelScale[2] === 0 ? 0 : ($modelTiePoints[5] - ($modelTiePoints[2] / $pixelScale[1]));
-                 
                 $projected = $this->rasterToModelTransform($corners, $pixelScale[0], $pixelScale[1], $Tx, $Ty, $Tz);
 
-            } elseif($exif['IFDO:ModelTransformation']) {
+            } elseif(array_key_exists('IFD0:ModelTransformation', $exif)) {
                 // another way of transforming
+            } else {
+                // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
+                throw ValidationException::withMessages(
+                    [
+                        'affineTransformation' => ['The GeoTIFF file does not have an affine transformation.'],
+                    ]
+                );
             }
 
 

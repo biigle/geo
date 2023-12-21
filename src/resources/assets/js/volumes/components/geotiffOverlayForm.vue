@@ -29,7 +29,7 @@ export default {
             this.success = true;
         },
         handleError(response) {
-            let knownError = response.body.errors && (response.body.errors.geotiff || response.body.errors.modelType);
+            let knownError = response.body.errors && (response.body.errors.geotiff || response.body.errors.modelType || response.body.errors.affineTransformation);
             if (knownError) {
                 if (Array.isArray(knownError)) {
                     this.error = knownError[0];
