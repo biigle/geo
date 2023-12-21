@@ -6,11 +6,15 @@ use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
 use DivisionByZeroError;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use PHPExif\Reader\Reader;
 use PHPExif\Enum\ReaderType;
 use Illuminate\Validation\ValidationException;
+use proj4php\Proj4php;
+use proj4php\Proj;
+use proj4php\Point;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -125,17 +129,31 @@ class VolumeGeoOverlayController extends Controller
 
             $width = $exif['IFD0:ImageWidth'];
             $height = $exif['IFD0:ImageHeight'];
+
             // modelTiePointTag = (I,J,K,X,Y,Z)
-            $modelTiePoints = array_map('floatval', explode(" ", $exif['IFD0:ModelTiePoint']));
-            // for top-left corner, extract the ModelTiePoint Coordinates (in raster space)
-            $top_left = [$modelTiePoints[0], $modelTiePoints[1]];
-            $bottom_left = [$top_left[0], $height];
-            $top_right = [$width, $top_left[1]];
+            if(array_key_exists('IFD0:ModelTiePoint', $exif)) {
+                $modelTiePoints = array_map('floatval', explode(" ", $exif['IFD0:ModelTiePoint']));
+                $tie_point_keys = ['I', 'J', 'K', 'X', 'Y', 'Z'];
+                $tie_points_combined = array_combine($tie_point_keys, $modelTiePoints);
+                // make variables availabe
+                extract($tie_points_combined);
+            } else {
+                throw ValidationException::withMessages(
+                    [
+                        'modelTiePoints' => ['The GeoTIFF file does not have the required ModelTiePointTag.'],
+                    ]
+                );
+            }
+            
+            // for top-left corner, extract the ModelTiePoint Coordinates (in raster space: I,J)
+            $top_left = [$I, $J];
+            $bottom_left = [$I, $height];
+            $top_right = [$width, $J];
             $bottom_right = [$width, $height];
             // define the corners
             $corners = [$top_left, $bottom_left, $top_right, $bottom_right];
 
-            // Convert corners from raster-space to model-space
+            // Convert corners from RASTER-SPACE to MODEL-SPACE
             // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-
             if(array_key_exists('IFD0:PixelScale', $exif)) {
                 // ModelPixelScale = (Sx, Sy, Sz)
@@ -151,18 +169,48 @@ class VolumeGeoOverlayController extends Controller
 
                 try {
                     // Tx = X - I/Sx
-                    $Tx = $modelTiePoints[3] - ($modelTiePoints[0] / $pixelScale[0]);
+                    $Tx = $X - ($I / $pixelScale[0]);
                      // Ty = Y + J/Sy
-                    $Ty = $modelTiePoints[4] - ($modelTiePoints[1] / $pixelScale[1]);
+                    $Ty = $Y - ($J / $pixelScale[1]);
+                    // Tz = Z - K/Sz (if not 0; aka. the 2D-case)
+                    // $Tz = $pixelScale[2] === 0 ? 0 : ($Z - ($K / $pixelScale[1]));
                 } catch(DivisionByZeroError $e) {
                     throw $e;
                 }
-                // Tz = Z - K/Sz (if not 0)
-                $Tz = $pixelScale[2] === 0 ? 0 : ($modelTiePoints[5] - ($modelTiePoints[2] / $pixelScale[1]));
-                $projected = $this->rasterToModelTransform($corners, $pixelScale[0], $pixelScale[1], $Tx, $Ty, $Tz);
+                // transformation matrix for relationship between raster and model space
+                // | Sx * I + Tx |
+                // | Sy * J + Ty |
+                // | Sz * k + Tz |
+                foreach($corners as $corner) {
+                    $projected[] = [
+                        ($pixelScale[0] * $corner[0]) + $Tx,
+                        ($pixelScale[1] * $corner[1]) + $Ty,
+                    ];
+                }
+                // get the minimum and maximum coordinates of the geoTIFF
+                $min_max_coords = $this->getMinMaxCoordinate($projected);
 
             } elseif(array_key_exists('IFD0:ModelTransformation', $exif)) {
-                // another way of transforming
+                // TODO: Test with geoTIFF (could not find a testcase yet)!!
+                // another way of transforming raster- to model-space with ModelTransformationTag (only 2D case implemented)
+                $model_transform = $exif['IFD0:ModelTransformation'];
+                $keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+                $var_array = array_combine($keys, array_slice($model_transform, 0, count($keys)));
+                // make variables availabe
+                extract($var_array);
+                $projected = [];
+                // transformation matrix for raster- to model-space, multiply with modelTiePoint (I,J,K)
+                // | a b 0 d |
+                // | e f 0 h |
+                // | 0 0 0 0 |
+                foreach($corners as $corner) {
+                    $projected[] = [
+                        (($a * $corner[0]) + ($b * $corner[1]) + $d),
+                        (($e * $corner[0]) + ($f * $corner[1]) + $h)
+                    ];
+                }
+                // get the minimum and maximum coordinates of the geoTIFF
+                $min_max_coords = $this->getMinMaxCoordinate($projected);
             } else {
                 // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
                 throw ValidationException::withMessages(
@@ -176,10 +224,26 @@ class VolumeGeoOverlayController extends Controller
             // determine the projected coordinate system in use
             if($modelType === 'projected') {
                 // project to correct CRS (WGS84)
-                if($exif['GeoTiff:ProjectedCSType']) {
-                    echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
-                    //TODO: check if projection is already WGS 84
-                    // else --> use proj4 and transform to correct one
+                if(array_key_exists('GeoTiff:ProjectedCSType', $exif)) {
+                    $pcs_code = intval($exif['GeoTiff:ProjectedCSType']);
+                    // check if projection is already WGS 84, if not, use proj4-functions to transform to WGS 84
+                    if($pcs_code !== 4326) {
+                        $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
+                        if(is_null($min_max_coordsWGS)) {
+                            // TODO: try another approach conversion approach
+                        } else {
+                            // save data in GeoOverlay DB
+                            $overlay = new GeoOverlay;
+                            $overlay->volume_id = $request->volume;
+                            $overlay->name = $request->input('name', $file->getClientOriginalName());
+                            $overlay->top_left_lng = $min_max_coordsWGS[0][0];
+                            $overlay->top_left_lat = $min_max_coordsWGS[0][1];
+                            $overlay->bottom_right_lng = $min_max_coordsWGS[1][0];
+                            $overlay->bottom_right_lat = $min_max_coordsWGS[1][1];
+                            $overlay->save();
+                            // $overlay->storeFile($file);
+                        }
+                    }
                 }
             } else {
                 throw ValidationException::withMessages(
@@ -191,8 +255,11 @@ class VolumeGeoOverlayController extends Controller
 
 
             echo 'ModelType: ' . $modelType . '<br>';
+            echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
             echo 'corners: ' . json_encode($corners) . '<br>';
             echo 'projected: ' . json_encode($projected) . '<br>';
+            echo 'MinMaxCoord: ' . json_encode($min_max_coords) . '<br>';
+            echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
 
             dd($exif);
             // $overlay = new GeoOverlay;
@@ -210,29 +277,57 @@ class VolumeGeoOverlayController extends Controller
     }
 
     /**
-     * Transform a raster-coordinate into a model-space coordinate.
+     * Return the min and max coordinate in model-space
      *
-     * @param $modelTiePoints
-     * @param $pixelScale
+     * @param $projected coordinates of the geoTIFF corners
      *
-     * @return boolean
+     * @return array
      */
-    protected function rasterToModelTransform($corners, $Sx, $Sy, $Tx, $Ty, $Tz)
+    protected function getMinMaxCoordinate($projected)
     {
-        $projected = [];
-        // transformation matrix for relationship between raster and model space
-        // | Sx * I + Tx |
-        // | Sy * J + Ty |
-        // | Sz * k + Tz |
-        foreach($corners as $c) {
-            $projected_c = [
-                ($Sx * $c[0]) + $Tx,
-                ($Sy * $c[1]) + $Ty,
-            ];
-            // push to result-array
-            $projected[] = $projected_c;
+        $x_coordinates = array_map(fn($pt) => $pt[0], $projected);
+        $y_coordinates = array_map(fn($pt) => $pt[1], $projected);
+
+        return [
+            min($x_coordinates),
+            min($y_coordinates),
+            max($x_coordinates),
+            max($y_coordinates)
+        ];
+    }
+
+    /**
+     * Transform coordinates from one model-space into another 
+     *
+     * @param $coords_current min and max coordinates of the geoTIFF
+     * @param $pcs_code from the ProjectedCSTypeTag of the geoTIFF
+     *
+     * @return array
+     */
+    protected function transformModelSpace($coords_current, $pcs_code)
+    {
+        // Initialise Proj4
+        $proj4 = new Proj4php();
+        // create the WGS84 projection
+        $projWGS84 = new Proj('EPSG:4326', $proj4);
+        // create projection of current geoTIFF from ProjectedCSTypeTag
+        try {
+            $proj_current = new Proj("EPSG:{$pcs_code}", $proj4);
+        } catch(Exception $e) {
+            report($e);
+            return NULL;
         }
-        return $projected;
+        $transformed_coords = [];
+
+        for($i = 0; $i < count($coords_current); $i+=2) {
+            // create a point
+            $pointSrc = new Point($coords_current[$i], $coords_current[$i+1], $proj_current);
+            // transform the point between datums
+            $projected_point = $proj4->transform($projWGS84, $pointSrc)->toArray();
+            $transformed_coords[] = [$projected_point[0], $projected_point[1]];
+        };
+
+        return $transformed_coords;
     }
 }
 

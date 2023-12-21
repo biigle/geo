@@ -29,7 +29,12 @@ export default {
             this.success = true;
         },
         handleError(response) {
-            let knownError = response.body.errors && (response.body.errors.geotiff || response.body.errors.modelType || response.body.errors.affineTransformation);
+            let knownError = response.body.errors && (
+                    response.body.errors.geotiff || 
+                    response.body.errors.modelTiePoints || 
+                    response.body.errors.modelType || 
+                    response.body.errors.affineTransformation
+                );
             if (knownError) {
                 if (Array.isArray(knownError)) {
                     this.error = knownError[0];
@@ -48,6 +53,7 @@ export default {
             this.startLoading();
             let data = new FormData();
             data.append('geotiff', event.target.files[0]);
+            data.append('volume', this.volumeId);
             this.upload(data)
                 .then(this.handleSuccess, this.handleError)
                 .finally(this.finishLoading);
