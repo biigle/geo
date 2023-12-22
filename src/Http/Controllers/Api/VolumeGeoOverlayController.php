@@ -89,7 +89,7 @@ class VolumeGeoOverlayController extends Controller
      *     "bottom_right_lng": 8.4931067,
      * }
      *
-     * @param StorePlainGeoOverlay $request
+     * @param Reqeuest $request
      * @param int $id Volume ID
      */
     public function storeGeoTiff(Request $request)
@@ -101,6 +101,7 @@ class VolumeGeoOverlayController extends Controller
 
         // return DB::transaction(function () use ($request) {
             $file = $request->file('geotiff');
+            $file_name = $request->input('name', $file->getClientOriginalName());
             // reader with Exiftool adapter
             $reader = Reader::factory(ReaderType::EXIFTOOL);
             $exif = $reader->read($file)->getRawData();
@@ -184,7 +185,7 @@ class VolumeGeoOverlayController extends Controller
                 foreach($corners as $corner) {
                     $projected[] = [
                         ($pixelScale[0] * $corner[0]) + $Tx,
-                        ($pixelScale[1] * $corner[1]) + $Ty,
+                        -($pixelScale[1] * $corner[1]) + $Ty,
                     ];
                 }
                 // get the minimum and maximum coordinates of the geoTIFF
@@ -226,24 +227,32 @@ class VolumeGeoOverlayController extends Controller
                 // project to correct CRS (WGS84)
                 if(array_key_exists('GeoTiff:ProjectedCSType', $exif)) {
                     $pcs_code = intval($exif['GeoTiff:ProjectedCSType']);
-                    // check if projection is already WGS 84, if not, use proj4-functions to transform to WGS 84
-                    if($pcs_code !== 4326) {
-                        $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
-                        if(is_null($min_max_coordsWGS)) {
-                            // TODO: try another approach conversion approach
-                        } else {
-                            // save data in GeoOverlay DB
-                            $overlay = new GeoOverlay;
-                            $overlay->volume_id = $request->volume;
-                            $overlay->name = $request->input('name', $file->getClientOriginalName());
-                            $overlay->top_left_lng = $min_max_coordsWGS[0][0];
-                            $overlay->top_left_lat = $min_max_coordsWGS[0][1];
-                            $overlay->bottom_right_lng = $min_max_coordsWGS[1][0];
-                            $overlay->bottom_right_lat = $min_max_coordsWGS[1][1];
-                            $overlay->save();
-                            // $overlay->storeFile($file);
-                        }
+                    
+                    switch($pcs_code) {
+                        case 0:
+                            // undefined code
+                            echo "ProjectedCS code is undefined! <br>";
+                            break;
+                        case 32767:
+                            // user-defined code
+                            echo "ProjectedCS code is user-defined! <br>";
+                            break;
+                        case 4326:
+                             // save data in GeoOverlay DB when already in WGS84
+                             $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coords);
+                            break;
+                        default:
+                            // use proj4-functions to transform to WGS 84
+                            $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
+                            if(is_null($min_max_coordsWGS)) {
+                                // TODO: try another conversion approach
+                            } else {
+                                // save data in GeoOverlay DB
+                                $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS);
+                            }
                     }
+                } else {
+                    // TODO: try another conversion approach
                 }
             } else {
                 throw ValidationException::withMessages(
@@ -259,7 +268,9 @@ class VolumeGeoOverlayController extends Controller
             echo 'corners: ' . json_encode($corners) . '<br>';
             echo 'projected: ' . json_encode($projected) . '<br>';
             echo 'MinMaxCoord: ' . json_encode($min_max_coords) . '<br>';
-            echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
+            if(isset($min_max_coordsWGS)) {
+                echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
+            }
 
             dd($exif);
             // $overlay = new GeoOverlay;
@@ -274,6 +285,28 @@ class VolumeGeoOverlayController extends Controller
 
             // return $overlay;
         // });
+    }
+
+    /**
+     * Save GeoTIFF data in GeoOverlay DB
+     *
+     * @param $request the Request
+     * @param $coords min and max coordinates in WGS84 format
+     *
+     * @return GeoOverlay
+     */
+    protected function saveGeoOverlay($volumeId, $fileName, $coords)
+    {
+        $overlay = new GeoOverlay;
+        $overlay->volume_id = $volumeId;
+        $overlay->name = $fileName;
+        $overlay->top_left_lng = $coords[0][0];
+        $overlay->top_left_lat = $coords[0][1];
+        $overlay->bottom_right_lng = $coords[1][0];
+        $overlay->bottom_right_lat = $coords[1][1];
+        // $overlay->save();
+        // $overlay->storeFile($file);
+        return $overlay;
     }
 
     /**
