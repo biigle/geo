@@ -236,6 +236,28 @@ class VolumeGeoOverlayController extends Controller
                         case 32767:
                             // user-defined code
                             echo "ProjectedCS code is user-defined! <br>";
+                            // find the custom coordinate transformation method, see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc
+                            if(array_key_exists('GeoTiff:Projection', $exif) && array_key_exists('GeoTiff:GeographicType', $exif)) {
+                                $geographic_type = intval($exif['GeoTiff:GeographicType']);
+                                $projection_type = intval($exif['GeoTiff:Projection']);
+                            
+                                //TODO: Continue finishing the user-defined geoTIFF parsing
+                                // Case 1: A base geographic CRS and map projection that are both available, but not associated together in the register
+                                if($geographic_type !== 32767 && $projection_type !== 32767) {
+
+                                // Case 2: A user-defined geographic CRS and a map projection that is available from the register 
+                                } elseif($geographic_type === 32767 && $projection_type !== 32767) {
+
+                                // Case 3: A user-defined geographic CRS available from the GeoTIFF CRS register and a map projection not in EPSG register
+                                } elseif($geographic_type !== 32767 && $projection_type === 32767) {
+                                    
+                                // Neither base GeogCRS or map projection is in EPSG.
+                                } else {
+
+                                }
+                            }
+                            // $custom_transform = $exif['GeoTiff:ProjCoordTrans'];
+                            // $linear_units = $exif['GeoTiff:ProjLinearUnits'];
                             break;
                         case 4326:
                              // save data in GeoOverlay DB when already in WGS84
@@ -246,6 +268,7 @@ class VolumeGeoOverlayController extends Controller
                             $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
                             if(is_null($min_max_coordsWGS)) {
                                 // TODO: try another conversion approach
+
                             } else {
                                 // save data in GeoOverlay DB
                                 $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS);
