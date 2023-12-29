@@ -157,7 +157,7 @@ class VolumeGeoOverlayController extends Controller
             // Convert corners from RASTER-SPACE to MODEL-SPACE
             // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-
             if(array_key_exists('IFD0:PixelScale', $exif)) {
-                // ModelPixelScale = (Sx, Sy, Sz)
+                // PixelScale = (Sx, Sy, Sz)
                 $pixelScale = array_map('floatval', explode(" ", $exif['IFD0:PixelScale']));
                 // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
                 if(($pixelScale[0] === 0 || $pixelScale[1] === 0) && !array_key_exists('IFD0:ModelTransformation', $exif)) {
@@ -229,36 +229,77 @@ class VolumeGeoOverlayController extends Controller
                     $pcs_code = intval($exif['GeoTiff:ProjectedCSType']);
                     
                     switch($pcs_code) {
+                        // undefined code
                         case 0:
-                            // undefined code
                             echo "ProjectedCS code is undefined! <br>";
                             break;
+                        // user-defined code
                         case 32767:
-                            // user-defined code
                             echo "ProjectedCS code is user-defined! <br>";
                             // find the custom coordinate transformation method, see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc
                             if(array_key_exists('GeoTiff:Projection', $exif) && array_key_exists('GeoTiff:GeographicType', $exif)) {
-                                $geographic_type = intval($exif['GeoTiff:GeographicType']);
+                                $geographic_type = intval($exif['GeoTiff:GeographicType']); //GeodeticCRSGeoKey
                                 $projection_type = intval($exif['GeoTiff:Projection']);
-                            
-                                //TODO: Continue finishing the user-defined geoTIFF parsing
+                                
                                 // Case 1: A base geographic CRS and map projection that are both available, but not associated together in the register
                                 if($geographic_type !== 32767 && $projection_type !== 32767) {
+                                    $pcs_citation = $exif['GeoTiff:PCSCitation']; //ProjectedCitationGeoKey
+                                    $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnits']);
+
+                                    // if ProjLinearUnits is user-defined
+                                    if($proj_linear_units === 32767) {
+                                        $proj_linear_units_size = floatval($exif['GeoTiff:ProjLinearUnitSize']);
+                                    }
 
                                 // Case 2: A user-defined geographic CRS and a map projection that is available from the register 
                                 } elseif($geographic_type === 32767 && $projection_type !== 32767) {
+                                    // the GeodeticCitationGeoKey, GeodeticDatumGeoKey and at least one of GeogAngularUnitsGeoKey or GeogLinearUnitsGeoKey SHALL be populated.
+                                    $geog_citation = $exif['GeoTiff:GeogCitation']; //geodeticCitationGeoKey
+                                    $geog_datum = intval($exif['GeoTiff:GeogGeodeticDatum']);
+                                    $geog_angular_units = intval($exif['GeoTiff:GeogAngularUnits']);
+
+                                    if($geog_angular_units === 32767) {
+                                        $geog_angular_units_size = floatval($exif['GeoTiff:GeogAngularUnitSize']);
+                                    }
+                                    // if geodeticDatum is user-defined
+                                    if($geog_datum === 32767) {
+                                        $geog_prime_meridian = intval($exif['GeoTiff:GeogPrimeMeridian']);
+                                        $geog_ellipsoid = intval($exif['GeoTiff:GeogEllipsoid']);
+                                        // For geocentric the ellipsoid axis or axes values must given in the length unit defined through the GeogLinearUnitsGeoKey
+                                        $geog_linear_units = intval($exif['GeoTiff:GeogLinearUnits']);
+                                        if($geog_linear_units == 32767) {
+                                            $geog_linear_units_size = floatval($exif['GeoTiff:GeogLinearUnitSize']);
+                                        }
+                                        if($geog_ellipsoid === 32767) {
+                                            $geog_semi_major_axis = floatval($exif['GeoTiff:GeogSemiMajorAxis']);
+                                            $geog_semi_minor_axis = floatval($exif['GeoTiff:GeogSemiMinorAxis']);
+                                            $geog_inv_flattening = floatval($exif['GeoTiff:GeogInvFlattening']);
+                                        }
+                                        // If no prime meridian is identified, it should be assumed to be Greenwich
+                                        if(!isset($geog_prime_meridian)) {
+                                            // TODO: assume Greenwich
+                                        } elseif($geog_prime_meridian === 32767) {
+                                            $geog_prime_meridian_long = floatval($exif['GeoTiff:GeogPrimeMeridianLong']);
+                                        }
+                                    }
 
                                 // Case 3: A user-defined geographic CRS available from the GeoTIFF CRS register and a map projection not in EPSG register
                                 } elseif($geographic_type !== 32767 && $projection_type === 32767) {
-                                    
+                                    //geographic_type
+                                    $pcs_citation = $exif['GeoTiff:PCSCitation'];  //ProjectedCitationGeoKey
+                                    //TODO:
+                                    // $ProjMethodGeoKey
+                                    // $ProjLinearUnitsGeoKey
                                 // Neither base GeogCRS or map projection is in EPSG.
                                 } else {
+                                    // Use the ProjCoordTransGeoKey to specify the coordinate transformation method (e.g. Transverse Mercator), and all of the associated parameters of that method
 
                                 }
                             }
                             // $custom_transform = $exif['GeoTiff:ProjCoordTrans'];
                             // $linear_units = $exif['GeoTiff:ProjLinearUnits'];
                             break;
+                        // WGS 84 code
                         case 4326:
                              // save data in GeoOverlay DB when already in WGS84
                              $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coords);
@@ -386,4 +427,3 @@ class VolumeGeoOverlayController extends Controller
         return $transformed_coords;
     }
 }
-
