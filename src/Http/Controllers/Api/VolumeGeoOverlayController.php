@@ -287,13 +287,20 @@ class VolumeGeoOverlayController extends Controller
                                 } elseif($geographic_type !== 32767 && $projection_type === 32767) {
                                     //geographic_type
                                     $pcs_citation = $exif['GeoTiff:PCSCitation'];  //ProjectedCitationGeoKey
-                                    //TODO:
-                                    // $ProjMethodGeoKey
-                                    // $ProjLinearUnitsGeoKey
+                                    $proj_coord_trans = intval($exif['GeoTiff:ProjCoordTrans']); // ProjMethodGeoKey
+                                    $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnitsGeoKey']);
+
+                                    if($proj_coord_trans === 32767) {
+                                        //then, the ProjectedCitationGeoKey and keys for each map projection parameter (coordinate operation parameter) appropriate to that method SHALL be populated
+                                    }
+                                    if($proj_linear_units === 32767) {
+                                        // then the ProjectedCitationGeoKey and the ProjLinearUnitSizeGeoKey SHALL be populated
+                                        $proj_linear_units_size = floatval($exif['GeoTiff:ProjLinearUnitSize']);
+                                    }
                                 // Neither base GeogCRS or map projection is in EPSG.
                                 } else {
                                     // Use the ProjCoordTransGeoKey to specify the coordinate transformation method (e.g. Transverse Mercator), and all of the associated parameters of that method
-
+                                    
                                 }
                             }
                             // $custom_transform = $exif['GeoTiff:ProjCoordTrans'];
