@@ -354,7 +354,8 @@ class VolumeGeoOverlayController extends Controller
     /**
      * Save GeoTIFF data in GeoOverlay DB
      *
-     * @param $request the Request
+     * @param $volumeId ID of the current volume
+     * @param $fileName of the original input-file
      * @param $coords min and max coordinates in WGS84 format
      *
      * @return GeoOverlay
