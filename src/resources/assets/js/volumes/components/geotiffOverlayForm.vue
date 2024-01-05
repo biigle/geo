@@ -33,7 +33,8 @@ export default {
                     response.body.errors.geotiff || 
                     response.body.errors.modelTiePoints || 
                     response.body.errors.modelType || 
-                    response.body.errors.affineTransformation
+                    response.body.errors.affineTransformation ||
+                    response.body.errors.missingKey
                 );
             if (knownError) {
                 if (Array.isArray(knownError)) {

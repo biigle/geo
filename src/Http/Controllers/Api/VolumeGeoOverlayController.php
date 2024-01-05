@@ -288,7 +288,7 @@ class VolumeGeoOverlayController extends Controller
                                     //geographic_type
                                     $pcs_citation = $exif['GeoTiff:PCSCitation'];  //ProjectedCitationGeoKey
                                     $proj_coord_trans = intval($exif['GeoTiff:ProjCoordTrans']); // ProjMethodGeoKey
-                                    $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnitsGeoKey']);
+                                    $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnits']);
 
                                     if($proj_coord_trans === 32767) {
                                         //then, the ProjectedCitationGeoKey and keys for each map projection parameter (coordinate operation parameter) appropriate to that method SHALL be populated
