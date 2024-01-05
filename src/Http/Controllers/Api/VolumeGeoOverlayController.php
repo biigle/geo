@@ -302,6 +302,13 @@ class VolumeGeoOverlayController extends Controller
                                     // Use the ProjCoordTransGeoKey to specify the coordinate transformation method (e.g. Transverse Mercator), and all of the associated parameters of that method
                                     
                                 }
+                            } else {
+                                // if Projection- or GeographicType-GeoKeys are missing in user-defined PCS --> throw error
+                                throw ValidationException::withMessages(
+                                    [
+                                        'missingKey' => ['Both "GeographicType" and "Projection" geokey is needed if providing a user-defined PCS.'],
+                                    ]
+                                );
                             }
                             // $custom_transform = $exif['GeoTiff:ProjCoordTrans'];
                             // $linear_units = $exif['GeoTiff:ProjLinearUnits'];
