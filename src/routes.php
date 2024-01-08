@@ -36,12 +36,13 @@ $router->group([
         'uses' => 'VolumeGeoOverlayController@storeGeoTiff',
     ]);
 
+    $router->resource('geo-overlays', 'GeoOverlayController', [
+        'only' => ['destroy'],
+        'parameters' => ['geo-overlays' => 'id'],
+    ]);
+    
     // $router->get('geo-overlays/{id}/file', [
     //     'uses' => 'GeoOverlayController@showFile',
     // ]);
 
-    // $router->resource('geo-overlays', 'GeoOverlayController', [
-    //     'only' => ['destroy'],
-    //     'parameters' => ['geo-overlays' => 'id'],
-    // ]);
 });
