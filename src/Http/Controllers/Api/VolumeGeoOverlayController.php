@@ -323,7 +323,7 @@ class VolumeGeoOverlayController extends Controller
                             $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
                             if(is_null($min_max_coordsWGS)) {
                                 // TODO: try another conversion approach
-
+                                echo 'WGS-transform amounted to null.';
                             } else {
                                 // save data in GeoOverlay DB
                                 $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS);
@@ -414,7 +414,7 @@ class VolumeGeoOverlayController extends Controller
      * @param $coords_current min and max coordinates of the geoTIFF
      * @param $pcs_code from the ProjectedCSTypeTag of the geoTIFF
      *
-     * @return array
+     * @return array in form [min_x, min_y, max_x, max_y]
      */
     protected function transformModelSpace($coords_current, $pcs_code)
     {
@@ -426,6 +426,7 @@ class VolumeGeoOverlayController extends Controller
         try {
             $proj_current = new Proj("EPSG:{$pcs_code}", $proj4);
         } catch(Exception $e) {
+            echo $e->getMessage();
             report($e);
             return NULL;
         }
