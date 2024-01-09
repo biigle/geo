@@ -325,7 +325,7 @@ class VolumeGeoOverlayController extends Controller
                                 // TODO: try another conversion approach
                             } else {
                                 // save data in GeoOverlay DB
-                                $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS);
+                                $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS, $file);
                             }
                     }
                 } else {
@@ -370,10 +370,11 @@ class VolumeGeoOverlayController extends Controller
      * @param $volumeId ID of the current volume
      * @param $fileName of the original input-file
      * @param $coords min and max coordinates in WGS84 format
+     * @param $file the geotiff file from request
      *
      * @return GeoOverlay
      */
-    protected function saveGeoOverlay($volumeId, $fileName, $coords)
+    protected function saveGeoOverlay($volumeId, $fileName, $coords, $file)
     {
         $overlay = new GeoOverlay;
         $overlay->volume_id = $volumeId;
@@ -382,7 +383,7 @@ class VolumeGeoOverlayController extends Controller
         $overlay->top_left_lat = $coords[0][1];
         $overlay->bottom_right_lng = $coords[1][0];
         $overlay->bottom_right_lat = $coords[1][1];
-        // $overlay->save();
+        $overlay->save();
         // $overlay->storeFile($file);
         return $overlay;
     }
