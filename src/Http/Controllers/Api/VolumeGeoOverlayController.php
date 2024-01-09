@@ -316,7 +316,7 @@ class VolumeGeoOverlayController extends Controller
                         // WGS 84 code
                     case 4326:
                         // save data in GeoOverlay DB when already in WGS84
-                        $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coords);
+                        $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coords, $file);
                         break;
                     default:
                         // use proj4-functions to transform to WGS 84
