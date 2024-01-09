@@ -222,6 +222,7 @@ class VolumeGeoOverlayController extends Controller
         }
 
 
+        // Change MODEL SPACE to WGS 84
         // determine the projected coordinate system in use
         if ($modelType === 'projected') {
             // project to correct CRS (WGS84)
@@ -243,13 +244,10 @@ class VolumeGeoOverlayController extends Controller
 
                             // Case 1: A base geographic CRS and map projection that are both available, but not associated together in the register
                             if ($geographic_type !== 32767 && $projection_type !== 32767) {
-                                $pcs_citation = $exif['GeoTiff:PCSCitation']; //ProjectedCitationGeoKey
-                                $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnits']);
-
-                                // if ProjLinearUnits is user-defined
-                                if ($proj_linear_units === 32767) {
-                                    $proj_linear_units_size = floatval($exif['GeoTiff:ProjLinearUnitSize']);
-                                }
+                                //TODO: create a custom proj4 projection string by, e.g.:
+                                // $proj4->addDef("EPSG:27700",'+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs');
+                                // create projections
+                                // $projOSGB36 = new Proj('EPSG:27700',$proj4);
 
                                 // Case 2: A user-defined geographic CRS and a map projection that is available from the register 
                             } elseif ($geographic_type === 32767 && $projection_type !== 32767) {
@@ -306,7 +304,7 @@ class VolumeGeoOverlayController extends Controller
                             // if Projection- or GeographicType-GeoKeys are missing in user-defined PCS --> throw error
                             throw ValidationException::withMessages(
                                 [
-                                    'missingKey' => ['Both "GeographicType" and "Projection" geokey is needed if providing a user-defined PCS.'],
+                                    'missingKey' => ['Both "GeographicType" and "Projection" geokey are needed if providing a user-defined PCS.'],
                                 ]
                             );
                         }
