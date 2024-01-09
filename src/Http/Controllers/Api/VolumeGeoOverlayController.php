@@ -238,78 +238,28 @@ class VolumeGeoOverlayController extends Controller
                     case 32767:
                         echo "ProjectedCS code is user-defined! <br>";
                         // find the custom coordinate transformation method, see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc
-                        if (array_key_exists('GeoTiff:Projection', $exif) && array_key_exists('GeoTiff:GeographicType', $exif)) {
-                            $geographic_type = intval($exif['GeoTiff:GeographicType']); //GeodeticCRSGeoKey
+                        // Case 1: geographicType key available
+                        if (array_key_exists('GeoTiff:GeographicType', $exif)) {
+                            $geographic_type = intval($exif['GeoTiff:GeographicType']); //GeodeticCRSGeoKey in GeoTiff v1.1
+                            if ($geographic_type !== 32767) {
+                                // use proj4-functions to transform to WGS 84
+                                $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $geographic_type);
+                            }
+                        // Case 2: map projection key available
+                        } elseif (array_key_exists('GeoTiff:Projection', $exif)) {
                             $projection_type = intval($exif['GeoTiff:Projection']);
-
-                            // Case 1: A base geographic CRS and map projection that are both available, but not associated together in the register
-                            if ($geographic_type !== 32767 && $projection_type !== 32767) {
-                                //TODO: create a custom proj4 projection string by, e.g.:
-                                // $proj4->addDef("EPSG:27700",'+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs');
-                                // create projections
-                                // $projOSGB36 = new Proj('EPSG:27700',$proj4);
-
-                                // Case 2: A user-defined geographic CRS and a map projection that is available from the register 
-                            } elseif ($geographic_type === 32767 && $projection_type !== 32767) {
-                                // the GeodeticCitationGeoKey, GeodeticDatumGeoKey and at least one of GeogAngularUnitsGeoKey or GeogLinearUnitsGeoKey SHALL be populated.
-                                $geog_citation = $exif['GeoTiff:GeogCitation']; //geodeticCitationGeoKey
-                                $geog_datum = intval($exif['GeoTiff:GeogGeodeticDatum']);
-                                $geog_angular_units = intval($exif['GeoTiff:GeogAngularUnits']);
-
-                                if ($geog_angular_units === 32767) {
-                                    $geog_angular_units_size = floatval($exif['GeoTiff:GeogAngularUnitSize']);
-                                }
-                                // if geodeticDatum is user-defined
-                                if ($geog_datum === 32767) {
-                                    $geog_prime_meridian = intval($exif['GeoTiff:GeogPrimeMeridian']);
-                                    $geog_ellipsoid = intval($exif['GeoTiff:GeogEllipsoid']);
-                                    // For geocentric the ellipsoid axis or axes values must given in the length unit defined through the GeogLinearUnitsGeoKey
-                                    $geog_linear_units = intval($exif['GeoTiff:GeogLinearUnits']);
-                                    if ($geog_linear_units == 32767) {
-                                        $geog_linear_units_size = floatval($exif['GeoTiff:GeogLinearUnitSize']);
-                                    }
-                                    if ($geog_ellipsoid === 32767) {
-                                        $geog_semi_major_axis = floatval($exif['GeoTiff:GeogSemiMajorAxis']);
-                                        $geog_semi_minor_axis = floatval($exif['GeoTiff:GeogSemiMinorAxis']);
-                                        $geog_inv_flattening = floatval($exif['GeoTiff:GeogInvFlattening']);
-                                    }
-                                    // If no prime meridian is identified, it should be assumed to be Greenwich
-                                    if (!isset($geog_prime_meridian)) {
-                                        // TODO: assume Greenwich
-                                    } elseif ($geog_prime_meridian === 32767) {
-                                        $geog_prime_meridian_long = floatval($exif['GeoTiff:GeogPrimeMeridianLong']);
-                                    }
-                                }
-
-                                // Case 3: A user-defined geographic CRS available from the GeoTIFF CRS register and a map projection not in EPSG register
-                            } elseif ($geographic_type !== 32767 && $projection_type === 32767) {
-                                //geographic_type
-                                $pcs_citation = $exif['GeoTiff:PCSCitation'];  //ProjectedCitationGeoKey
-                                $proj_coord_trans = intval($exif['GeoTiff:ProjCoordTrans']); // ProjMethodGeoKey
-                                $proj_linear_units = intval($exif['GeoTiff:ProjLinearUnits']);
-
-                                if ($proj_coord_trans === 32767) {
-                                    //then, the ProjectedCitationGeoKey and keys for each map projection parameter (coordinate operation parameter) appropriate to that method SHALL be populated
-                                }
-                                if ($proj_linear_units === 32767) {
-                                    // then the ProjectedCitationGeoKey and the ProjLinearUnitSizeGeoKey SHALL be populated
-                                    $proj_linear_units_size = floatval($exif['GeoTiff:ProjLinearUnitSize']);
-                                }
-                                // Neither base GeogCRS or map projection is in EPSG.
-                            } else {
-                                // Use the ProjCoordTransGeoKey to specify the coordinate transformation method (e.g. Transverse Mercator), and all of the associated parameters of that method
-
+                            if ($projection_type !== 32767) {
+                                // use proj4-functions to transform to WGS 84
+                                $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $projection_type);
                             }
                         } else {
                             // if Projection- or GeographicType-GeoKeys are missing in user-defined PCS --> throw error
                             throw ValidationException::withMessages(
                                 [
-                                    'missingKey' => ['Both "GeographicType" and "Projection" geokey are needed if providing a user-defined PCS.'],
+                                    'missingKey' => ['Either "GeographicType" or "Projection" geokey is needed (in EPSG format) if providing a user-defined PCS.'],
                                 ]
                             );
                         }
-                        // $custom_transform = $exif['GeoTiff:ProjCoordTrans'];
-                        // $linear_units = $exif['GeoTiff:ProjLinearUnits'];
                         break;
                         // WGS 84 code
                     case 4326:
