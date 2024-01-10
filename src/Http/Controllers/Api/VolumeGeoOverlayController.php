@@ -232,34 +232,21 @@ class VolumeGeoOverlayController extends Controller
                 switch ($pcs_code) {
                         // undefined code
                     case 0:
-                        echo "ProjectedCS code is undefined! <br>";
+                        // echo "ProjectedCS code is undefined! <br>";
+                        throw ValidationException::withMessages(
+                            [
+                                'unDefined' => ['The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.'],
+                            ]
+                        );
                         break;
                         // user-defined code
                     case 32767:
-                        echo "ProjectedCS code is user-defined! <br>";
-                        // find the custom coordinate transformation method, see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc
-                        // Case 1: geographicType key available
-                        if (array_key_exists('GeoTiff:GeographicType', $exif)) {
-                            $geographic_type = intval($exif['GeoTiff:GeographicType']); //GeodeticCRSGeoKey in GeoTiff v1.1
-                            if ($geographic_type !== 32767) {
-                                // use proj4-functions to transform to WGS 84
-                                $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $geographic_type);
-                            }
-                        // Case 2: map projection key available
-                        } elseif (array_key_exists('GeoTiff:Projection', $exif)) {
-                            $projection_type = intval($exif['GeoTiff:Projection']);
-                            if ($projection_type !== 32767) {
-                                // use proj4-functions to transform to WGS 84
-                                $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $projection_type);
-                            }
-                        } else {
-                            // if Projection- or GeographicType-GeoKeys are missing in user-defined PCS --> throw error
-                            throw ValidationException::withMessages(
-                                [
-                                    'missingKey' => ['Either "GeographicType" or "Projection" geokey is needed (in EPSG format) if providing a user-defined PCS.'],
-                                ]
-                            );
-                        }
+                        // if ProjectedCS-GeoKey is user-defined --> throw error
+                        throw ValidationException::withMessages(
+                            [
+                                'userDefined' => ['User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.'],
+                            ]
+                        );
                         break;
                         // WGS 84 code
                     case 4326:
@@ -268,7 +255,7 @@ class VolumeGeoOverlayController extends Controller
                         break;
                     default:
                         // use proj4-functions to transform to WGS 84
-                        $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, $pcs_code);
+                        $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, "EPSG:{$pcs_code}");
                         if (is_null($min_max_coordsWGS)) {
                             // TODO: try another conversion approach
                         } else {
@@ -373,9 +360,9 @@ class VolumeGeoOverlayController extends Controller
         $projWGS84 = new Proj('EPSG:4326', $proj4);
         // create projection of current geoTIFF from ProjectedCSTypeTag
         try {
-            $proj_current = new Proj("EPSG:{$pcs_code}", $proj4);
+            $proj_current = new Proj($pcs_code, $proj4);
         } catch (Exception $e) {
-            echo $e->getMessage() . "<br>";
+            echo $e->getMessage();
             report($e);
             return NULL;
         }

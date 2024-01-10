@@ -34,7 +34,8 @@ export default {
                     response.body.errors.modelTiePoints || 
                     response.body.errors.modelType || 
                     response.body.errors.affineTransformation ||
-                    response.body.errors.missingKey
+                    response.body.errors.userDefined ||
+                    response.body.errors.unDefined
                 );
             if (knownError) {
                 if (Array.isArray(knownError)) {
