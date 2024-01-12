@@ -26,9 +26,9 @@
     </div>
     <ul class="list-group" v-cloak>
         <overlay-item v-for="overlay in overlays" key="overlay.id" :overlay="overlay" inline-template v-on:remove="handleRemove">
-            <li class="list-group-item" :class="classObject">
+            <li class="list-group-item custom" :class="classObject">
                 <button type="button" class="close" :title="title" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>
-                <span v-text="overlay.name"></span>
+                <span class="ellipsis" v-text="overlay.name"></span>
             </li>
         </overlay-item>
         <li class="list-group-item text-muted" v-if="!hasOverlays">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>
