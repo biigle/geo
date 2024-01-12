@@ -15,10 +15,6 @@ export default {
     },
     data() {
         return {
-            selectedTLLat: '',
-            selectedTLLng: '',
-            selectedBRLat: '',
-            selectedBRLng: '',
             error: false,
             success: false,
         };

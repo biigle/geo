@@ -110,14 +110,17 @@ class VolumeGeoOverlayController extends Controller
         $volumeId = $request->volume;
 
         // check whether file exists alread in DB 
-        $existing_filenames = DB::table('geo_overlays')->where('volume_id', $volumeId)->pluck('name')->toArray();
+        $existing_filenames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
         if(in_array($file_name, $existing_filenames)) {
+            // strip the name if too long
+            $file_name_short = strlen($file_name) > 25 ? substr($file_name, 0, 25) . "..." : $file_name;
             throw ValidationException::withMessages(
                 [
-                    'fileExists' => ['The geoTIFF file has already been uploaded.'],
+                    'fileExists' => ["The geoTIFF \"{$file_name_short}\" has already been uploaded."],
                 ]
             );
         }
+
         //  1 = 'pixelIsArea', 2 = 'pixelIsPoint', 32767 = 'user-defined'
         $rasterType = $exif['GeoTiff:GTRasterType'];
         //find out which coord-system we're dealing with
