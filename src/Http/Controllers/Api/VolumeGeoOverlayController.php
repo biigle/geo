@@ -232,7 +232,6 @@ class VolumeGeoOverlayController extends Controller
                 switch ($pcs_code) {
                         // undefined code
                     case 0:
-                        // echo "ProjectedCS code is undefined! <br>";
                         throw ValidationException::withMessages(
                             [
                                 'unDefined' => ['The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.'],
@@ -256,15 +255,15 @@ class VolumeGeoOverlayController extends Controller
                     default:
                         // use proj4-functions to transform to WGS 84
                         $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, "EPSG:{$pcs_code}");
-                        if (is_null($min_max_coordsWGS)) {
-                            // TODO: try another conversion approach
-                        } else {
-                            // save data in GeoOverlay DB
-                            $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS, $file);
-                        }
+                        // save data in GeoOverlay DB
+                        $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS, $file);
                 }
             } else {
-                // TODO: try another conversion approach
+                throw ValidationException::withMessages(
+                    [
+                        'noPCSKEY' => ["Did not detect the 'ProjectedCSType' geokey in geoTIFF metadata. Make sure this key exists for geoTIFF's containing a projected coordinate system."],
+                    ]
+                );
             }
         } else {
             throw ValidationException::withMessages(
@@ -362,9 +361,12 @@ class VolumeGeoOverlayController extends Controller
         try {
             $proj_current = new Proj($pcs_code, $proj4);
         } catch (Exception $e) {
-            echo $e->getMessage();
             report($e);
-            return NULL;
+            throw ValidationException::withMessages(
+                [
+                    'transformError' => ['An error occurred during transformation of the projected coordinate system to WGS84: ' . $e->getMessage()],
+                ]
+            );
         }
         $transformed_coords = [];
 
