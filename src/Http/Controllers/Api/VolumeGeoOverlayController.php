@@ -10,6 +10,7 @@ use DivisionByZeroError;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use PHPExif\Reader\Reader;
 use PHPExif\Enum\ReaderType;
 use Illuminate\Validation\ValidationException;
@@ -106,8 +107,17 @@ class VolumeGeoOverlayController extends Controller
         // reader with Exiftool adapter
         $reader = Reader::factory(ReaderType::EXIFTOOL);
         $exif = $reader->read($file)->getRawData();
+        $volumeId = $request->volume;
 
-
+        // check whether file exists alread in DB 
+        $existing_filenames = DB::table('geo_overlays')->where('volume_id', $volumeId)->pluck('name')->toArray();
+        if(in_array($file_name, $existing_filenames)) {
+            throw ValidationException::withMessages(
+                [
+                    'fileExists' => ['The geoTIFF file has already been uploaded.'],
+                ]
+            );
+        }
         //  1 = 'pixelIsArea', 2 = 'pixelIsPoint', 32767 = 'user-defined'
         $rasterType = $exif['GeoTiff:GTRasterType'];
         //find out which coord-system we're dealing with
@@ -142,7 +152,7 @@ class VolumeGeoOverlayController extends Controller
         } else {
             throw ValidationException::withMessages(
                 [
-                    'modelTiePoints' => ['The GeoTIFF file does not have the required ModelTiePointTag.'],
+                    'modelTiePoints' => ['The geoTIFF file does not have the required ModelTiePointTag.'],
                 ]
             );
         }
@@ -164,7 +174,7 @@ class VolumeGeoOverlayController extends Controller
             if (($pixelScale[0] === 0 || $pixelScale[1] === 0) && !array_key_exists('IFD0:ModelTransformation', $exif)) {
                 throw ValidationException::withMessages(
                     [
-                        'affineTransformation' => ['The GeoTIFF file does not have an affine transformation.'],
+                        'affineTransformation' => ['The geoTIFF file does not have an affine transformation.'],
                     ]
                 );
             }
@@ -216,7 +226,7 @@ class VolumeGeoOverlayController extends Controller
             // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
             throw ValidationException::withMessages(
                 [
-                    'affineTransformation' => ['The GeoTIFF file does not have an affine transformation.'],
+                    'affineTransformation' => ['The geoTIFF file does not have an affine transformation.'],
                 ]
             );
         }
@@ -250,13 +260,13 @@ class VolumeGeoOverlayController extends Controller
                         // WGS 84 code
                     case 4326:
                         // save data in GeoOverlay DB when already in WGS84
-                        $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coords, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $file_name, $min_max_coords, $file);
                         break;
                     default:
                         // use proj4-functions to transform to WGS 84
                         $min_max_coordsWGS = $this->transformModelSpace($min_max_coords, "EPSG:{$pcs_code}");
                         // save data in GeoOverlay DB
-                        $overlay = $this->saveGeoOverlay($request->volume, $file_name, $min_max_coordsWGS, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $file_name, $min_max_coordsWGS, $file);
                 }
             } else {
                 throw ValidationException::withMessages(
@@ -285,7 +295,7 @@ class VolumeGeoOverlayController extends Controller
 
         dd($exif);
         // $overlay = new GeoOverlay;
-        // $overlay->volume_id = $request->volume->id;
+        // $overlay->volume_id = $volumeId->id;
         // $overlay->name = $request->input('name', $file->getClientOriginalName());
         // $overlay->top_left_lat = $request->input('top_left_lat');
         // $overlay->top_left_lng = $request->input('top_left_lng');

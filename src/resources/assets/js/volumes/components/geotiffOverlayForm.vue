@@ -30,15 +30,16 @@ export default {
         },
         handleError(response) {
             let knownError = response.body.errors && (
-                    response.body.errors.noPCSKEY ||
-                    response.body.errors.geotiff || 
-                    response.body.errors.modelTiePoints || 
-                    response.body.errors.modelType || 
-                    response.body.errors.affineTransformation ||
-                    response.body.errors.userDefined ||
-                    response.body.errors.unDefined ||
-                    response.body.errors.transformError
-                );
+                response.body.errors.geotiff || 
+                response.body.errors.fileExists ||
+                response.body.errors.noPCSKEY ||
+                response.body.errors.modelTiePoints || 
+                response.body.errors.modelType || 
+                response.body.errors.affineTransformation ||
+                response.body.errors.userDefined ||
+                response.body.errors.unDefined ||
+                response.body.errors.transformError
+            );
             if (knownError) {
                 if (Array.isArray(knownError)) {
                     this.error = knownError[0];
