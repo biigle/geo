@@ -43,6 +43,7 @@ class GeoServiceProvider extends ServiceProvider
                 'volumesSidebar',
                 'volumesScripts',
                 'projectsShowTabs',
+                'volumesStyles',
                 'volumesEditRight',
                 'volumesEditScripts',
                 'volumesEditStyles'
