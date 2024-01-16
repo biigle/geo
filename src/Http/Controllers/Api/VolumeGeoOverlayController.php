@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Jobs\TileSingleImage;
+use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
 use DivisionByZeroError;
@@ -331,8 +331,8 @@ class VolumeGeoOverlayController extends Controller
         $overlay->bottom_right_lng = $coords[1][0];
         $overlay->bottom_right_lat = $coords[1][1];
         $overlay->save();
-        // $this->submitTileJob($overlay);
-        // $overlay->storeFile($file);
+        $overlay->storeFile($file);
+        $this->submitTileJob($overlay);
         return $overlay;
     }
 
@@ -403,7 +403,6 @@ class VolumeGeoOverlayController extends Controller
     {
         $overlay->tiled = true;
         $overlay->tilingInProgress = true;
-        $overlay->save();
-        TileSingleImage::dispatch($overlay);
+        TileSingleOverlay::dispatch($overlay);
     }
 }

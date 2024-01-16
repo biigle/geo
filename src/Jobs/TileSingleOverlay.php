@@ -1,6 +1,6 @@
 <?php
 
-namespace Biigle\Jobs;
+namespace Biigle\Modules\Geo\Jobs;
 
 // use Biigle\Image;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -16,7 +16,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use VipsImage;
 
-class TileSingleOverlay extends TileSingleImage implements ShouldQueue
+class TileSingleOverlay extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
@@ -35,7 +35,7 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
     public $tempPath;
 
     /**
-     * Ignore this job if the image does not exist any more.
+     * Ignore this job if the overlay does not exist any more.
      *
      * @var bool
      */
@@ -44,7 +44,7 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param GeoOverlay $image The image to generate tiles for.
+     * @param GeoOverlay $overlay The Overlay to generate tiles for.
      *
      * @return void
      */
@@ -74,10 +74,9 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
     /**
      * Generate tiles for the image and put them to temporary storage.
      *
-     * @param Image $image
      * @param string $path Path to the cached image file.
      */
-    public function generateTiles(Image $image, $path)
+    public function generateTiles($path)
     {
         $this->getVipsImage($path)->dzsave($this->tempPath, [
             'layout' => 'zoomify',
@@ -94,11 +93,14 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
         // +1 for the connecting slash.
         $prefixLength = strlen($this->tempPath) + 1;
         $iterator = $this->getIterator($this->tempPath);
-        $disk = Storage::disk(config('image.tiles.disk'));
-        $fragment = fragment_uuid_path($this->overlay->uuid);
+        $disk = Storage::disk(config('geo.overlay_storage_disk'));
+        $fragment = $this->overlay->id;
         try {
             foreach ($iterator as $pathname => $fileInfo) {
-                $disk->putFileAs($fragment, $fileInfo, substr($pathname, $prefixLength));
+                echo "pathname: " . $pathname . "<br>";
+                echo "fileInfo: " . $fileInfo . "<br>";
+                echo "disk path: " . $this->overlay->volume_id . "/" . $fragment . "<br>";
+                $disk->putFileAs("{$this->overlay->volume_id}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
             }
         } catch (Exception $e) {
             $disk->deleteDirectory($fragment);
