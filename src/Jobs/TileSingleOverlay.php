@@ -2,11 +2,10 @@
 
 namespace Biigle\Modules\Geo\Jobs;
 
-// use Biigle\Image;
+use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
 use Exception;
 use File;
-use FileCache;
 use FilesystemIterator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -34,6 +33,8 @@ class TileSingleOverlay extends Job implements ShouldQueue
      */
     public $tempPath;
 
+    public $file;
+
     /**
      * Ignore this job if the overlay does not exist any more.
      *
@@ -51,6 +52,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function __construct(GeoOverlay $overlay)
     {
         $this->overlay = $overlay;
+        $this->file = new File($overlay->file);
         $this->tempPath = config('overlay.tiles.tmp_dir')."/{$overlay->id}";
     }
 
@@ -62,7 +64,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            FileCache::getOnce($this->overlay, [$this, 'generateTiles']);
+            FileCache::getOnce($this->file, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->overlay->tilingInProgress = false;
             $this->overlay->save();

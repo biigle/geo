@@ -332,6 +332,7 @@ class VolumeGeoOverlayController extends Controller
         $overlay->bottom_right_lat = $coords[1][1];
         $overlay->save();
         $overlay->storeFile($file);
+        $overlay->file = $file;
         $this->submitTileJob($overlay);
         return $overlay;
     }
@@ -403,6 +404,8 @@ class VolumeGeoOverlayController extends Controller
     {
         $overlay->tiled = true;
         $overlay->tilingInProgress = true;
-        TileSingleOverlay::dispatch($overlay);
+        $job = new TileSingleOverlay($overlay);
+        // TileSingleOverlay::dispatch($overlay);
+        $job->handle();
     }
 }
