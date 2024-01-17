@@ -63,6 +63,12 @@ class GeoServiceProvider extends ServiceProvider
             return new \Biigle\Modules\Geo\Console\Commands\Publish();
         });
         $this->commands('command.geo.publish');
+
+
+        $this->app->singleton('command.geo.config', function ($app) {
+            return new \Biigle\Modules\Geo\Console\Commands\Config();
+        });
+        $this->commands('command.geo.config');
     }
 
     /**
@@ -74,6 +80,7 @@ class GeoServiceProvider extends ServiceProvider
     {
         return [
             'command.geo.publish',
+            'command.geo.config',
         ];
     }
 }
