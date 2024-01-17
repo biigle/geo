@@ -65,9 +65,8 @@ class TileSingleOverlay extends Job implements ShouldQueue
     {
         try {
             $disk = config('geo.overlay_storage_disk');
-            dd($disk);
-            $file = new GenericFile("{$disk}://{$this->overlay->id}");
-            FileCache::getOnce($file, [$this, 'generateTiles']);
+            $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
+            FileCache::getOnce($this->file, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->overlay->tilingInProgress = false;
             $this->overlay->save();
@@ -81,7 +80,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
      *
      * @param string $path Path to the cached image file.
      */
-    public function generateTiles($path)
+    public function generateTiles(GenericFile $file, $path)
     {
         $this->getVipsImage($path)->dzsave($this->tempPath, [
             'layout' => 'zoomify',
