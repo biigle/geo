@@ -332,7 +332,6 @@ class VolumeGeoOverlayController extends Controller
         $overlay->bottom_right_lat = $coords[1][1];
         $overlay->save();
         $overlay->storeFile($file);
-        $overlay->file = $file;
         $this->submitTileJob($overlay);
         return $overlay;
     }
