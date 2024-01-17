@@ -96,9 +96,9 @@ class VolumeGeoOverlayController extends Controller
      */
     public function storeGeoTiff(Request $request)
     {
-        // validation logic
+        // validation logic: make sure th file is in tiff format and not bigger than 50GB (52.430.000 kilobytes)
         $validated = $request->validate([
-            'geotiff' => 'required|file|mimetypes:image/tiff',
+            'geotiff' => 'required|file|max:52430000|mimetypes:image/tiff',
         ]);
 
         // return DB::transaction(function () use ($request) {
