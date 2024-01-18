@@ -34,8 +34,6 @@ class TileSingleOverlay extends Job implements ShouldQueue
      */
     public $tempPath;
 
-    public $file;
-
     /**
      * Ignore this job if the overlay does not exist any more.
      *
@@ -53,7 +51,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function __construct(GeoOverlay $overlay)
     {
         $this->overlay = $overlay;
-        $this->tempPath = config('overlay.tiles.tmp_dir')."/{$overlay->id}";
+        $this->tempPath = config('overlay.tiles.tmp_dir')."/{$overlay->getPathAttribute()}";
     }
 
     /**
@@ -64,9 +62,9 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            $disk = config('geo.overlay_storage_disk');
-            $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
-            FileCache::getOnce($this->file, [$this, 'generateTiles']);
+            // $disk = config('geo.overlay_storage_disk');
+            // $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
+            // FileCache::getOnce($this->file, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->overlay->tilingInProgress = false;
             $this->overlay->save();
@@ -103,8 +101,8 @@ class TileSingleOverlay extends Job implements ShouldQueue
             foreach ($iterator as $pathname => $fileInfo) {
                 echo "pathname: " . $pathname . "<br>";
                 echo "fileInfo: " . $fileInfo . "<br>";
-                echo "disk path: " . $this->overlay->volume_id . "/" . $fragment . "<br>";
-                $disk->putFileAs("{$this->overlay->volume_id}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
+                echo "disk path: " . $this->overlay->getPathAttribute() . "/" . $fragment . "<br>";
+                // $disk->putFileAs("{$this->overlay->getPathAttribute()}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
             }
         } catch (Exception $e) {
             $disk->deleteDirectory($fragment);
