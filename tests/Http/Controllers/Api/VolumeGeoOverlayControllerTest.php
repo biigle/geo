@@ -32,8 +32,24 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
     {
         Storage::fake('geo-overlays');
         $id = $this->volume()->id;
+    
+        // Get current ID so we can predict the next ID later.
+        $overlay = GeoOverlayTest::create();
+        $overlayId = $overlay->id;
+        $overlay->delete();
 
-        // $this->beEditor();
-        // $this->post("/api/v1/volumes/{$id}/geo-overlays/geotiff")->assertStatus(403);
+        $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
+
+        $this->beEditor();
+        $this->post("/api/v1/volumes/{$id}/geo-overlays/geotiff")->assertStatus(403);
+
+        $this->beAdmin();
+        $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff")
+            ->assertStatus(422);
+
+        // $file = UploadedFile::fake()->create('overlay.png');
+        $user_defined_file = new UploadedFile(__DIR__."/../../../files/geotiff_user_defined2011.tif");
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['file' => $user_defined_file])
+            ->assertStatus(422);
     }
 }
