@@ -35,6 +35,13 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public $tempPath;
 
     /**
+     * The uploaded geoTIFF file fetched from geo.overlay_storage_disk
+     *
+     * @var GenericFile
+     */
+    public $file;
+
+    /**
      * Ignore this job if the overlay does not exist any more.
      *
      * @var bool
@@ -62,9 +69,9 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            // $disk = config('geo.overlay_storage_disk');
-            // $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
-            // FileCache::getOnce($this->file, [$this, 'generateTiles']);
+            $disk = config('geo.overlay_storage_disk');
+            $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
+            FileCache::getOnce($this->file, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->overlay->tilingInProgress = false;
             $this->overlay->save();
