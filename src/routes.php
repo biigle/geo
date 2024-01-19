@@ -41,8 +41,8 @@ $router->group([
         'parameters' => ['geo-overlays' => 'id'],
     ]);
     
-    // $router->get('geo-overlays/{id}/file', [
-    //     'uses' => 'GeoOverlayController@showFile',
-    // ]);
+    $router->get('geo-overlays/{id}/file', [
+        'uses' => 'GeoOverlayController@showFile',
+    ]);
 
 });
