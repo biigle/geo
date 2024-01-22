@@ -292,25 +292,14 @@ class VolumeGeoOverlayController extends Controller
         }
 
 
-        echo 'wrongModelType: ' . $wrongModelType . '<br>';
-        echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
-        echo 'corners: ' . json_encode($corners) . '<br>';
-        echo 'projected: ' . json_encode($projected) . '<br>';
-        echo 'MinMaxCoord: ' . json_encode($min_max_coords) . '<br>';
-        if (isset($min_max_coordsWGS)) {
-            echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
-        }
-
-        // dd($exif);
-        // $overlay = new GeoOverlay;
-        // $overlay->volume_id = $volumeId->id;
-        // $overlay->name = $request->input('name', $file->getClientOriginalName());
-        // $overlay->top_left_lat = $request->input('top_left_lat');
-        // $overlay->top_left_lng = $request->input('top_left_lng');
-        // $overlay->bottom_right_lat = $request->input('bottom_right_lat');
-        // $overlay->bottom_right_lng = $request->input('bottom_right_lng');
-        // $overlay->save();
-        // $overlay->storeFile($file);
+        // echo 'ModelType: ' . $modelType . '<br>';
+        // echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
+        // echo 'corners: ' . json_encode($corners) . '<br>';
+        // echo 'projected: ' . json_encode($projected) . '<br>';
+        // echo 'MinMaxCoord: ' . json_encode($min_max_coords) . '<br>';
+        // if (isset($min_max_coordsWGS)) {
+        //     echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
+        // }
 
         return $overlay;
         // });
