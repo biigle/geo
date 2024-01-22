@@ -37,24 +37,31 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $overlay = GeoOverlayTest::create();
         $overlayId = $overlay->id;
         $overlay->delete();
-
-        $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
-
-        $normal_file = new UploadedFile(
+        $standard_gtiff = new UploadedFile(
             __DIR__."/../../../files/geotiff_standardEPSG2013.tif",
-            'geotiff_standardEPSG2013',
+            'standardEPSG2013.tif',
+            'image/tiff',
+            null, 
+            true
+        );
+        $user_defined_gtiff = new UploadedFile(
+            __DIR__."/../../../files/geotiff_user_defined2011.tif",
+            'user_defined2011.tif',
             'image/tiff',
             null, 
             true
         );
 
+        $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
+
         $this->beEditor();
         // 403: The client does not have access rights to the content
         $this->postJson(
-            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
-            ['geotiff' => $normal_file,
-            'volumeId' => $id]
-            )->assertStatus(403);
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+                'geotiff' => $standard_gtiff,
+                'volumeId' => $id
+            ])
+            ->assertStatus(403);
 
         $this->beAdmin();
         // 422: The request was well-formed but was unable to be followed due to semantic errors.
@@ -66,6 +73,44 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $file])
             ->assertStatus(422);
 
-        
+        $this->assertFalse(GeoOverlay::exists());
+        $this->assertFalse(Storage::disk('geo-overlays')->exists($overlay->path));
+
+        // test upload of standard geoTIFF (in form of projected-Coordinate-Reference-System and EPSG-code)
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+            'geotiff' => $standard_gtiff,
+            'volumeId' => $id
+        ])
+        ->assertSuccessful();
+
+        $overlay = GeoOverlay::where('volume_id', $id)->first();
+        $this->assertNotNull($overlay);
+        $this->assertEqualsWithDelta($overlay->top_left_lat, 57.097483857335796, 0.00001);
+        $this->assertEqualsWithDelta($overlay->top_left_lng, -2.9198048485706547, 0.00001);
+        $this->assertEqualsWithDelta($overlay->bottom_right_lat, 57.09845896597305, 0.00001);
+        $this->assertEqualsWithDelta($overlay->bottom_right_lng, -2.917006253590798, 0.00001);
+        $this->assertEquals($overlay->name, 'standardEPSG2013.tif');
+        $response->assertJson($overlay->toArray(), $exact=false);
+        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
+
+        // testing upload of user-defined geoTIFF (GTModelType-Tag equals 32767)
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+            'geotiff' => $user_defined_gtiff,
+            'volumeId' => $id
+        ])
+        ->assertInvalid([
+            'userDefined' => 'User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.',
+        ]);
+    }
+
+    public function testStoreVideoVolume()
+    {
+        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $file = UploadedFile::fake()->create('overlay.tif');
+        $this->beAdmin();
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+                'file' => $file,
+            ])
+            ->assertStatus(422);
     }
 }
