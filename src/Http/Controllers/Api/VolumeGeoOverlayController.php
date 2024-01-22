@@ -320,13 +320,19 @@ class VolumeGeoOverlayController extends Controller
         $overlay = new GeoOverlay;
         $overlay->volume_id = $volumeId;
         $overlay->name = $fileName;
-        $overlay->top_left_lng = $coords[0][0];
-        $overlay->top_left_lat = $coords[0][1];
-        $overlay->bottom_right_lng = $coords[1][0];
-        $overlay->bottom_right_lat = $coords[1][1];
+        $overlay->top_left_lng = number_format($coords[0][0], 13);
+        $overlay->top_left_lat = number_format($coords[0][1], 13);
+        $overlay->bottom_right_lng = number_format($coords[1][0], 13);
+        $overlay->bottom_right_lat = number_format($coords[1][1], 13);
         $overlay->save();
         $overlay->storeFile($file);
         $this->submitTileJob($overlay);
+
+        // echo 'name: ' . $fileName . "<br>";
+        // echo 'top_left_lng: ' . json_encode(number_format($coords[0][0], 15)) . '<br>';
+        // echo 'top_left_lat: ' . json_encode(number_format($coords[0][1], 15)) . '<br>';
+        // echo 'bottom_right_lng: ' . json_encode(number_format($coords[1][0], 15)) . '<br>';
+        // echo 'bottom_right_lat: ' . json_encode(number_format($coords[1][1], 15)) . '<br>';
         return $overlay;
     }
 
