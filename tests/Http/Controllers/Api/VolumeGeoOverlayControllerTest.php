@@ -40,16 +40,32 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
 
+        $normal_file = new UploadedFile(
+            __DIR__."/../../../files/geotiff_standardEPSG2013.tif",
+            'geotiff_standardEPSG2013',
+            'image/tiff',
+            null, 
+            true
+        );
+
         $this->beEditor();
-        $this->post("/api/v1/volumes/{$id}/geo-overlays/geotiff")->assertStatus(403);
+        // 403: The client does not have access rights to the content
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            ['geotiff' => $normal_file,
+            'volumeId' => $id]
+            )->assertStatus(403);
 
         $this->beAdmin();
+        // 422: The request was well-formed but was unable to be followed due to semantic errors.
         $this->json('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff")
             ->assertStatus(422);
 
-        // $file = UploadedFile::fake()->create('overlay.png');
-        $user_defined_file = new UploadedFile(__DIR__."/../../../files/geotiff_user_defined2011.tif");
-        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['file' => $user_defined_file])
+        $file = UploadedFile::fake()->create('overlay.tif');
+        // check if "empty" geotiff fails properly
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $file])
             ->assertStatus(422);
+
+        
     }
 }
