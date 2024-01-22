@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 use Biigle\Volume;
 use DivisionByZeroError;
 use Exception;
@@ -91,15 +92,11 @@ class VolumeGeoOverlayController extends Controller
      *     "bottom_right_lng": 8.4931067,
      * }
      *
-     * @param Reqeuest $request
+     * @param StoreGeotiffOverlay $request
      * @param int $id Volume ID
      */
-    public function storeGeoTiff(Request $request)
+    public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
-        // validation logic: make sure th file is in tiff format and not bigger than 50GB (52.430.000 kilobytes)
-        $validated = $request->validate([
-            'geotiff' => 'required|file|max:52430000|mimetypes:image/tiff',
-        ]);
 
         // return DB::transaction(function () use ($request) {
         $file = $request->file('geotiff');
@@ -107,7 +104,7 @@ class VolumeGeoOverlayController extends Controller
         // reader with Exiftool adapter
         $reader = Reader::factory(ReaderType::EXIFTOOL);
         $exif = $reader->read($file)->getRawData();
-        $volumeId = $request->volume;
+        $volumeId = $request->volumeId;
 
         // check whether file exists alread in DB 
         $existing_filenames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
@@ -122,24 +119,32 @@ class VolumeGeoOverlayController extends Controller
         }
 
         //  1 = 'pixelIsArea', 2 = 'pixelIsPoint', 32767 = 'user-defined'
-        $rasterType = $exif['GeoTiff:GTRasterType'];
+        // $rasterType = $exif['GeoTiff:GTRasterType'];
         //find out which coord-system we're dealing with
-        $modelTypeKey = $exif['GeoTiff:GTModelType'];
-        switch ($modelTypeKey) {
-            case 1:
-                $modelType = 'projected';
-                break;
-            case 2:
-                $modelType = 'geographic';
-                break;
-            case 3:
-                $modelType = 'geocentric';
-                break;
-            case 32767:
-                $modelType = 'user-defined';
-                break;
-            default:
-                $modelType = null;
+        if (array_key_exists('GeoTiff:GTModelType', $exif)) {
+            $modelTypeKey = $exif['GeoTiff:GTModelType'];
+            switch ($modelTypeKey) {
+                case 1:
+                    $modelType = 'projected';
+                    break;
+                case 2:
+                    $modelType = 'geographic';
+                    break;
+                case 3:
+                    $modelType = 'geocentric';
+                    break;
+                case 32767:
+                    $modelType = 'user-defined';
+                    break;
+                default:
+                    $modelType = null;
+            }
+        } else {
+            throw ValidationException::withMessages(
+                [
+                    'missingModelType' => ['The geoTIFF file does not have the required GTModelTypeTag.'],
+                ]
+            );
         }
 
         $width = $exif['IFD0:ImageWidth'];
@@ -155,7 +160,7 @@ class VolumeGeoOverlayController extends Controller
         } else {
             throw ValidationException::withMessages(
                 [
-                    'modelTiePoints' => ['The geoTIFF file does not have the required ModelTiePointTag.'],
+                    'missingModelTiePoints' => ['The geoTIFF file does not have the required ModelTiePointTag.'],
                 ]
             );
         }
@@ -281,13 +286,13 @@ class VolumeGeoOverlayController extends Controller
         } else {
             throw ValidationException::withMessages(
                 [
-                    'modelType' => ["The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!"],
+                    'wrongModelType' => ["The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!"],
                 ]
             );
         }
 
 
-        echo 'ModelType: ' . $modelType . '<br>';
+        echo 'wrongModelType: ' . $wrongModelType . '<br>';
         echo 'PCS: ' . $exif['GeoTiff:ProjectedCSType'] . '<br>';
         echo 'corners: ' . json_encode($corners) . '<br>';
         echo 'projected: ' . json_encode($projected) . '<br>';
@@ -296,7 +301,7 @@ class VolumeGeoOverlayController extends Controller
             echo 'WGS84: ' . json_encode($min_max_coordsWGS) . '<br>';
         }
 
-        dd($exif);
+        // dd($exif);
         // $overlay = new GeoOverlay;
         // $overlay->volume_id = $volumeId->id;
         // $overlay->name = $request->input('name', $file->getClientOriginalName());
@@ -307,7 +312,7 @@ class VolumeGeoOverlayController extends Controller
         // $overlay->save();
         // $overlay->storeFile($file);
 
-        // return $overlay;
+        return $overlay;
         // });
     }
 

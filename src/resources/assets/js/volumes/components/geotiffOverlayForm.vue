@@ -29,8 +29,9 @@ export default {
                 response.body.errors.geotiff || 
                 response.body.errors.fileExists ||
                 response.body.errors.noPCSKEY ||
-                response.body.errors.modelTiePoints || 
-                response.body.errors.modelType || 
+                response.body.errors.missingModelTiePoints ||
+                response.body.errors.missingModelType || 
+                response.body.errors.wrongModelType || 
                 response.body.errors.affineTransformation ||
                 response.body.errors.userDefined ||
                 response.body.errors.unDefined ||
@@ -54,7 +55,7 @@ export default {
             this.startLoading();
             let data = new FormData();
             data.append('geotiff', event.target.files[0]);
-            data.append('volume', this.volumeId);
+            data.append('volumeId', this.volumeId);
             this.upload(data)
                 .then(this.handleSuccess, this.handleError)
                 .finally(this.finishLoading);
