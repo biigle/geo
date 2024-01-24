@@ -3,12 +3,11 @@
 namespace Biigle\Tests\Modules\Geo\Jobs;
 
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 use Biigle\FileCache\GenericFile;
 use File;
 use Illuminate\Http\UploadedFile;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Jcupitt\Vips\Image;
 use Mockery;
 use TestCase;
@@ -28,7 +27,7 @@ class TileSingleOverlayTest extends TestCase
         // retreive fake UploadedFile from geo-overlay storage and cast to GenericFile
         $disk = config('geo.tiles.overlay_storage_disk');
         $file = new GenericFile("{$disk}://{$overlay->path}");
-
+        
         $job = new TileSingleOverlayStub($overlay);
         $mock = Mockery::mock(Image::class);
         $mock->shouldReceive('dzsave')
@@ -50,9 +49,9 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlayTest::create();
         $fragment = $overlay->id;
         $job = new TileSingleOverlayStub($overlay);
-        dd($job->tempPath);
-        File::makeDirectory($job->tempPath);
-        File::put("{$job->tempPath}/test.txt", 'test');
+        Storage::makeDirectory($job->tempPath);
+        Storage::put("{$job->tempPath}/test.txt", 'test');
+        $this->assertTrue(Storage::disk($job->tempPath)->exists("{$job->tempPath}/test.txt"));
 
         // try {
         //     Storage::fake('tiles');
