@@ -28,7 +28,7 @@ class GeoOverlayController extends Controller
         $this->authorize('access', $overlay->volume);
 
         try {
-            return Storage::disk(config('geo.overlay_storage_disk'))
+            return Storage::disk(config('geo.tiles.overlay_storage_disk'))
                 ->download($overlay->path);
         } catch (FileNotFoundException $e) {
             abort(404);

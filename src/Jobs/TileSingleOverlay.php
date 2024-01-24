@@ -35,7 +35,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public $tempPath;
 
     /**
-     * The uploaded geoTIFF file fetched from geo.overlay_storage_disk
+     * The uploaded geoTIFF file fetched from geo.tiles.overlay_storage_disk
      *
      * @var GenericFile
      */
@@ -58,7 +58,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function __construct(GeoOverlay $overlay)
     {
         $this->overlay = $overlay;
-        $this->tempPath = config('overlay.tiles.tmp_dir')."/{$overlay->getPathAttribute()}";
+        $this->tempPath = config('geo.tiles.tmp_dir')."/{$overlay->path}";
     }
 
     /**
@@ -69,8 +69,8 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            $disk = config('geo.overlay_storage_disk');
-            $this->file = new GenericFile("{$disk}://{$this->overlay->getPathAttribute()}");
+            $disk = config('geo.tiles.overlay_storage_disk');
+            $this->file = new GenericFile("{$disk}://{$this->overlay->path}");
             FileCache::getOnce($this->file, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->overlay->tilingInProgress = false;
@@ -102,14 +102,14 @@ class TileSingleOverlay extends Job implements ShouldQueue
         // +1 for the connecting slash.
         $prefixLength = strlen($this->tempPath) + 1;
         $iterator = $this->getIterator($this->tempPath);
-        $disk = Storage::disk(config('geo.overlay_storage_disk'));
+        $disk = Storage::disk(config('geo.tiles.overlay_storage_disk'));
         $fragment = $this->overlay->id;
         try {
             foreach ($iterator as $pathname => $fileInfo) {
                 echo "pathname: " . $pathname . "<br>";
                 echo "fileInfo: " . $fileInfo . "<br>";
-                echo "disk path: " . $this->overlay->getPathAttribute() . "/" . $fragment . "<br>";
-                // $disk->putFileAs("{$this->overlay->getPathAttribute()}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
+                echo "disk path: " . $this->overlay->path . "/" . $fragment . "<br>";
+                $disk->putFileAs("{$this->overlay->path}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
             }
         } catch (Exception $e) {
             $disk->deleteDirectory($fragment);
