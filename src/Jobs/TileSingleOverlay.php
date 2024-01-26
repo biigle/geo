@@ -58,7 +58,7 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function __construct(GeoOverlay $overlay)
     {
         $this->overlay = $overlay;
-        $this->tempPath = config('geo.tiles.tmp_dir')."/{$overlay->path}";
+        $this->tempPath = config('geo.tiles.tmp_dir')."/{$overlay->id}";
     }
 
     /**
@@ -103,13 +103,12 @@ class TileSingleOverlay extends Job implements ShouldQueue
         $prefixLength = strlen($this->tempPath) + 1;
         $iterator = $this->getIterator($this->tempPath);
         $disk = Storage::disk(config('geo.tiles.overlay_storage_disk'));
-        $fragment = $this->overlay->id;
+        $fragment = "{$this->overlay->path}/{$this->overlay->id}_tiles";
         try {
             foreach ($iterator as $pathname => $fileInfo) {
-                echo "pathname: " . $pathname . "<br>";
-                echo "fileInfo: " . $fileInfo . "<br>";
-                echo "disk path: " . $this->overlay->path . "/" . $fragment . "<br>";
-                $disk->putFileAs("{$this->overlay->path}/{$fragment}", $fileInfo, substr($pathname, $prefixLength));
+                echo "fileInfo: " . $fileInfo . "   ";
+                echo "disk path: " . $fragment . "   ";
+                $disk->putFileAs($fragment, $fileInfo, substr($pathname, $prefixLength));
             }
         } catch (Exception $e) {
             $disk->deleteDirectory($fragment);
