@@ -45,22 +45,21 @@ class TileSingleOverlayTest extends TestCase
 
     public function testUploadOverlayToStorage()
     {
-        config(['geo.tiles.overlay_storage_disk' => 'tiles']);
+        config(['geo.tiles.overlay_storage_disk' => 'geo-overlays']);
         $overlay = GeoOverlayTest::create();
-        $fragment = $overlay->id;
+        $fragment = "{$overlay->path}/{$overlay->id}_tiles";;
         $job = new TileSingleOverlayStub($overlay);
-        Storage::makeDirectory($job->tempPath);
-        Storage::put("{$job->tempPath}/test.txt", 'test');
-        $this->assertTrue(Storage::disk($job->tempPath)->exists("{$job->tempPath}/test.txt"));
+        File::makeDirectory($job->tempPath);
+        File::put("{$job->tempPath}/test.txt", 'test');
 
-        // try {
-        //     Storage::fake('tiles');
-        //     $job->uploadToStorage();
-        //     Storage::disk('tiles')->assertExists($fragment);
-        //     Storage::disk('tiles')->assertExists("{$fragment}/test.txt");
-        // } finally {
-        //     File::deleteDirectory($job->tempPath);
-        // }
+        try {
+            Storage::fake('geo-overlays');
+            $job->uploadToStorage();
+            Storage::disk('geo-overlays')->assertExists($fragment);
+            Storage::disk('geo-overlays')->assertExists("{$fragment}/test.txt");
+        } finally {
+            File::deleteDirectory($job->tempPath);
+        }
     }
 }
 
