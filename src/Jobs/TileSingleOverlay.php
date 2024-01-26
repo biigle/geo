@@ -3,20 +3,16 @@
 namespace Biigle\Modules\Geo\Jobs;
 
 use Biigle\FileCache\GenericFile;
+use Biigle\Jobs\TileSingleImage;
 use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
-use Exception;
 use File;
-use FilesystemIterator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use VipsImage;
 
-class TileSingleOverlay extends Job implements ShouldQueue
+
+class TileSingleOverlay extends TileSingleImage implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
@@ -25,40 +21,29 @@ class TileSingleOverlay extends Job implements ShouldQueue
      *
      * @var GeoOverlay
      */
-    public $overlay;
-
-    /**
-     * Path to the temporary storage file for the tiles.
-     *
-     * @var string
-     */
-    public $tempPath;
+    public $file;
 
     /**
      * The uploaded geoTIFF file fetched from geo.tiles.overlay_storage_disk
      *
      * @var GenericFile
      */
-    public $file;
-
-    /**
-     * Ignore this job if the overlay does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
+    public $generic_file;
 
     /**
      * Create a new job instance.
      *
-     * @param GeoOverlay $overlay The Overlay to generate tiles for.
+     * @param GeoOverlay $file The Overlay to generate tiles for.
      *
      * @return void
      */
-    public function __construct(GeoOverlay $overlay)
+    public function __construct(GeoOverlay $file)
     {
-        $this->overlay = $overlay;
-        $this->tempPath = config('geo.tiles.tmp_dir')."/{$overlay->id}";
+        $this->file = $file;
+        $this->tempPath = config('geo.tiles.tmp_dir')."/{$file->id}";
+        // for uploadToStorage method
+        $this->storage = 'geo.tiles.overlay_storage_disk';
+        $this->fragment = "{$file->path}/{$file->id}_tiles";
     }
 
     /**
@@ -69,81 +54,14 @@ class TileSingleOverlay extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            $disk = config('geo.tiles.overlay_storage_disk');
-            $this->file = new GenericFile("{$disk}://{$this->overlay->path}");
-            FileCache::getOnce($this->file, [$this, 'generateTiles']);
+            $disk = config($this->storage);
+            $this->generic_file = new GenericFile("{$disk}://{$this->file->path}");
+            FileCache::getOnce($this->generic_file, [$this, 'generateTiles']);
             $this->uploadToStorage();
-            $this->overlay->tilingInProgress = false;
-            $this->overlay->save();
+            $this->file->tilingInProgress = false;
+            $this->file->save();
         } finally {
             File::deleteDirectory($this->tempPath);
         }
-    }
-
-    /**
-     * Generate tiles for the image and put them to temporary storage.
-     *
-     * @param string $path Path to the cached image file.
-     */
-    public function generateTiles(GenericFile $file, $path)
-    {
-        $this->getVipsImage($path)->dzsave($this->tempPath, [
-            'layout' => 'zoomify',
-            'container' => 'fs',
-            'strip' => true,
-        ]);
-    }
-
-    /**
-     * Upload the tiles from temporary local storage to the tiles storage disk.
-     */
-    public function uploadToStorage()
-    {
-        // +1 for the connecting slash.
-        $prefixLength = strlen($this->tempPath) + 1;
-        $iterator = $this->getIterator($this->tempPath);
-        $disk = Storage::disk(config('geo.tiles.overlay_storage_disk'));
-        $fragment = "{$this->overlay->path}/{$this->overlay->id}_tiles";
-        try {
-            foreach ($iterator as $pathname => $fileInfo) {
-                echo "fileInfo: " . $fileInfo . "   ";
-                echo "disk path: " . $fragment . "   ";
-                $disk->putFileAs($fragment, $fileInfo, substr($pathname, $prefixLength));
-            }
-        } catch (Exception $e) {
-            $disk->deleteDirectory($fragment);
-            throw $e;
-        }
-    }
-
-    /**
-     * Get the vips image instance.
-     *
-     * @param string $path
-     *
-     * @return \Jcupitt\Vips\Image
-     */
-    protected function getVipsImage($path)
-    {
-        return VipsImage::newFromFile($path, ['access' => 'sequential']);
-    }
-
-    /**
-     * Get the recursive directory iterator for the given path.
-     *
-     * @param string $path
-     *
-     * @return RecursiveIteratorIterator
-     */
-    protected function getIterator($path)
-    {
-        return new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                $path,
-                FilesystemIterator::KEY_AS_PATHNAME |
-                    FilesystemIterator::CURRENT_AS_FILEINFO |
-                    FilesystemIterator::SKIP_DOTS
-            )
-        );
     }
 }
