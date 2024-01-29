@@ -47,8 +47,8 @@ class TileSingleOverlayTest extends TestCase
     {
         config(['geo.tiles.overlay_storage_disk' => 'geo-overlays']);
         $overlay = GeoOverlayTest::create();
-        $fragment = "{$overlay->path}/{$overlay->id}_tiles";;
         $job = new TileSingleOverlayStub($overlay);
+        $fragment = $job->fragment;
         File::makeDirectory($job->tempPath);
         File::put("{$job->tempPath}/test.txt", 'test');
 
