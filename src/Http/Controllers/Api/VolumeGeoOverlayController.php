@@ -120,10 +120,10 @@ class VolumeGeoOverlayController extends Controller
         // determine the projected coordinate system in use
         if ($modelType === 'projected') {
             // get the ProjectedCSTypeTag from the geoTIFF (if exists)
-            $pcs_code = $geotiff->getKey('GeoTiff:ProjectedCSType');
+            $pcs_code = is_null($geotiff->getKey('GeoTiff:ProjectedCSType')) ? null : intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
             if (!is_null($pcs_code)) {
                 // project to correct CRS (WGS84)
-                switch (intval($pcs_code)) {
+                switch ($pcs_code) {
                         // undefined code
                     case 0:
                         throw ValidationException::withMessages(
