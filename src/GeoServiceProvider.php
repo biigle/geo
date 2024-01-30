@@ -59,6 +59,8 @@ class GeoServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/config/geo.php', 'geo');
+
         $this->app->singleton('command.geo.publish', function ($app) {
             return new \Biigle\Modules\Geo\Console\Commands\Publish();
         });
