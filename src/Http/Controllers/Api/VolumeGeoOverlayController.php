@@ -92,19 +92,19 @@ class VolumeGeoOverlayController extends Controller
 
         // return DB::transaction(function () use ($request) {
         $file = $request->file('geotiff');
-        $file_name = $request->input('name', $file->getClientOriginalName());
+        $fileName = $request->input('name', $file->getClientOriginalName());
         // create GeoManager-class from uploadedFile
         $geotiff = new GeoManager($file);
         $volumeId = $request->volumeId;
 
         // check whether file exists alread in DB 
-        $existing_filenames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
-        if(in_array($file_name, $existing_filenames)) {
+        $existingFileNames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
+        if(in_array($fileName, $existingFileNames)) {
             // strip the name if too long
-            $file_name_short = strlen($file_name) > 25 ? substr($file_name, 0, 25) . "..." : $file_name;
+            $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
             throw ValidationException::withMessages(
                 [
-                    'fileExists' => ["The geoTIFF \"{$file_name_short}\" has already been uploaded."],
+                    'fileExists' => ["The geoTIFF \"{$fileNameShort}\" has already been uploaded."],
                 ]
             );
         }
@@ -114,16 +114,16 @@ class VolumeGeoOverlayController extends Controller
         // Retreive the four corner coordinates of the geoTIFF in raster space
         $corners = $geotiff->getCorners();
         // Convert corners from RASTER-SPACE to MODEL-SPACE
-        $min_max_coords = $geotiff->convertToModelSpace($corners);
+        $minMaxCoords = $geotiff->convertToModelSpace($corners);
 
         // Change MODEL SPACE to WGS 84
         // determine the projected coordinate system in use
         if ($modelType === 'projected') {
             // get the ProjectedCSTypeTag from the geoTIFF (if exists)
-            $pcs_code = is_null($geotiff->getKey('GeoTiff:ProjectedCSType')) ? null : intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
-            if (!is_null($pcs_code)) {
+            $pcsCode = is_null($geotiff->getKey('GeoTiff:ProjectedCSType')) ? null : intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
+            if (!is_null($pcsCode)) {
                 // project to correct CRS (WGS84)
-                switch ($pcs_code) {
+                switch ($pcsCode) {
                         // undefined code
                     case 0:
                         throw ValidationException::withMessages(
@@ -144,13 +144,13 @@ class VolumeGeoOverlayController extends Controller
                         // WGS 84 code
                     case 4326:
                         // save data in GeoOverlay DB when already in WGS84
-                        $overlay = $this->saveGeoOverlay($volumeId, $file_name, $min_max_coords, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file);
                         break;
                     default:
                         // use proj4-functions to transform to WGS 84
-                        $min_max_coordsWGS = $geotiff->transformModelSpace($min_max_coords, "EPSG:{$pcs_code}");
+                        $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
                         // save data in GeoOverlay DB
-                        $overlay = $this->saveGeoOverlay($volumeId, $file_name, $min_max_coordsWGS, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file);
                 }
             } else {
                 throw ValidationException::withMessages(

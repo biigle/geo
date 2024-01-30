@@ -28,7 +28,7 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
      *
      * @var GenericFile
      */
-    public $generic_file;
+    public $genericFile;
 
     /**
      * Create a new job instance.
@@ -55,8 +55,8 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
     {
         try {
             $disk = config($this->storage);
-            $this->generic_file = new GenericFile("{$disk}://{$this->file->path}");
-            FileCache::getOnce($this->generic_file, [$this, 'generateTiles']);
+            $this->genericFile = new GenericFile("{$disk}://{$this->file->path}");
+            FileCache::getOnce($this->genericFile, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->file->tilingInProgress = false;
             $this->file->save();
