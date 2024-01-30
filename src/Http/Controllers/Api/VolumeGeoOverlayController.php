@@ -49,43 +49,34 @@ class VolumeGeoOverlayController extends Controller
     }
 
     /**
-     * TODO: Change API-Documentation
-     * Stores a new geo overlay that was uploaded with the plain method.
+     * Stores a new geo overlay that was uploaded with the geotiff method.
      *
-     * @api {post} volumes/:id/geo-overlays/plain Upload a plain geo overlay
+     * @api {post} volumes/:id/geo-overlays/geotiff Upload a geotiff geo overlay
      * @apiGroup Geo
-     * @apiName VolumesumesStoreGeoOverlaysPlain
+     * @apiName VolumesStoreGeoTiff
      * @apiPermission projectAdmin
      *
-     * @apiParam {Number} id The volume ID.
-     * @apiParam (Required attributes) {File} file The image file of the geo overlay. Allowed file formats ate JPEG, PNG and TIFF. The file must not be larger than 10 MByte.
-     * @apiParam (Required attributes) {Number} top_left_lat Latitude of the top left corner of the image file in WGS 84 (EPSG:4326).
-     * @apiParam (Required attributes) {Number} top_left_lng Longitude of the top left corner of the image file in WGS 84 (EPSG:4326).
-     * @apiParam (Required attributes) {Number} bottom_right_lat Latitude of the bottom right corner of the image file in WGS 84 (EPSG:4326).
-     * @apiParam (Required attributes) {Number} bottom_right_lng Longitude of the bottom right corner of the image file in WGS 84 (EPSG:4326).
-     *
-     * @apiParam (Optional attributes) {String} name A short description of the geo overlay. If empty, the filename will be taken.
-     *
+     * @apiParam {Number} volumeId The volume ID.
+     * @apiParam (Required attributes) {File} geotiff The geotiff file of the geo overlay. Allowed file formats are TIFF. The file must not be larger than 50 GByte.
+     * 
      * @apiParamExample {String} Request example:
-     * file: bath_map_1.jpg
-     * top_left_lat: 52.03737667
-     * top_left_lng: 8.49285457
-     * bottom_right_lat: 52.03719188
-     * bottom_right_lng: 8.4931067
+     * volumeId: 1
+     * geotiff: bath_map_1.tif
      *
      * @apiSuccessExample {json} Success response:
      * {
-     *     "id": 1,
-     *     "name": "bath_map_1.jpg",
-     *     "volume_id": 123,
-     *     "top_left_lat": 52.03737667,
-     *     "top_left_lng": 8.49285457,
-     *     "bottom_right_lat": 52.03719188,
-     *     "bottom_right_lng": 8.4931067,
+     *   "volume_id" => 1
+     *   "name" => "standardEPSG2013.tif"
+     *   "top_left_lng" => "-2.9198048485707"
+     *   "top_left_lat" => "57.0974838573358"
+     *   "bottom_right_lng" => "-2.9170062535908"
+     *   "bottom_right_lat" => "57.0984589659731"
+     *   "id" => 3
+     *   "tiled" => true
+     *   "tilingInProgress" => true
      * }
      *
      * @param StoreGeotiffOverlay $request
-     * @param int $id Volume ID
      */
     public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
@@ -194,11 +185,6 @@ class VolumeGeoOverlayController extends Controller
         $overlay->storeFile($file);
         $this->submitTileJob($overlay);
 
-        // echo 'name: ' . $fileName . "<br>";
-        // echo 'top_left_lng: ' . json_encode(number_format($coords[0][0], 15)) . '<br>';
-        // echo 'top_left_lat: ' . json_encode(number_format($coords[0][1], 15)) . '<br>';
-        // echo 'bottom_right_lng: ' . json_encode(number_format($coords[1][0], 15)) . '<br>';
-        // echo 'bottom_right_lat: ' . json_encode(number_format($coords[1][1], 15)) . '<br>';
         return $overlay;
     }
 
