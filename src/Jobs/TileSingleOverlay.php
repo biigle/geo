@@ -43,7 +43,7 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
         $this->tempPath = config('geo.tiles.tmp_dir')."/{$file->id}";
         // for uploadToStorage method
         $this->storage = 'geo.tiles.overlay_storage_disk';
-        $this->fragment = "{$file->path}/{$file->id}_tiles";
+        $this->fragment = "{$file->id}/{$file->id}_tiles";
     }
 
     /**

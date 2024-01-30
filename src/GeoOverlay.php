@@ -69,7 +69,7 @@ class GeoOverlay extends Model
      */
     public function getPathAttribute()
     {
-        return "{$this->volume_id}/{$this->id}";
+        return "{$this->id}/{$this->id}_original";
     }
 
     /**
@@ -80,6 +80,6 @@ class GeoOverlay extends Model
     public function storeFile(UploadedFile $file)
     {
         Storage::disk(config('geo.tiles.overlay_storage_disk'))
-            ->putFileAs($this->volume_id, $file, $this->id);
+            ->putFileAs($this->id, $file, "{$this->id}_original");
     }
 }
