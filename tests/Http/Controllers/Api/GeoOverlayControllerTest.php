@@ -60,6 +60,6 @@ class GeoOverlayControllerTest extends ApiTestCase
 
         $this->beAdmin();
         $this->delete("/api/v1/geo-overlays/{$id}")->assertStatus(200);
-        $this->assertFalse(Storage::disk('geo-overlays')->exists($overlay->path));
+        $this->assertFalse(Storage::disk('geo-overlays')->exists($overlay->id));
     }
 }
