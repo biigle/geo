@@ -48,7 +48,7 @@ class GeoOverlay extends Model
 
         // Delete the overlay image file when the model is deleted.
         static::deleting(function ($overlay) {
-            Storage::disk(config('geo.tiles.overlay_storage_disk'))->delete($overlay->path);
+            Storage::disk(config('geo.tiles.overlay_storage_disk'))->deleteDirectory($overlay->id);
         });
     }
 
