@@ -28,7 +28,8 @@ class TileSingleOverlayTest extends TestCase
         $disk = config('geo.tiles.overlay_storage_disk');
         $file = new GenericFile("{$disk}://{$overlay->path}");
         
-        $job = new TileSingleOverlayStub($overlay);
+        $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
+        $job = new TileSingleOverlayStub($overlay, $disk, $targetPath);
         $mock = Mockery::mock(Image::class);
         $mock->shouldReceive('dzsave')
             ->once()
@@ -47,16 +48,16 @@ class TileSingleOverlayTest extends TestCase
     {
         config(['geo.tiles.overlay_storage_disk' => 'geo-overlays']);
         $overlay = GeoOverlayTest::create();
-        $job = new TileSingleOverlayStub($overlay);
-        $fragment = $job->fragment;
+        $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
+        $job = new TileSingleOverlayStub($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
         File::makeDirectory($job->tempPath);
         File::put("{$job->tempPath}/test.txt", 'test');
 
         try {
             Storage::fake('geo-overlays');
             $job->uploadToStorage();
-            Storage::disk('geo-overlays')->assertExists($fragment);
-            Storage::disk('geo-overlays')->assertExists("{$fragment}/test.txt");
+            Storage::disk('geo-overlays')->assertExists($targetPath);
+            Storage::disk('geo-overlays')->assertExists("{$targetPath}/test.txt");
         } finally {
             File::deleteDirectory($job->tempPath);
         }

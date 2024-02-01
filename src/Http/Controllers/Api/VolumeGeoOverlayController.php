@@ -197,8 +197,7 @@ class VolumeGeoOverlayController extends Controller
     {
         $overlay->tiled = true;
         $overlay->tilingInProgress = true;
-        // $job = new TileSingleOverlay($overlay);
-        // $job->handle();
-        TileSingleOverlay::dispatch($overlay);
+        $targetPath =  "{$overlay->id}/{$overlay->id}_tiles";
+        TileSingleOverlay::dispatch($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
     }
 }

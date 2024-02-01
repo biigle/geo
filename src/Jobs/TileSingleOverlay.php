@@ -37,13 +37,13 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(GeoOverlay $file)
+    public function __construct(GeoOverlay $file, $storage, $targetPath)
     {
         $this->file = $file;
         $this->tempPath = config('geo.tiles.tmp_dir')."/{$file->id}";
         // for uploadToStorage method
-        $this->storage = 'geo.tiles.overlay_storage_disk';
-        $this->fragment = "{$file->id}/{$file->id}_tiles";
+        $this->storage = $storage;
+        $this->targetPath = $targetPath;
     }
 
     /**
@@ -54,8 +54,7 @@ class TileSingleOverlay extends TileSingleImage implements ShouldQueue
     public function handle()
     {
         try {
-            $disk = config($this->storage);
-            $this->genericFile = new GenericFile("{$disk}://{$this->file->path}");
+            $this->genericFile = new GenericFile("{$this->storage}://{$this->file->path}");
             FileCache::getOnce($this->genericFile, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->file->tilingInProgress = false;
