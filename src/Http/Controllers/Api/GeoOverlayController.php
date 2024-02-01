@@ -4,7 +4,7 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use League\Flysystem\UnableToRetrieveMetadata;
 use Storage;
 
 class GeoOverlayController extends Controller
@@ -30,7 +30,7 @@ class GeoOverlayController extends Controller
         try {
             return Storage::disk(config('geo.tiles.overlay_storage_disk'))
                 ->download($overlay->path);
-        } catch (FileNotFoundException $e) {
+        } catch (UnableToRetrieveMetadata $e) {
             abort(404);
         }
     }

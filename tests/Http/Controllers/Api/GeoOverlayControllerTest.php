@@ -28,21 +28,19 @@ class GeoOverlayControllerTest extends ApiTestCase
             ->assertStatus(200);
         $this->assertEquals(7, $response->headers->get('content-length'));
     }
+    
+    public function testShowFileNotFound()
+    {
+        Storage::fake('geo-overlays');
+        $overlay = GeoOverlayTest::create();
+        $overlay->volume_id = $this->volume()->id;
+        $overlay->save();
+        $id = $overlay->id;
 
-    // ToDo: Find out why get this error --> Unable to retrieve the file_size for file at location
-    // 
-    // public function testShowFileNotFound()
-    // {
-    //     Storage::fake('geo-overlays');
-    //     $overlay = GeoOverlayTest::create();
-    //     $overlay->volume_id = $this->volume()->id;
-    //     $overlay->save();
-    //     $id = $overlay->id;
-
-    //     $this->beGuest();
-    //     $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
-    //         ->assertStatus(404);
-    // }
+        $this->beGuest();
+        $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
+            ->assertStatus(404);
+    }
 
     public function testDestroy()
     {
