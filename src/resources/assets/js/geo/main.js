@@ -1,4 +1,4 @@
-import 'ol/ol.css';
+import '@biigle/ol/ol.css';
 import ImageLocationPanel from './imageLocationPanel';
 import Navbar from './navbar';
 import ProjectMap from './projectMap';

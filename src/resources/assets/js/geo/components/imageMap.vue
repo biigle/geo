@@ -3,25 +3,25 @@
 </template>
 
 <script>
-import DragBox from 'ol/interaction/DragBox';
-import Feature from 'ol/Feature';
-import Map from 'ol/Map';
-import OSMSource from 'ol/source/OSM';
-import OverviewMap from 'ol/control/OverviewMap';
-import Point from 'ol/geom/Point';
-import ScaleLine from 'ol/control/ScaleLine';
-import Select from 'ol/interaction/Select';
+import DragBox from '@biigle/ol/interaction/DragBox';
+import Feature from '@biigle/ol/Feature';
+import Map from '@biigle/ol/Map';
+import OSMSource from '@biigle/ol/source/OSM';
+import OverviewMap from '@biigle/ol/control/OverviewMap';
+import Point from '@biigle/ol/geom/Point';
+import ScaleLine from '@biigle/ol/control/ScaleLine';
+import Select from '@biigle/ol/interaction/Select';
 import Style from '../ol/style';
-import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import View from 'ol/View';
-import ZoomToExtent from 'ol/control/ZoomToExtent';
-import {defaults as defaultControls} from 'ol/control';
-import {defaults as defaultInteractions} from 'ol/interaction';
+import TileLayer from '@biigle/ol/layer/Tile';
+import VectorLayer from '@biigle/ol/layer/Vector';
+import VectorSource from '@biigle/ol/source/Vector';
+import View from '@biigle/ol/View';
+import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
+import {defaults as defaultControls} from '@biigle/ol/control';
+import {defaults as defaultInteractions} from '@biigle/ol/interaction';
 import {Events} from '../import';
-import {fromLonLat} from 'ol/proj';
-import {platformModifierKeyOnly} from 'ol/events/condition';
+import {fromLonLat} from '@biigle/ol/proj';
+import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -110,7 +110,7 @@ export default {
         let map = new Map({
             target: this.$el,
             layers: [tileLayer, vectorLayer],
-            view: new View(),
+            view: new View({padding: [10, 10, 10, 10]}),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,
                 doubleClickZoom: this.interactive,
@@ -141,7 +141,7 @@ export default {
             map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
-                layers: [tileLayer],
+                layers: [new TileLayer({source: tileLayer.getSource()})],
                 view: new View({zoom: 1, maxZoom: 1})
             }));
         }
@@ -149,8 +149,10 @@ export default {
         if (this.selectable) {
             let selectInteraction = new Select({
                 style: Style.selected,
-                features: this.features.filter((feature) => feature.get('preselected')),
             });
+            selectInteraction
+                .getFeatures()
+                .extend(this.features.filter(feature => feature.get('preselected')));
             let selectedFeatures = selectInteraction.getFeatures();
             map.addInteraction(selectInteraction);
             selectInteraction.on('select', () => {
