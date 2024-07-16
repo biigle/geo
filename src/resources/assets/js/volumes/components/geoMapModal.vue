@@ -6,9 +6,7 @@
         :backdrop="false"
         @hide="callback"
       >
-        <div class="sidebar-container__content">
-            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
-        </div>
+        <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
         <p class="text-muted">
             <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
         </p>
@@ -77,6 +75,10 @@ export default {
 </script>
 
 <style scoped>
+    .image-map {
+        height: 450px;
+    }
+
     p {
         padding-top: 10px;
     }
