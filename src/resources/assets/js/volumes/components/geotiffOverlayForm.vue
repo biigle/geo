@@ -20,9 +20,10 @@ export default {
         };
     },
     methods: {
-        handleSuccess() {
+        handleSuccess(response) {
             this.error = false;
             this.success = true;
+            this.$emit('success', response.data);
         },
         handleError(response) {
             let knownError = response.body.errors && (

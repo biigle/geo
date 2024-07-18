@@ -6,6 +6,7 @@ import {handleErrorResponse} from './import';
 import {LoaderMixin} from './import';
 import Tabs from 'uiv/dist/Tabs';
 import Tab from 'uiv/dist/Tab';
+import Btn from 'uiv/dist/Btn';
 
 
 /**
@@ -41,6 +42,7 @@ export default {
     components: {
         tabs: Tabs,
         tab: Tab,
+        Btn: Btn,
         overlayItem: overlayItem,
         geotiffOverlayForm: GeotiffOverlayForm,
     },
