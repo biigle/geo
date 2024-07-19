@@ -1,7 +1,10 @@
 <template>
     <tr>
-        <td class="start">
-            <span class="text-muted">#<span>{{ index }}</span></span>
+        <td class="handle">
+            <i class="fas fa-grip-lines"></i>
+        </td>
+        <td scope="row" class="start">
+            <span class="text-muted">#<span>{{ overlay.id }}</span></span>
         </td>
         <td class="start">
             <span class="ellipsis" v-text="overlay.name"></span>
@@ -21,7 +24,6 @@
 </template>
 
 <script>
-import Btn from 'uiv/dist/Btn';
 
 
 export default {
@@ -58,8 +60,5 @@ export default {
             this.contextLayer = !this.contextLayer;
         }
     },
-    components: {
-        Btn: Btn,
-    }
 };
 </script>

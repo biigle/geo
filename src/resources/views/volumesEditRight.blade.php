@@ -26,7 +26,7 @@
     </div>
     <!-- Create overlays-table -->
      
-    <table class="table table-sm" v-cloak>
+    <!-- <table class="table table-sm" v-cloak>
         <thead>
             <tr>
                 <th>#</th>
@@ -36,11 +36,12 @@
                 <th>Delete</th>
             </tr>
         </thead>
-        <tbody>
+        <draggable v-model="overlays" :element="'tbody'">
             <tr is="overlay-item" v-for="(overlay, idx) in overlays" :key="overlay.id" :index="idx" :overlay="overlay" v-on:remove="handleRemove">
             </tr>
-        </tbody>
-    </table>
+        </draggable>
+    </table> -->
+    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove"></geotiff-overlay-table>
     <ul class="list-group" v-cloak>
         <!-- <overlay-item v-for="overlay in overlays" :key="overlay.id" :overlay="overlay" inline-template v-on:remove="handleRemove">
             <li class="list-group-item custom" :class="classObject">

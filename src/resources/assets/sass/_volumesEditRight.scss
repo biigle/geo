@@ -15,7 +15,6 @@ td:not(.start) {
     text-align: center;
 }
 
-
 .toggle-btn {
     background-color: grey;
     text-decoration: none;
@@ -26,6 +25,10 @@ td:not(.start) {
 
 .toggle-btn.active {
     background-color: darkorange;
+}
+
+.handle:hover {
+    cursor: grab;
 }
 
 .custom > .ellipsis {
