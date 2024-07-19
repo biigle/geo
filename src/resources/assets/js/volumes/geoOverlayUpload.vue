@@ -1,38 +1,12 @@
 <script>
 import Api from './api/geoOverlays';
 import GeotiffOverlayForm from './components/geotiffOverlayForm';
+import overlayItem from './components/overlayItem';
 import {EditorMixin} from './import';
 import {handleErrorResponse} from './import';
 import {LoaderMixin} from './import';
 import Tabs from 'uiv/dist/Tabs';
 import Tab from 'uiv/dist/Tab';
-import Btn from 'uiv/dist/Btn';
-
-
-/**
- * The geo overlay upload of the volume edit page.
- */
-
-let overlayItem = {
-    props: ['overlay'],
-    computed: {
-        classObject() {
-            return {
-                'list-group-item-success': this.overlay.isNew,
-            };
-        },
-        title() {
-            return 'Delete overlay ' + this.overlay.name;
-        },
-    },
-    methods: {
-        remove() {
-            if (confirm(`Are you sure you want to delete the overlay ${this.overlay.name}?`)) {
-                this.$emit('remove', this.overlay);
-            }
-        },
-    },
-};
 
 export default {
     mixins: [
@@ -42,7 +16,6 @@ export default {
     components: {
         tabs: Tabs,
         tab: Tab,
-        Btn: Btn,
         overlayItem: overlayItem,
         geotiffOverlayForm: GeotiffOverlayForm,
     },

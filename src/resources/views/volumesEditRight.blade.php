@@ -25,9 +25,11 @@
         </tabs>
     </div>
     <!-- Create overlays-table -->
+     
     <table class="table table-sm" v-cloak>
         <thead>
             <tr>
+                <th>#</th>
                 <th>Filename</th>
                 <th>Browsing layer</th>
                 <th>Context layer</th>
@@ -35,22 +37,8 @@
             </tr>
         </thead>
         <tbody>
-            <!-- <overlay-item v-for="overlay in overlays" :key="overlay.id" :overlay="overlay" inline-template> -->
-                <tr v-for="overlay in overlays">
-                    <td class="p-2">
-                        <span class="ellipsis" v-text="overlay.name"></span>
-                    </td>
-                    <td>
-                        <Btn size="xs" type="primary" :id="overlay.id"><span class="fa fa-plus" aria-hidden="true"></span></Btn>
-                    </td>
-                    <td>
-                        <Btn size="xs" type="primary" :id="overlay.id"><span class="fa fa-plus" aria-hidden="true"></span></Btn>
-                    </td>
-                    <td>
-                        <button type="button" class="close" :id="overlay.id" v-once><span aria-hidden="true">&times;</span></button>
-                    </td>
-                </tr>
-            <!-- </overlay-item> -->
+            <tr is="overlay-item" v-for="(overlay, idx) in overlays" :key="overlay.id" :index="idx" :overlay="overlay" v-on:remove="handleRemove">
+            </tr>
         </tbody>
     </table>
     <ul class="list-group" v-cloak>

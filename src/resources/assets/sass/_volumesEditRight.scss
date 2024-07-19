@@ -10,6 +10,24 @@
     flex: 0;
 }
 
+// align all row entries in center except the ones marked with "start"
+td:not(.start) {
+    text-align: center;
+}
+
+
+.toggle-btn {
+    background-color: grey;
+    text-decoration: none;
+    border: 0;
+    border-radius: 50%;
+}
+
+
+.toggle-btn.active {
+    background-color: darkorange;
+}
+
 .custom > .ellipsis {
     order: 1;
     flex: 1;
