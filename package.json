@@ -25,6 +25,7 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
-    "ol": "^5.3.3"
+    "ol": "^5.3.3",
+    "vuedraggable": "^2.24.3"
   }
 }
