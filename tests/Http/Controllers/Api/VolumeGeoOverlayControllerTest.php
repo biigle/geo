@@ -8,6 +8,7 @@ use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 use Illuminate\Http\UploadedFile;
 use Storage;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 class VolumeGeoOverlayControllerTest extends ApiTestCase
 {
@@ -26,6 +27,44 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $response = $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
             ->assertJsonFragment([$overlay->toArray()]);
         $response->assertStatus(200);
+    }
+
+    public function testUpdateGeotiff()
+    {
+        Storage::fake('geo-overlays');
+        $id = $this->volume()->id;
+    
+        // Create overlay-instance
+        $overlay = GeoOverlayTest::create();
+        $overlay->save();
+       
+        $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}");
+
+        $this->beEditor();
+        // 403: The client does not have access rights to the content
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
+            'browsing_layer' => true,
+            'context_layer' => false
+        ])
+        ->assertStatus(403);
+
+        $this->beAdmin();
+        // 422: The request was well-formed but was unable to be followed due to semantic errors.
+        // reason: no input data
+        $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}")
+        ->assertStatus(422);
+
+        // now test if updating with data will succeed with the correct values being returned
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
+            'browsing_layer' => true,
+            'context_layer' => false
+        ]);
+        $response
+            ->assertStatus(200)            
+            ->assertJson(fn (AssertableJson $json) =>
+                $json->where('browsing_layer', true)
+                    ->where('context_layer', false)
+            );
     }
 
     public function testStoreGeotiff() 
