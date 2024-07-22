@@ -14,4 +14,8 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
         method: 'POST',
         url: 'api/v1/volumes{/id}/geo-overlays/geotiff',
     },
+    updateGeoTiff: {
+        method: 'PUT',
+        url: 'api/v1/volumes{/id}/geo-overlays/geotiff{/geo_overlay_id}',
+    },
 });

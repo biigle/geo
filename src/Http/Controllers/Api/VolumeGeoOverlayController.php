@@ -6,6 +6,7 @@ use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
+use Biigle\Modules\Geo\Http\Requests\UpdateGeotiffOverlay;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
 use Biigle\Volume;
 use Illuminate\Http\Response;
@@ -202,4 +203,47 @@ class VolumeGeoOverlayController extends Controller
         $targetPath =  "{$overlay->id}/{$overlay->id}_tiles";
         TileSingleOverlay::dispatch($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
     }
+
+
+    /**
+     * Update the context_layer and/or browsing_layer values
+     * 
+     * @api {put} volumes/:id/geo-overlays/geotiff/:geo_overlay_id Update a geotiff geo overlay
+     * @apiGroup Geo
+     * @apiName VolumesUpdateGeoTiff
+     * @apiPermission projectAdmin
+     * 
+     * @apiParam (Attributes that can be updated) {Boolean} browsing_layer Defines whether to show the geoTIFF as a browsing-visualisation layer.
+     * @apiParam (Attributes that can be updated) {Boolean} context_layer Defines whether to show the geoTIFF as a context-fusion layer.
+     * 
+     * @apiParamExample {String} Request example:
+     * browsing_layer: true
+     * context_layer: false
+     * 
+     * @param UpdateGeotiffOverlay $request
+     * @param $geo_overlay_id
+     */
+
+     public function updateGeoTiff(UpdateGeotiffOverlay $request)
+     {
+         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
+         if($request->filled('context_layer') || $request->filled('browsing_layer')) {
+             if($request->filled('context_layer')) {
+                 $overlay->update([
+                     'context_layer' => $request->input('context_layer')
+                 ]);
+             }
+             if($request->filled('browsing_layer')) {
+                 $overlay->update([
+                     'browsing_layer' => $request->input('browsing_layer')
+                 ]);
+             }
+             return response()->json([
+                 'browsing_layer' => $overlay->browsing_layer,
+                 'context_layer' =>  $overlay->context_layer
+             ]);
+         } else {
+             return response('no data update performed', $status=422);
+         }
+     }
 }

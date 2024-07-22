@@ -25,6 +25,11 @@ class GeoOverlay extends Model
         'volume_id',
     ];
 
+    protected $fillable = [
+        'browsing_layer',
+        'context_layer'
+    ];
+
     /**
      * The attributes that should be casted to native types.
      *

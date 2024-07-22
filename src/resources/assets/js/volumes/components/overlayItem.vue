@@ -24,17 +24,20 @@
 </template>
 
 <script>
+import Api from '../api/geoOverlays';
+import {handleErrorResponse} from '../../geo/import';
 
 
 export default {
     data() {
         return {
-            browsingLayer: true,
-            contextLayer: true,
+            browsingLayer: false,
+            contextLayer: false,
         }
     },
     props: {
         overlay: {type: Object, required: true},
+        volumeId: {type: Number, required: true,},
         index: {type: Number, required: true}
     },
     computed: {
@@ -54,11 +57,33 @@ export default {
             }
         },
         toggleBrowsingButton() {
-            this.browsingLayer = !this.browsingLayer;
+            Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
+                    browsing_layer: !this.browsingLayer,
+                })
+                .then((response) => {
+                    if(response.status == 200) {
+                        this.browsingLayer = !this.browsingLayer;
+                    }
+                })
+                .catch(handleErrorResponse);
         },
         toggleContextButton() {
-            this.contextLayer = !this.contextLayer;
-        }
+            // TODO: update the data in the geoOverlay database 
+            Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
+                    context_layer: !this.contextLayer,
+                })
+                .then((response) => {
+                    if(response.status == 200) {
+                        this.contextLayer = !this.contextLayer;
+                    }
+                })
+                .catch(handleErrorResponse);
+        },
     },
+    mounted() {
+        // initially set the two values 
+        this.browsingLayer = this.overlay.browsing_layer;
+        this.contextLayer = this.overlay.context_layer;
+    }
 };
 </script>

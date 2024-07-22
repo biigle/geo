@@ -36,6 +36,10 @@ $router->group([
         'uses' => 'VolumeGeoOverlayController@storeGeoTiff',
     ]);
 
+    $router->put('volumes/{id}/geo-overlays/geotiff/{geo_overlay_id}', [
+        'uses' => 'VolumeGeoOverlayController@updateGeoTiff',
+    ]);
+
     $router->resource('geo-overlays', 'GeoOverlayController', [
         'only' => ['destroy'],
         'parameters' => ['geo-overlays' => 'id'],

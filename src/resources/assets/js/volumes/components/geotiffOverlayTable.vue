@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <draggable v-model="sortedOverlays" tag="tbody" handle=".handle">
-            <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :index="idx" :overlay="overlay" v-on:remove="$emit('remove', overlay);">
+            <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :index="idx" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
             </tr>
         </draggable>
     </table>
@@ -35,6 +35,10 @@ export default {
             type: Array,
             required: true,
         },
+        volumeId: {
+            type: Number,
+            required: true,
+        }
     },
     mounted() {
         this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));

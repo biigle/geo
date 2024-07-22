@@ -41,7 +41,7 @@
             </tr>
         </draggable>
     </table> -->
-    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove"></geotiff-overlay-table>
+    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}"></geotiff-overlay-table>
     <ul class="list-group" v-cloak>
         <!-- <overlay-item v-for="overlay in overlays" :key="overlay.id" :overlay="overlay" inline-template v-on:remove="handleRemove">
             <li class="list-group-item custom" :class="classObject">
