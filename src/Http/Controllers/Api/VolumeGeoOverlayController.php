@@ -90,7 +90,7 @@ class VolumeGeoOverlayController extends Controller
 
         // check whether file exists alread in DB 
         $existingFileNames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
-        if(in_array($fileName, $existingFileNames)) {
+        if (in_array($fileName, $existingFileNames)) {
             // strip the name if too long
             $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
             throw ValidationException::withMessages(
@@ -181,6 +181,8 @@ class VolumeGeoOverlayController extends Controller
         $overlay->top_left_lat = number_format($coords[0][1], 13);
         $overlay->bottom_right_lng = number_format($coords[1][0], 13);
         $overlay->bottom_right_lat = number_format($coords[1][1], 13);
+        $overlay->browsing_layer = false;
+        $overlay->context_layer = false;
         $overlay->save();
         $overlay->storeFile($file);
         $this->submitTileJob($overlay);

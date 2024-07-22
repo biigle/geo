@@ -90,6 +90,8 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->assertEqualsWithDelta($overlay->bottom_right_lat, 57.09845896597305, 0.00001);
         $this->assertEqualsWithDelta($overlay->bottom_right_lng, -2.917006253590798, 0.00001);
         $this->assertEquals($overlay->name, 'standardEPSG2013.tif');
+        $this->assertEquals($overlay->browsing_layer, false);
+        $this->assertEquals($overlay->context_layer, false);
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
 

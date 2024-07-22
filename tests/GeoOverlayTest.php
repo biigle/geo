@@ -19,6 +19,8 @@ class GeoOverlayTest extends TestCase
         $model->bottom_right_lng = $faker->randomNumber();
         $model->bottom_right_lat = $faker->randomNumber();
         $model->volume_id = VolumeTest::create()->id;
+        $model->browsing_layer = false;
+        $model->context_layer = false;
         $model->save();
 
         return $model;
