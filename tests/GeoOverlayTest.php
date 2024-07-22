@@ -48,6 +48,6 @@ class GeoOverlayTest extends TestCase
     public function testPathAttribute()
     {
         $model = self::create();
-        $this->assertEquals("{$model->volume_id}/{$model->id}", $model->path);
+        $this->assertEquals("{$model->id}/{$model->id}_original", $model->getPathAttribute());
     }
 }
