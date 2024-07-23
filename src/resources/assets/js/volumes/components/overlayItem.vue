@@ -68,7 +68,6 @@ export default {
                 .catch(handleErrorResponse);
         },
         toggleContextButton() {
-            // TODO: update the data in the geoOverlay database 
             Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
                     context_layer: !this.contextLayer,
                 })
