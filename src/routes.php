@@ -28,7 +28,7 @@ $router->group([
         'uses' => 'FileCoordinatesController@index',
     ]);
 
-    $router->get('volumes/{id}/geo-overlays', [
+    $router->get('volumes/{id}/geo-overlays/{layer_type?}', [
         'uses' => 'VolumeGeoOverlayController@index',
     ]);
     

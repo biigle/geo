@@ -9,6 +9,7 @@ use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 use Biigle\Modules\Geo\Http\Requests\UpdateGeotiffOverlay;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
 use Biigle\Volume;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
@@ -32,13 +33,18 @@ class VolumeGeoOverlayController extends Controller
      *         "top_left_lng": 1.2345,
      *         "bottom_right_lat": 7.7890,
      *         "bottom_right_lng": 2.2345,
+     *         "browsing_layer": true,
+     *         "context_layer": false,
      *     }
      * ]
      *
      * @param int $id volume id
+     * @param String $layer_type If specified, retrieves only a subset of the geo-overlays, e.g. 'browsing_layer', 'context_layer' or null
      */
-    public function index($id)
+    public function index(Request $request, $id, $layer_type = null)
     {
+        // set layer_type if it appears in the query-url, otherwise null 
+        $layer_type  = $layer_type ?: $request->layer_type;
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);
 
@@ -46,7 +52,14 @@ class VolumeGeoOverlayController extends Controller
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        return GeoOverlay::where('volume_id', $id)->get();
+        // retrieve subset of the geo-overlays if layer_type is specified
+        if($layer_type == 'browsing_layer') {
+            return GeoOverlay::where('volume_id', $id)->where('browsing_layer', true)->get();
+        } else if($layer_type == 'context_layer') {
+            return GeoOverlay::where('volume_id', $id)->where('context_layer', true)->get();
+        } else { // return all geoOverlays
+            return GeoOverlay::where('volume_id', $id)->get();
+        }
     }
 
     /**

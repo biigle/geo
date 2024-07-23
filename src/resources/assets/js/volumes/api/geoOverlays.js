@@ -18,4 +18,8 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
         method: 'PUT',
         url: 'api/v1/volumes{/id}/geo-overlays/geotiff{/geo_overlay_id}',
     },
+    get: {
+        method: 'GET',
+        url: 'api/v1/volumes{/id}/geo-overlays/{/layer_type?}',
+    }
 });
