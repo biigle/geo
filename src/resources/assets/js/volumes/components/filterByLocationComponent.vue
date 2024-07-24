@@ -1,15 +1,12 @@
 <template>
     <div class="filter-select">
-        <geo-map-modal v-if="showModal" :volumeId="volumeId" v-on:on="submit" v-on:close-modal="hideModal" :geoOverlays="browsingOverlays"></geo-map-modal>
+        <geo-map-modal v-if="showModal" :volumeId="volumeId" v-on:on="submit" v-on:close-modal="hideModal"></geo-map-modal>
         <button type="submit" class="btn btn-default pull-right position" @click="showModal = true">Add rule</button>
     </div>
 </template>
 
 <script>
 import GeoMapModal from './geoMapModal.vue';
-import Api from '../api/geoOverlays';
-import {handleErrorResponse} from '../../geo/import';
-
 
 /**
  * Base component for a filter select element
@@ -30,7 +27,6 @@ export default {
         return {
             selectedItem: [],
             showModal: false,
-            browsingOverlays: [],
         };
     },
     methods: {
@@ -42,16 +38,7 @@ export default {
         hideModal() {
             this.showModal = false;
         }
-    },
-    created() {
-        Api.get({id: this.volumeId, layer_type: 'browsing_layer'})
-            .then((response) => {
-                if(response.status == 200) {
-                    this.browsingOverlays = response.body;
-                }
-            })
-            .catch(handleErrorResponse);
-    },
+    }
 };
 </script>
 

@@ -8,12 +8,12 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlay="overlay"></image-map>
+            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays"></image-map>
         </div>
         <div class="cell cell-edit">
             <h4>Geo Overlays</h4>
             <p>Select an overlay from the list below to show on map.</p>
-            <div v-for="overlay in geoOverlays" :key="overlay.id">
+            <div v-for="overlay in browsingOverlays" :key="overlay.id">
                 <button :id="overlay.id" :class="{active: activeLayerId === overlay.id}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)">
                     <span class="ellipsis" v-text="overlay.name"></span>
                 </button>
@@ -36,7 +36,11 @@
 import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
+import GeoApi from '../api/geoOverlays';
+import ImageLayer from 'ol/layer/Image';
+import ImageStaticSource from 'ol/source/ImageStatic';
 import {LoaderMixin} from '../import';
+import {handleErrorResponse} from '../../geo/import';
 
 
 export default {
@@ -49,10 +53,6 @@ export default {
         volumeId: {
             type: Number,
             required: true,
-        },
-        geoOverlays: {
-            type: Array,
-            required: true
         }
     },
     data() {
@@ -63,7 +63,27 @@ export default {
             imageIds: [],
             activeLayerId: null,
             overlay: null,
+            browsingOverlays: [],
+            overlayUrl: '',
         }
+    },
+    computed: {
+        overlays() {
+            return this.browsingOverlays.map((overlay) => {
+                return new ImageLayer({
+                    source: new ImageStaticSource({
+                        url:  this.overlayUrl.replace(':id', overlay.id),
+                        imageExtent: [
+                            overlay.top_left_lng,
+                            overlay.bottom_right_lat,
+                            overlay.bottom_right_lng,
+                            overlay.top_left_lat,
+                        ],
+                        projection: 'EPSG:4326',
+                    }),
+                });
+            });
+        },
     },
     methods: {
         callback(msg) {
@@ -97,7 +117,7 @@ export default {
             if(id === null) {
                 this.overlay = null;
             } else {
-                this.overlay = this.geoOverlays.find(x => x.id === id);
+                this.overlay = this.browsingOverlays.find(x => x.id === id);
             }
         }
     },
@@ -109,6 +129,18 @@ export default {
         CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
+
+        // make overlay-url variable accessible
+        this.overlayUrl = biigle.$require('geo.overlayUrl');
+
+        // retrieve the geo-overlays for browsing layer
+        GeoApi.get({id: this.volumeId, layer_type: 'browsing_layer'})
+            .then((response) => {
+                if(response.status == 200) {
+                    this.browsingOverlays = response.body;
+                }
+            })
+            .catch(handleErrorResponse);
     },
 }
 </script>

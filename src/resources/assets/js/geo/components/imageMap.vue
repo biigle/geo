@@ -51,6 +51,12 @@ export default {
             type: Boolean,
             default: false
         },
+        overlays: {
+            type: Array,
+            default() {
+                return [];
+            },
+        },
     },
     data() {
         return {
@@ -107,9 +113,13 @@ export default {
             updateWhileInteracting: true,
         });
 
+        let layers = [tileLayer];
+        Array.prototype.push.apply(layers, this.overlays);
+        layers.push(vectorLayer);
+
         let map = new Map({
             target: this.$el,
-            layers: [tileLayer, vectorLayer],
+            layers: layers,
             view: new View(),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,
