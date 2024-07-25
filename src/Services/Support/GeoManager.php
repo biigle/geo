@@ -120,14 +120,51 @@ class GeoManager
     }
 
     /**
+     * Retrieve the overlay size (width, height) of the geoTIFF file in pixels
+     * 
+     * @return Array the pixel width and height [$width, $height] 
+     */
+    public function getPixelSize()
+    {
+        $width = $this->exif['IFD0:ImageWidth'];
+        $height = $this->exif['IFD0:ImageHeight'];
+        return [$width, $height];
+    }
+
+    /**
+     * Retrieve the overlay size (col, row) of the geoTIFF file in raster-size
+     * 
+     * @return Array the raster column and row count in raster-space 
+     */
+    public function getRasterSize($corners)
+    {
+        $pixelScale = array_map('floatval', explode(" ", $this->exif['IFD0:PixelScale']));
+        // [$top_left, $bottom_left, $top_right, $bottom_right];
+        $raster_rows = abs(($corners[0][1] - $corners[1][1]) / $pixelScale[1]);
+        $raster_cols = abs(($corners[2][0] - $corners[0][0]) / $pixelScale[0]);
+        return [$raster_cols, $raster_rows];
+    }
+
+    /**
+     * Retrieve the overlay size (width, height) of the geoTIFF file in model-space
+     * 
+     * @return Array the model-space width and height [$width, $height] 
+     */
+    public function getModelSize($coords) 
+    {
+        $width = number_format($coords[2] - $coords[0], 13);
+        $height = number_format($coords[3] -$coords[1], 13);
+        return [$width, $height];
+    }
+
+    /**
      * Retreive the four corner coordinates of the geoTIFF in raster space
      * 
      * @return Array the outer coordinates [$top_left, $bottom_left, $top_right, $bottom_right]
      */
     public function getCorners()
     {
-        $width = $this->exif['IFD0:ImageWidth'];
-        $height = $this->exif['IFD0:ImageHeight'];
+        [$width, $height] = $this->getPixelSize();
 
         // modelTiePointTag = (I,J,K,X,Y,Z)
         if (array_key_exists('IFD0:ModelTiePoint', $this->exif)) {
@@ -266,7 +303,8 @@ class GeoManager
             $pointSrc = new Point($coords_current[$i], $coords_current[$i + 1], $proj_current);
             // transform the point between datums
             $projected_point = $proj4->transform($projWGS84, $pointSrc)->toArray();
-            $transformed_coords[] = [$projected_point[0], $projected_point[1]];
+            $transformed_coords[] = $projected_point[0];
+            $transformed_coords[] = $projected_point[1];
         };
 
         return $transformed_coords;

@@ -116,6 +116,8 @@ class VolumeGeoOverlayController extends Controller
 
         // find out which coordinate-system we're dealing with
         $modelType = $geotiff->getCoordSystemType();
+        // find the width and height of geotiff file in pixels
+        $pixelDimensions = $geotiff->getPixelSize();
         // Retreive the four corner coordinates of the geoTIFF in raster space
         $corners = $geotiff->getCorners();
         // Convert corners from RASTER-SPACE to MODEL-SPACE
@@ -149,13 +151,13 @@ class VolumeGeoOverlayController extends Controller
                         // WGS 84 code
                     case 4326:
                         // save data in GeoOverlay DB when already in WGS84
-                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
                         break;
                     default:
                         // use proj4-functions to transform to WGS 84
                         $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
                         // save data in GeoOverlay DB
-                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file);
+                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
                 }
             } else {
                 throw ValidationException::withMessages(
@@ -186,17 +188,18 @@ class VolumeGeoOverlayController extends Controller
      *
      * @return GeoOverlay
      */
-    protected function saveGeoOverlay($volumeId, $fileName, $coords, $file)
+    protected function saveGeoOverlay($volumeId, $fileName, $coords, $file, $pixelDimensions)
     {
         $overlay = new GeoOverlay;
         $overlay->volume_id = $volumeId;
         $overlay->name = $fileName;
-        $overlay->top_left_lng = number_format($coords[0][0], 13);
-        $overlay->top_left_lat = number_format($coords[0][1], 13);
-        $overlay->bottom_right_lng = number_format($coords[1][0], 13);
-        $overlay->bottom_right_lat = number_format($coords[1][1], 13);
+        $overlay->top_left_lng = number_format($coords[0], 13);
+        $overlay->top_left_lat = number_format($coords[1], 13);
+        $overlay->bottom_right_lng = number_format($coords[2], 13);
+        $overlay->bottom_right_lat = number_format($coords[3], 13);
         $overlay->browsing_layer = false;
         $overlay->context_layer = false;
+        $overlay->attrs = ["width" => $pixelDimensions[0],  "height" => $pixelDimensions[1]];
         $overlay->save();
         $overlay->storeFile($file);
         $this->submitTileJob($overlay);
@@ -211,8 +214,6 @@ class VolumeGeoOverlayController extends Controller
      */
     protected function submitTileJob(GeoOverlay $overlay)
     {
-        $overlay->tiled = true;
-        $overlay->tilingInProgress = true;
         $targetPath =  "{$overlay->id}/{$overlay->id}_tiles";
         TileSingleOverlay::dispatch($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
     }
