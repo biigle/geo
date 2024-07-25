@@ -36,11 +36,9 @@
 import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
-import GeoApi from '../api/geoOverlays';
-import ImageLayer from 'ol/layer/Image';
-import ImageStaticSource from 'ol/source/ImageStatic';
 import {LoaderMixin} from '../import';
-import {handleErrorResponse} from '../../geo/import';
+import TileLayer from 'ol/layer/Tile';
+import ZoomifySource from 'ol/source/Zoomify';
 
 
 export default {
@@ -53,7 +51,7 @@ export default {
         volumeId: {
             type: Number,
             required: true,
-        }
+        },
     },
     data() {
         return {
@@ -63,27 +61,10 @@ export default {
             imageIds: [],
             activeLayerId: null,
             overlay: null,
-            browsingOverlays: [],
             overlayUrl: '',
+            overlays: [],
+            browsingOverlays: [],
         }
-    },
-    computed: {
-        overlays() {
-            return this.browsingOverlays.map((overlay) => {
-                return new ImageLayer({
-                    source: new ImageStaticSource({
-                        url:  this.overlayUrl.replace(':id', overlay.id),
-                        imageExtent: [
-                            overlay.top_left_lng,
-                            overlay.bottom_right_lat,
-                            overlay.bottom_right_lng,
-                            overlay.top_left_lat,
-                        ],
-                        projection: 'EPSG:4326',
-                    }),
-                });
-            });
-        },
     },
     methods: {
         callback(msg) {
@@ -109,7 +90,7 @@ export default {
             } else {
                 this.activeLayerId = id;
             }
-        }
+        },
     },
     watch: {
         // select the geo overlay based on currently active id
@@ -119,6 +100,27 @@ export default {
             } else {
                 this.overlay = this.browsingOverlays.find(x => x.id === id);
             }
+        },
+        browsingOverlays(browsingOverlays) {
+            this.overlays = browsingOverlays.map((overlay) => {
+                return new TileLayer({
+                    source: new ZoomifySource({
+                            url: this.overlayUrl.replace(':id', overlay.id),
+                            size: [overlay.attrs.width, overlay.attrs.height],
+                            extent: [
+                                // 0,
+                                // 0,
+                                // overlay.attrs.width, 
+                                // overlay.attrs.height
+                                overlay.top_left_lng,
+                                overlay.bottom_right_lat,
+                                overlay.bottom_right_lng,
+                                overlay.top_left_lat,
+                            ]
+                    }),
+                    name: 'overlayTile'
+                });
+            });
         }
     },
     created() {
@@ -132,15 +134,7 @@ export default {
 
         // make overlay-url variable accessible
         this.overlayUrl = biigle.$require('geo.overlayUrl');
-
-        // retrieve the geo-overlays for browsing layer
-        GeoApi.get({id: this.volumeId, layer_type: 'browsing_layer'})
-            .then((response) => {
-                if(response.status == 200) {
-                    this.browsingOverlays = response.body;
-                }
-            })
-            .catch(handleErrorResponse);
+        this.browsingOverlays = biigle.$require('geo.browsingOverlays');
     },
 }
 </script>
