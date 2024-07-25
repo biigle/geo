@@ -21,6 +21,7 @@ class GeoOverlayTest extends TestCase
         $model->volume_id = VolumeTest::create()->id;
         $model->browsing_layer = false;
         $model->context_layer = false;
+        $model->attrs = ['width' => $faker->randomNumber(), 'height' => $faker->randomNumber()];
         $model->save();
 
         return $model;
@@ -36,6 +37,8 @@ class GeoOverlayTest extends TestCase
         $this->assertTrue(is_float($model->bottom_right_lat));
         $this->assertNull($model->created_at);
         $this->assertNull($model->updated_at);
+        $this->assertTrue(is_int($model->attrs['width']));
+        $this->assertTrue(is_int($model->attrs['height']));
     }
 
     public function testVolumeOnDeleteCascade()

@@ -40,6 +40,7 @@ class GeoOverlay extends Model
         'top_left_lat' => 'float',
         'bottom_right_lng' => 'float',
         'bottom_right_lat' => 'float',
+        'attrs' => 'array',
     ];
 
     /**

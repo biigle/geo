@@ -154,6 +154,7 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->assertEquals($overlay->name, 'standardEPSG2013.tif');
         $this->assertEquals($overlay->browsing_layer, false);
         $this->assertEquals($overlay->context_layer, false);
+        $this->assertEquals($overlay->attrs, ['width' => 3, 'height' => 2]);
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
 
