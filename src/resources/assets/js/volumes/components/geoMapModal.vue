@@ -36,6 +36,7 @@
 import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
+import GeoApi from '../api/geoOverlays';
 import {LoaderMixin} from '../import';
 import TileLayer from 'ol/layer/Tile';
 import ZoomifySource from 'ol/source/Zoomify';
@@ -61,7 +62,7 @@ export default {
             imageIds: [],
             activeLayerId: null,
             overlay: null,
-            overlayUrl: '',
+            overlayUrlTemplate: '',
             overlays: [],
             browsingOverlays: [],
         }
@@ -105,17 +106,17 @@ export default {
             this.overlays = browsingOverlays.map((overlay) => {
                 return new TileLayer({
                     source: new ZoomifySource({
-                            url: this.overlayUrl.replace(':id', overlay.id),
+                            url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                             size: [overlay.attrs.width, overlay.attrs.height],
                             extent: [
-                                // 0,
-                                // 0,
-                                // overlay.attrs.width, 
-                                // overlay.attrs.height
-                                overlay.top_left_lng,
-                                overlay.bottom_right_lat,
-                                overlay.bottom_right_lng,
-                                overlay.top_left_lat,
+                                0,
+                                0,
+                                overlay.attrs.width, 
+                                overlay.attrs.height
+                                // overlay.top_left_lng,
+                                // overlay.bottom_right_lat,
+                                // overlay.bottom_right_lng,
+                                // overlay.top_left_lat,
                             ]
                     }),
                     name: 'overlayTile'
@@ -132,8 +133,12 @@ export default {
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
 
-        // make overlay-url variable accessible
-        this.overlayUrl = biigle.$require('geo.overlayUrl');
+        // provide overlay-url template string
+        GeoApi.getOverlayUrlTemplate({id: this.volumeId})
+            .then((response) => {
+                this.overlayUrlTemplate = response.body;
+            });
+        // provide overlays array (only those where browsing_overlay = true)
         this.browsingOverlays = biigle.$require('geo.browsingOverlays');
     },
 }
