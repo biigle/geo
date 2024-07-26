@@ -1,5 +1,5 @@
 <template>
-    <table class="table table-sm" v-cloak>
+    <table v-if="overlays.length !== 0" class="table table-sm" v-cloak>
         <thead>
             <tr>
                 <th></th>
