@@ -12,6 +12,7 @@ use Biigle\Volume;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use Storage;
 
 class VolumeGeoOverlayController extends Controller
 {
@@ -63,6 +64,19 @@ class VolumeGeoOverlayController extends Controller
     }
 
     /**
+     * Returns an url template to the tile-storage directory of a geo-overlay
+     * 
+     *  @param int $id volume id
+     */
+    public function getOverlayUrlTemplate($id) {
+        $volume = Volume::findOrFail($id);
+        $this->authorize('access', $volume);
+
+        return Storage::disk(config('geo.tiles.overlay_storage_disk'))
+                ->url(':id/:id_tiles/');
+    }
+
+    /**
      * Stores a new geo overlay that was uploaded with the geotiff method.
      *
      * @api {post} volumes/:id/geo-overlays/geotiff Upload a geotiff geo overlay
@@ -86,8 +100,9 @@ class VolumeGeoOverlayController extends Controller
      *   "bottom_right_lng" => "-2.9170062535908"
      *   "bottom_right_lat" => "57.0984589659731"
      *   "id" => 3
-     *   "tiled" => true
-     *   "tilingInProgress" => true
+     *   "browsing_layer" => false
+     *   "context_layer" => false
+     *   "attrs" => {"width": 648, "height": 480}
      * }
      *
      * @param StoreGeotiffOverlay $request

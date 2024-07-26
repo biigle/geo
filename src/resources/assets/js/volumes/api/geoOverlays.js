@@ -21,5 +21,9 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
     get: {
         method: 'GET',
         url: 'api/v1/volumes{/id}/geo-overlays/{/layer_type?}',
+    },
+    getOverlayUrlTemplate: {
+        method: 'GET',
+        url: 'api/v1/volumes{/id}/geo-overlays/geotiff/url',
     }
 });
