@@ -100,10 +100,3 @@ export default {
     }
 };
 </script>
-<style scoped>
-td {
-    white-space: normal; /* Only needed when it's set differntly somewhere else */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-</style>
