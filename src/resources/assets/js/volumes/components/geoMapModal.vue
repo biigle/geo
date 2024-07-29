@@ -119,7 +119,7 @@ export default {
                                 // overlay.top_left_lat,
                             ]
                     }),
-                    name: 'overlayTile'
+                    name: 'overlayTile-' + overlay.id
                 });
             });
         }
