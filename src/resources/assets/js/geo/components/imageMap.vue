@@ -134,6 +134,12 @@ export default {
             controls: defaultControls({zoom: this.interactive}),
         });
 
+        // for(let layer of this.overlays) {
+        //     console.log(layer);
+        //     map.addLayer(layer);
+        // }
+        // map.addLayer(vectorLayer);
+
         map.getView().fit(extent, map.getSize());
 
         if (this.zoom) {

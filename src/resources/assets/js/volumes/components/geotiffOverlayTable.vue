@@ -78,7 +78,6 @@ export default {
         // initially retrieve the array of ordered overlay-ids 
         let overlayOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
         if(overlayOrder) {
-            console.log(overlayOrder);
             // add the overlays according to the specified order in overlayOrder-array
             for(let id of overlayOrder) {
                 this.sortedOverlays.push(this.overlays.find(x => x.id === id));
