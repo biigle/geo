@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle">
-                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :index="idx" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
+                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="idx" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
                 </tr>
             </draggable>
         </table>
@@ -38,6 +38,28 @@ export default {
         volumeId: {
             type: Number,
             required: true,
+        }
+    },
+    methods: {
+    },
+    watch: {
+        overlays(overlays) {
+            // create simplified arrays of overlay-ids
+            let overlaysId = overlays.map(x => x.id);
+            let sortedOverlaysId = this.sortedOverlays.map(x => x.id);
+
+            // in case an overlay was deleted
+            if(overlays.length < this.sortedOverlays.length) {
+                // find the id of the removed overlay 
+                let removedId = sortedOverlaysId.filter(x => !overlaysId.includes(x));
+                // remove the deleted overlay from sortedOverlays-array
+                let removedIdIndex = this.sortedOverlays.findIndex(x => x.id === removedId[0]);
+                this.sortedOverlays.splice(removedIdIndex, 1);
+            } else { 
+                // in case an overlay was added, find its Id and add the overlay to sortedOverlays-array 
+                let addedId = overlaysId.filter(x => !sortedOverlaysId.includes(x));
+                this.sortedOverlays.unshift(overlays.find(x => x.id === addedId[0]));
+            }
         }
     },
     mounted() {
