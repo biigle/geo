@@ -7,7 +7,7 @@
             <span class="text-muted">#<span>{{ overlay.id }}</span></span>
         </td>
         <td class="start">
-            <span class="ellipsis" v-text="overlay.name"></span>
+            <span class="ellipsis" v-text="truncateString(overlay.name)"></span>
         </td>
         <td>
             <!-- browsing-layer -->
@@ -78,6 +78,20 @@ export default {
                 })
                 .catch(handleErrorResponse);
         },
+        // checks if string is too long and returns truncated version
+        truncateString(str) {
+            const n = 20;
+            const ext = str.substring(str.lastIndexOf("."));
+
+            if(str.length > n) {
+                // check if the file extension exists (ext != the full string)
+                if(ext.length < str.length) {
+                    return str.slice(0, n-1) + '...' + ext;
+                }
+                return str.slice(0, n-1) + '...';
+            }
+            return str;
+        }
     },
     mounted() {
         // initially set the two values 
@@ -86,3 +100,10 @@ export default {
     }
 };
 </script>
+<style scoped>
+td {
+    white-space: normal; /* Only needed when it's set differntly somewhere else */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
