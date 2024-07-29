@@ -113,13 +113,13 @@ export default {
             updateWhileInteracting: true,
         });
 
-        let layers = [tileLayer];
-        Array.prototype.push.apply(layers, this.overlays);
-        layers.push(vectorLayer);
+        // let layers = [tileLayer];
+        // Array.prototype.push.apply(layers, this.overlays);
+        // layers.push(vectorLayer);
 
         let map = new Map({
             target: this.$el,
-            layers: layers,
+            layers: [tileLayer],
             view: new View(),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,
@@ -134,11 +134,10 @@ export default {
             controls: defaultControls({zoom: this.interactive}),
         });
 
-        // for(let layer of this.overlays) {
-        //     console.log(layer);
-        //     map.addLayer(layer);
-        // }
-        // map.addLayer(vectorLayer);
+        for(let layer of this.overlays) {
+            map.addLayer(layer);
+        }
+        map.addLayer(vectorLayer);
 
         map.getView().fit(extent, map.getSize());
 
