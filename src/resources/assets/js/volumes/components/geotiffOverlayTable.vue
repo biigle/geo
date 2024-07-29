@@ -28,6 +28,7 @@ export default {
     data() {
         return {
             sortedOverlays: [],
+            dataLoaded: false,
         };
     },
     props: {
@@ -36,6 +37,10 @@ export default {
             required: true,
         },
         volumeId: {
+            type: Number,
+            required: true,
+        },
+        projectId: {
             type: Number,
             required: true,
         }
@@ -60,10 +65,30 @@ export default {
                 let addedId = overlaysId.filter(x => !sortedOverlaysId.includes(x));
                 this.sortedOverlays.unshift(overlays.find(x => x.id === addedId[0]));
             }
+        },
+        sortedOverlays(sortedArray) {
+            if(this.dataLoaded) {
+                let indexArray = sortedArray.map(x => x.id);
+                // save the new overlay-order in localStorage variable
+                window.localStorage.setItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`, JSON.stringify(indexArray));
+            }
         }
     },
     mounted() {
-        this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));
+        // initially retrieve the array of ordered overlay-ids 
+        let overlayOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+        if(overlayOrder) {
+            console.log(overlayOrder);
+            // add the overlays according to the specified order in overlayOrder-array
+            for(let id of overlayOrder) {
+                this.sortedOverlays.push(this.overlays.find(x => x.id === id));
+            }
+        } else { // default case
+            this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));
+        }
+        this.$nextTick(() => { //with this skip the first change of sortedOverlays
+            this.dataLoaded = true;
+        })
     },
     components: {
         overlayItem: OverlayItem,

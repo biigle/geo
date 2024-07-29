@@ -24,7 +24,7 @@
             </tab>
         </tabs>
     </div>
-    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}"></geotiff-overlay-table>
+    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" ></geotiff-overlay-table>
     <ul class="list-group" v-cloak>
         <li class="list-group-item text-muted" v-if="!hasOverlays">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>
     </ul>

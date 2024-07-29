@@ -4,7 +4,7 @@
             <i class="fas fa-grip-lines"></i>
         </td>
         <td scope="row" class="start">
-            <span class="text-muted">#<span>{{ overlay.id }}</span></span>
+            <span class="text-muted">#<span>{{ index + 1 }}</span></span>
         </td>
         <td class="start">
             <span class="ellipsis" v-text="truncateString(overlay.name)"></span>
