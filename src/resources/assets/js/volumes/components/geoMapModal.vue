@@ -65,6 +65,8 @@ export default {
             overlayUrlTemplate: '',
             overlays: [],
             browsingOverlays: [],
+            projectId: null,
+            overlayOrder: [],
         }
     },
     methods: {
@@ -92,18 +94,9 @@ export default {
                 this.activeLayerId = id;
             }
         },
-    },
-    watch: {
-        // select the geo overlay based on currently active id
-        activeLayerId(id) {
-            if(id === null) {
-                this.overlay = null;
-            } else {
-                this.overlay = this.browsingOverlays.find(x => x.id === id);
-            }
-        },
-        browsingOverlays(browsingOverlays) {
-            this.overlays = browsingOverlays.map((overlay) => {
+        // takes array of overlays as input and returns them as ol-tileLayers
+        createOverlayTile(overlays) {
+            return overlays.map((overlay) => {
                 return new TileLayer({
                     source: new ZoomifySource({
                             url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
@@ -124,6 +117,35 @@ export default {
             });
         }
     },
+    watch: {
+        // select the geo overlay based on currently active id
+        activeLayerId(id) {
+            if(id === null) {
+                this.overlay = null;
+            } else {
+                this.overlay = this.browsingOverlays.find(x => x.id === id);
+            }
+        },
+        // 
+        browsingOverlays(browsingOverlays) {
+            // adhere to the specific overlay order, if it has been defined in the volume settings
+            if(this.overlayOrder) {
+                for(let id of this.overlayOrder) {
+                    // call createOverlayTile-method with one overlay at a time
+                    let singleBrowsingOverlay = browsingOverlays.find(x => x.id === id);
+                    // handle case of missing id (not all overlays have to be marked as browsingOverlays)  
+                    if(typeof singleBrowsingOverlay !== 'undefined') {
+                        let overlayTileArr = this.createOverlayTile([singleBrowsingOverlay]);
+                        // add newly created overlayTile to overlays-array
+                        this.overlays.push(...overlayTileArr);
+                    }
+                }
+            } else { // default case
+                // call createOverlayTile-method with complete overlays-array, as order does not matter
+                this.overlays = this.createOverlayTile(browsingOverlays)
+            }
+        }
+    },
     created() {
         // show the modal upon trigger-event
         this.startLoading();
@@ -137,7 +159,11 @@ export default {
         GeoApi.getOverlayUrlTemplate({id: this.volumeId})
             .then((response) => {
                 this.overlayUrlTemplate = response.body;
-            });
+        });
+
+        this.projectId = biigle.$require('geo.projectId');
+        // retrieve the array of ordered overlay-ids
+        this.overlayOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
         // provide overlays array (only those where browsing_overlay = true)
         this.browsingOverlays = biigle.$require('geo.browsingOverlays');
     },
