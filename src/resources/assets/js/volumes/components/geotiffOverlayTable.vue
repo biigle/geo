@@ -98,13 +98,13 @@ export default {
 </script>
 
 <style scoped>
+
 .table-responsive {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    max-height: 300px;
     overflow-x: scroll;
-}
-.table {
-    width: 100%;
+    overflow-y: scroll;
 }
 
 th {

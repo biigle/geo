@@ -10,6 +10,11 @@
     flex: 0;
 }
 
+
+#volume-geo-overlay-upload.panel {
+    margin-bottom: 80px;
+}
+
 // align all row entries in center except the ones marked with "start"
 td:not(.start) {
     text-align: center;
