@@ -5,7 +5,7 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Modules\Geo\WebMapOverlay;
 use Illuminate\Http\Request;
 use Biigle\Http\Controllers\Api\Controller;
-
+use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
 
 class WebMapOverlayController extends Controller
 {
@@ -28,9 +28,9 @@ class WebMapOverlayController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreWebMapOverlay $request)
     {
-        //
+        $baseUrl = $request->input('url');
     }
 
     /**

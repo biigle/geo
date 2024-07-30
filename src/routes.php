@@ -44,6 +44,10 @@ $router->group([
         'uses' => 'VolumeGeoOverlayController@updateGeoTiff',
     ]);
 
+    $router->post('volumes/{id}/geo-overlays/webmap', [
+        'uses' => 'WebMapOverlayController@store',
+    ]);
+
     $router->resource('geo-overlays', 'GeoOverlayController', [
         'only' => ['destroy'],
         'parameters' => ['geo-overlays' => 'id'],
