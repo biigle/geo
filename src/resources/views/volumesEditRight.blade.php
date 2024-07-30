@@ -20,7 +20,9 @@
                 </geotiff-overlay-form>
             </tab>
             <tab title="WMS" :disabled="loading">
-                <p>Embed a geo overlay from a web-map-service link</p>
+                <webmap-overlay-form inline-template :volume-id="{{$volume->id}}">
+                @include('geo::volumes.edit.webmapOverlayForm')
+                </webmap-overlay-form>
             </tab>
         </tabs>
     </div>

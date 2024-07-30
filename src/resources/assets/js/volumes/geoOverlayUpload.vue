@@ -1,6 +1,7 @@
 <script>
 import Api from './api/geoOverlays';
 import GeotiffOverlayForm from './components/geotiffOverlayForm';
+import WebmapOverlayForm from './components/webmapOverlayForm';
 import GeotiffOverlayTable from './components/geotiffOverlayTable';
 import {EditorMixin} from './import';
 import {handleErrorResponse} from './import';
@@ -17,7 +18,8 @@ export default {
         tabs: Tabs,
         tab: Tab,
         geotiffOverlayForm: GeotiffOverlayForm,
-        geotiffOverlayTable: GeotiffOverlayTable
+        geotiffOverlayTable: GeotiffOverlayTable,
+        webmapOverlayForm: WebmapOverlayForm
     },
     data() {
         return {
