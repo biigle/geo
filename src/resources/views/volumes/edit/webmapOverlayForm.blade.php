@@ -1,5 +1,5 @@
 <div>
-    <p>Embed a geo overlay by providing a web-map-service url</p>
+    <p>Embed a geo overlay by providing a web-map-service url and name.</p>
     <form class="form" method="POST" v-on:submit.prevent="submitWebMap">
         <div class="form-group">
             <div class="row">
@@ -30,7 +30,7 @@
                     <p class="help-block">The base url of the WMS</p>
                 </div>
             </div>
-            <button class="btn btn-default" type="submit" v-on:click="submitWebMap">Upload WMS</button>
+            <button class="btn btn-default" type="submit">Upload WMS</button>
         </div>
     </form>
     <div class="alert alert-danger" v-if="error" v-text="error" v-cloak></div>

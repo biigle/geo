@@ -1,5 +1,5 @@
 <script>
-import Api from '../api/geoOverlays';
+import geoApi from '../api/geoOverlays';
 import {LoaderMixin} from '../import';
 
 export default {
@@ -19,10 +19,36 @@ export default {
         },
     },
   methods: {
-    submitWebMap(event) {
-    //   console.log(event.target);
+    handleSuccess(response) {
+        this.error = false;
+        this.success = true;
+        this.$emit('success', response.data);
     },
-  },
+    handleError(response) {
+        let knownError = response.body.errors && (
+          response.body.errors.url ||
+          response.body.errors.name ||
+          response.body.errors.fileExists ||
+          response.body.errors.invalidWMS
+        );
+        if (knownError) {
+          if (Array.isArray(knownError)) {
+              this.error = knownError[0];
+          } else {
+              this.error = knownError;
+          }
+        }
+    },
+    submitWebMap(event) {
+        this.startLoading();
+        let data = new FormData();
+        data.append('name', event.target[0].value);
+        data.append('url', event.target[1].value);      
+        geoApi.saveWebMap({id: this.volumeId}, data)
+          .then(this.handleSuccess, this.handleError)
+          .finally(this.finishLoading)
+      },
+    },
 };
 </script>
 
