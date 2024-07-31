@@ -18,6 +18,8 @@
                 <geotiff-overlay-form inline-template :volume-id="{{$volume->id}}" v-on:success="addOverlay">
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
+                <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                </geotiff-overlay-table>
             </tab>
             <tab title="WMS" :disabled="loading">
                 <webmap-overlay-form inline-template :volume-id="{{$volume->id}}">
@@ -26,9 +28,17 @@
             </tab>
         </tabs>
     </div>
-    <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" ></geotiff-overlay-table>
-    <ul class="list-group" v-cloak>
-        <li class="list-group-item text-muted" v-if="!hasOverlays">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>
-    </ul>
+    <div v-else>
+        <div v-if="hasOverlays">
+            <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            </geotiff-overlay-table>
+        </div>
+        <div v-if="hasOverlays">
+                <!-- add webmap-overlay-table -->
+        </div>
+        <ul class="list-group" v-cloak>
+            <li class="list-group-item text-muted" v-if="!hasOverlays">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>
+        </ul>
+    </div>
 </div>
 @endif

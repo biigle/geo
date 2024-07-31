@@ -1,6 +1,7 @@
 <template>
     <div class="table-responsive">
         <table v-if="overlays.length !== 0" class="table table-sm" v-cloak>
+            <caption><b>GeoTIFF Table</b></caption>
             <thead>
                 <tr>
                     <th></th>
@@ -109,5 +110,9 @@ export default {
 th {
     white-space: normal;
     word-wrap: break-word;
+}
+
+caption {
+    text-align: center;
 }
 </style>
