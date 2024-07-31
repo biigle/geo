@@ -26,6 +26,7 @@ class WebMapOverlay extends Model
     protected $fillable = [
         'url',
         'name',
+        'layer',
         'browsing_layer',
         'context_layer'
     ];

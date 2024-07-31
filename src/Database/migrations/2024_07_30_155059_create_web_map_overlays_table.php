@@ -23,6 +23,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name', 255)->unique();
             $table->string('url', 512)->unique();
+            $table->string('layer', 255);
             $table->boolean('browsing_layer')->default(0);
             $table->boolean('context_layer')->default(0);
             $table->integer('volume_id')->unsigned()->index();
