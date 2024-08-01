@@ -32,7 +32,6 @@ class StoreWebMapOverlay extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:web_map_overlays|max:255',
             'url' => 'required|unique:web_map_overlays|url:http,https|max:512'
         ];
     }

@@ -21,9 +21,9 @@ return new class extends Migration
 
         Schema::create('web_map_overlays', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 255)->unique();
+            $table->string('name', 255);
             $table->string('url', 512)->unique();
-            $table->string('layer', 255);
+            $table->json('layers');
             $table->boolean('browsing_layer')->default(0);
             $table->boolean('context_layer')->default(0);
             $table->integer('volume_id')->unsigned()->index();

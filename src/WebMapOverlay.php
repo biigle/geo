@@ -14,6 +14,10 @@ class WebMapOverlay extends Model
      */
     public $timestamps = false;
 
+    protected $casts = [
+        'layers' => 'array'
+    ];
+
     /**
      * The attributes hidden in the model's JSON form.
      *
@@ -26,7 +30,7 @@ class WebMapOverlay extends Model
     protected $fillable = [
         'url',
         'name',
-        'layer',
+        'layers',
         'browsing_layer',
         'context_layer'
     ];
