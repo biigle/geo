@@ -1,20 +1,7 @@
 <div>
-    <p>Embed a geo overlay by providing a web-map-service url and name.</p>
+    <p>Embed a geo overlay by providing a web-map-service url.</p>
     <form class="form" method="POST" v-on:submit.prevent="submitWebMap">
         <div class="form-group">
-            <div class="row">
-                <div class="form-group col-xs-12">
-                    <label for="wms_name" class="form-label">
-                        Name<br>
-                    </label>
-                    <input 
-                        class="form-control"
-                        type="text" 
-                        name="wms_name"
-                        placeholder="comp_bathymetry_001" 
-                        required>
-                </div>
-            </div>
             <div class="row">
                 <div class="form-group col-xs-12">
                     <label for="wms_url" class="form-label">

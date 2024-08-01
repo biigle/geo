@@ -27,9 +27,8 @@ export default {
     handleError(response) {
         let knownError = response.body.errors && (
           response.body.errors.url ||
-          response.body.errors.name ||
-          response.body.errors.fileExists ||
-          response.body.errors.invalidWMS
+          response.body.errors.invalidWMS ||
+          response.body.errors.noValidLayer
         );
         if (knownError) {
           if (Array.isArray(knownError)) {
@@ -42,8 +41,8 @@ export default {
     submitWebMap(event) {
         this.startLoading();
         let data = new FormData();
-        data.append('name', event.target[0].value);
-        data.append('url', event.target[1].value);      
+        data.append('url', event.target[0].value); 
+        data.append('volumeId', this.volumeId);
         geoApi.saveWebMap({id: this.volumeId}, data)
           .then(this.handleSuccess, this.handleError)
           .finally(this.finishLoading)
