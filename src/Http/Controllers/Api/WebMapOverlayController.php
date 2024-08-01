@@ -32,37 +32,103 @@ class WebMapOverlayController extends Controller
     public function store(StoreWebMapOverlay $request)
     {
         $webmapUrl = $request->input('url');
-        $webmapName = $request->input('name');
-        $volumeId = $request->volumeId;
-
-        // check whether file exists alread in DB 
-        $existingFileNames = WebMapOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
-        if (in_array($webmapName, $existingFileNames)) {
-            // strip the name if too long
-            $fileNameShort = strlen($webmapName) > 25 ? substr($webmapName, 0, 25) . "..." : $webmapName;
-            throw ValidationException::withMessages(
-                [
-                    'fileExists' => ["The WMS \"{$fileNameShort}\" has already been uploaded."],
-                ]
-            );
-        }
-
+        $volumeId = $request->input('volumeId');
         $parsed_url = parse_url($webmapUrl);
+
         // Check whether provided url is base url or query-url
         // 1. Case --> base URL given
-        // Steps: 
-        // - perform getCapablities lookup and extract first layer
+        // Steps: perform getCapablities lookup and extract first layer
         if(is_null(parse_url($webmapUrl, PHP_URL_QUERY))) {
             $baseUrl = $this->unparseUrl($parsed_url);
-            $result = $this->getCapabilities($baseUrl);
-            
+            $xmlResult = $this->getCapabilities($baseUrl);
+            [$webmapTitle, $webmapLayers] = $this->firstValidLayer($xmlResult);
+            $overlay = $this->saveWebMapOverlay($volumeId, $baseUrl, $webmapTitle, $webmapLayers);
         } else {
-            // 2. Case --> specific URL with query parameters (?service=wms&version=1.1.0&request=GetMap&layers=CV_Acc...)
-            // Steps: 
-            // - Extract layer from layers-variable
+            // 2. Case --> specific URL with query parameters given (e.g. '?service=wms&version=1.1.0&request=GetMap&layers=CV_Acc...')
+            // Steps: Extract layer from layers parameter in url
             $baseUrl = $this->unparseUrl($parsed_url, $base = true);
-            $result = $this->getCapabilities($baseUrl);
+            $xmlResult = $this->getCapabilities($baseUrl);
+            $queryString = $parsed_url['query'];
+            
+            // split the query-string into its compartments
+            parse_str(urldecode($queryString), $output);
+            // if queryString is empty or does not contain the layers parameter, use getCapabilities-request to find layer (like first case)
+            if(empty($queryString) || empty($output['layers'])) {
+                [$webmapTitle, $webmapLayers] = $this->firstValidLayer($xmlResult);
+            } else {
+                // Extract layers from url query-string
+                $layerString = $output['layers'];
+                // if multiple layers are defined in url layers-parameter:
+                if(str_contains($layerString, ',')) {
+                    $webmapLayers = explode(',', $layerString);
+                    // overwrite layerString with only first layer (searches for title of this layer in getCapabilities)
+                    $layerString = $webmapLayers[0];
+                } else {
+                    // if $layerString contains only one layer
+                    $webmapLayers = [$layerString];
+                }
+                
+                // xpath query to find the corresponding layer-title in the getCapabilities xml
+                $titleArray = $xmlResult->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString .'"])[1]/Title');
+                if(count($titleArray) !== 0) {
+                    $webmapTitle = (string) $titleArray[0];
+                } else { // default case
+                    $webmapTitle = $layerString;
+                }
+            }
+            $overlay = $this->saveWebMapOverlay($volumeId, $baseUrl, $webmapTitle, $webmapLayers);
         }
+
+        return $overlay;
+    }
+
+    /**
+     * Save webmap data in WebMapOverlay DB
+     *
+     * @param $volumeId ID of the current volume
+     * @param $url The base url of the WMS resource
+     * @param $title The title of the WMS resource (gets displayed to the user)
+     * @param $layer The layer-name of the WMS resource
+     *
+     * @return WebMapOverlay
+     */
+    protected function saveWebMapOverlay($volumeId, $url, $title, $layers)
+    {
+        $overlay = new WebMapOverlay;
+        $overlay->volume_id = $volumeId;
+        $overlay->url = $url;
+        $overlay->name = $title;
+        $overlay->layers = $layers;
+        $overlay->browsing_layer = false;
+        $overlay->context_layer = false;
+        $overlay->save();
+
+        return $overlay;
+    }
+
+    protected function firstValidLayer($xmlResult)
+    {
+        // select only those layers that have no Child layers within them
+        $layers = $xmlResult->xpath('//*[local-name()="Layer"][not(.//*[local-name()="Layer"])]');
+        // loop over layers and return first valid layer title and name
+        foreach($layers as $layer) {
+            if((string) $layer['queryable'] === "1") {
+                $webmapTitle = (string) $layer->Title;
+                // Excerpt from OpenGIS 'Web Map Server Implementation Specification':
+                // If, and only if, a layer has a <Name>, then it is a map layer that can be requested
+                // If the layer has a Title but no Name, then that layer is only a category title for
+                // all the layers nested within (the latter case should not occur due to xpath query above)
+                if(!empty($layer->Name)) {
+                    $webmapLayers = [(string) $layer->Name];
+                    return [$webmapTitle, $webmapLayers];
+                }
+            }
+        }
+        throw ValidationException::withMessages(
+            [
+                'noValidLayer' => ["Could not find any valid layers within the WMS resource."],
+            ]
+        );
     }
     
     /**

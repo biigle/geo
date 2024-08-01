@@ -14,7 +14,7 @@ class WebMapOverlayTest extends TestCase
         $faker = \Faker\Factory::create();
         $model = new WebMapOverlay;
         $model->name = $faker->company();
-        $model->layer = $faker->word();
+        $model->layers = [$faker->word(), $faker->word()];
         $model->volume_id = VolumeTest::create()->id;
         $model->url = $faker->url();
         $model->browsing_layer = false;
@@ -29,7 +29,7 @@ class WebMapOverlayTest extends TestCase
         $model = self::create()->fresh();
         $this->assertNotNull($model->name);
         $this->assertNotNull($model->url);
-        $this->assertNotNull($model->layer);
+        $this->assertNotNull($model->layers);
         $this->assertEquals($model->browsing_layer, false);
         $this->assertEquals($model->context_layer, false);
         $this->assertNull($model->created_at);
