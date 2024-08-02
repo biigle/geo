@@ -23,7 +23,8 @@ export default {
     },
     data() {
         return {
-            overlays: [],
+            geotiffOverlays: [],
+            webmapOverlays: [],
         }
     },
     computed: {
@@ -32,14 +33,11 @@ export default {
                 'panel-warning panel--editing': this.editing,
             };
         },
-        hasOverlays() {
-            return this.overlays.length > 0;
-        },
     },
     methods: {
         addOverlay(overlay) {
             overlay.isNew = true;
-            this.overlays.unshift(overlay);
+            this.geotiffOverlays.unshift(overlay);
             this.finishLoading();
         },
         handleRemove(overlay) {
@@ -50,7 +48,7 @@ export default {
                 .finally(this.finishLoading);
         },
         overlayRemoved(overlay) {
-            let overlays = this.overlays;
+            let overlays = this.geotiffOverlays;
             for (let i = overlays.length - 1; i >= 0; i--) {
                 if (overlays[i].id === overlay.id) {
                     overlays.splice(i, 1);
@@ -58,9 +56,14 @@ export default {
                 }
             }
         },
+        // dataKey either 'geotiffOverlays' or 'webmapOverlays'
+        hasOverlays(dataKey) {
+            return this[dataKey].length > 0;
+        },
     },
     created() {
-        this.overlays = biigle.$require('volumes.geoOverlays');
+        this.geotiffOverlays = biigle.$require('volumes.geoOverlays');
+        this.webmapOverlays = biigle.$require('volumes.webmapOverlays');
     },
 };
 </script>

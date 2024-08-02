@@ -156,7 +156,7 @@ export default {
             .finally(this.finishLoading);
 
         // provide overlay-url template string
-        GeoApi.getOverlayUrlTemplate({id: this.volumeId})
+        GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
             .then((response) => {
                 this.overlayUrlTemplate = response.body;
         });
