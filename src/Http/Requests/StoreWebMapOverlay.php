@@ -35,4 +35,16 @@ class StoreWebMapOverlay extends FormRequest
             'url' => 'required|unique:web_map_overlays|url:http,https|max:512'
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'url.unique' => 'The url has already been uploaded.',
+        ];
+    }
 }

@@ -28,7 +28,8 @@ export default {
         let knownError = response.body.errors && (
           response.body.errors.url ||
           response.body.errors.invalidWMS ||
-          response.body.errors.noValidLayer
+          response.body.errors.noValidLayer ||
+          response.body.errors.uniqueUrl
         );
         if (knownError) {
           if (Array.isArray(knownError)) {

@@ -31,6 +31,7 @@ class WebMapOverlayController extends Controller
      */
     public function store(StoreWebMapOverlay $request)
     {
+        $validated = $request->validated();
         $webmapUrl = $request->input('url');
         $volumeId = $request->input('volumeId');
         $parsed_url = parse_url($webmapUrl);
@@ -76,6 +77,19 @@ class WebMapOverlayController extends Controller
                     $webmapTitle = $layerString;
                 }
             }
+
+            // check whether baseURL exists alread in DB
+            $existingUrls = WebMapOverlay::where('volume_id', $volumeId)->pluck('url')->toArray();
+            if (in_array($baseUrl, $existingUrls)) {
+                // strip the url if too long
+                $urlShort = strlen($baseUrl) > 80 ? substr($baseUrl, 0, 80) . "..." : $baseUrl;
+                throw ValidationException::withMessages(
+                    [
+                        'uniqueUrl' => ["The url \"{$urlShort}\" has already been uploaded (Filename: \"{$webmapTitle}\")."],
+                    ]
+                );
+            }
+            // save the WebMapOverlay to DB
             $overlay = $this->saveWebMapOverlay($volumeId, $baseUrl, $webmapTitle, $webmapLayers);
         }
 
@@ -199,9 +213,14 @@ class WebMapOverlayController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * 
+     * @param int $id webmap overlay id
      */
-    public function destroy(WebMapOverlay $webMapOverlay)
+    public function destroy($id)
     {
-        //
+        $overlay = WebMapOverlay::findOrFail($id);
+        $this->authorize('update', $overlay->volume);
+
+        $overlay->delete();
     }
 }
