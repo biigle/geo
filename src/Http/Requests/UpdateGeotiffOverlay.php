@@ -34,8 +34,8 @@ class updateGeotiffOverlay extends FormRequest
     public function rules(): array
     {
         return [
-            'browsing_layer' => 'filled|boolean',
-            'context_layer' => 'filled|boolean'
+            'layer_type' => 'filled|string',
+            'value' => 'filled|boolean'
         ];
     }
 }

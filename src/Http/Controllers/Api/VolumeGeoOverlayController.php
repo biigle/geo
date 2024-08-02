@@ -255,24 +255,24 @@ class VolumeGeoOverlayController extends Controller
 
      public function updateGeoTiff(UpdateGeotiffOverlay $request)
      {
-         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
-         if($request->filled('context_layer') || $request->filled('browsing_layer')) {
-             if($request->filled('context_layer')) {
-                 $overlay->update([
-                     'context_layer' => $request->input('context_layer')
-                 ]);
-             }
-             if($request->filled('browsing_layer')) {
-                 $overlay->update([
-                     'browsing_layer' => $request->input('browsing_layer')
-                 ]);
-             }
-             return response()->json([
-                 'browsing_layer' => $overlay->browsing_layer,
-                 'context_layer' =>  $overlay->context_layer
-             ]);
-         } else {
-             return response('no data update performed', $status=422);
-         }
+        $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
+        if($request->filled('layer_type')) {
+            if($request->input('layer_type') == 'contextLayer') {
+                $overlay->update([
+                    'context_layer' => $request->input('value')
+                ]);
+            }
+            if($request->input('layer_type') == 'browsingLayer') {
+                $overlay->update([
+                    'browsing_layer' => $request->input('value')
+                ]);
+            }
+            return response()->json([
+                'browsing_layer' => $overlay->browsing_layer,
+                'context_layer' =>  $overlay->context_layer
+            ]);
+        } else {
+            return response('no data update performed', $status=422);
+        }
      }
 }
