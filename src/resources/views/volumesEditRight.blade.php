@@ -18,8 +18,8 @@
                 <geotiff-overlay-form inline-template :volume-id="{{$volume->id}}" v-on:success="addOverlay">
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
-                <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
-                </geotiff-overlay-table>
+                <overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                </overlay-table>
             </tab>
             <tab title="WMS" :disabled="loading">
                 <webmap-overlay-form inline-template :volume-id="{{$volume->id}}">
@@ -30,8 +30,8 @@
     </div>
     <div v-else>
         <div v-if="hasOverlays">
-            <geotiff-overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
-            </geotiff-overlay-table>
+            <overlay-table :overlays="overlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            </overlay-table>
         </div>
         <div v-if="hasOverlays">
                 <!-- add webmap-overlay-table -->

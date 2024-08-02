@@ -2,7 +2,7 @@
 import Api from './api/geoOverlays';
 import GeotiffOverlayForm from './components/geotiffOverlayForm';
 import WebmapOverlayForm from './components/webmapOverlayForm';
-import GeotiffOverlayTable from './components/geotiffOverlayTable';
+import OverlayTable from './components/overlayTable';
 import {EditorMixin} from './import';
 import {handleErrorResponse} from './import';
 import {LoaderMixin} from './import';
@@ -18,7 +18,7 @@ export default {
         tabs: Tabs,
         tab: Tab,
         geotiffOverlayForm: GeotiffOverlayForm,
-        geotiffOverlayTable: GeotiffOverlayTable,
+        overlayTable: OverlayTable,
         webmapOverlayForm: WebmapOverlayForm
     },
     data() {
