@@ -14,7 +14,7 @@
                         placeholder="https://maps.org/geoserver/namespace/wms"
                         value="{{ old('url') }}" 
                         required>
-                    <p class="help-block">The base url of the WMS</p>
+                    <!-- <p class="help-block">The base url of the WMS</p> -->
                 </div>
             </div>
             <button class="btn btn-default" type="submit">Upload WMS</button>
