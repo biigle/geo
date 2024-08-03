@@ -6,6 +6,7 @@ use Biigle\Modules\Geo\WebMapOverlay;
 use Illuminate\Http\Request;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
+use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
 use Illuminate\Validation\ValidationException;
 
 class WebMapOverlayController extends Controller
@@ -206,10 +207,28 @@ class WebMapOverlayController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WebMapOverlay $webMapOverlay)
+    public function update(UpdateOverlay $request)
     {
-        //
-    }
+        $overlay = WebMapOverlay::findOrFail($request->webmap_overlay_id);
+        if($request->filled('layer_type')) {
+            if($request->input('layer_type') == 'contextLayer') {
+                $overlay->update([
+                    'context_layer' => $request->input('value')
+                ]);
+            }
+            if($request->input('layer_type') == 'browsingLayer') {
+                $overlay->update([
+                    'browsing_layer' => $request->input('value')
+                ]);
+            }
+            return response()->json([
+                'browsing_layer' => $overlay->browsing_layer,
+                'context_layer' =>  $overlay->context_layer
+            ]);
+        } else {
+            return response('no data update performed', $status=422);
+        }
+     }
 
     /**
      * Remove the specified resource from storage.

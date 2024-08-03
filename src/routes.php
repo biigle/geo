@@ -57,4 +57,13 @@ $router->group([
         'uses' => 'GeoOverlayController@showFile',
     ]);
 
+    $router->put('volumes/{id}/geo-overlays/webmap/{webmap_overlay_id}', [
+        'uses' => 'WebMapOverlayController@update',
+    ]);
+
+    $router->resource('web-map-overlays', 'WebMapOverlayController', [
+        'only' => ['destroy'],
+        'parameters' => ['web-map-overlays' => 'id'],
+    ]);
+
 });
