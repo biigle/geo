@@ -19,6 +19,10 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
         method: 'PUT',
         url: 'api/v1/volumes{/id}/geo-overlays/geotiff{/geo_overlay_id}',
     },
+    deleteGeoTiff: {
+        method: 'DELETE',
+        url: 'api/v1/geo-overlays/{id}',
+    },
     // getGeoTiff: {
     //     method: 'GET',
     //     url: 'api/v1/volumes{/id}/geo-overlays/{/layer_type?}',
@@ -31,5 +35,13 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
     saveWebMap: {
         method: 'POST',
         url: 'api/v1/volumes{/id}/geo-overlays/webmap',
-    }
+    },
+    updateWebMap: {
+        method: 'PUT',
+        url: 'api/v1/volumes{/id}/geo-overlays/webmap{/webmap_overlay_id}',
+    },
+    deleteWebMap: {
+        method: 'DELETE',
+        url: 'api/v1/web-map-overlays/{id}',
+    },
 });

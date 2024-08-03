@@ -19,22 +19,50 @@
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
                 <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                    <template v-slot:title>GeoTIFF Overlays</template>
+                    <template v-slot:header>
+                        <th></th>
+                        <th>#</th>
+                        <th>Filename</th>
+                        <th>Browsing</th>
+                        <th>Context</th>
+                        <th>Delete</th>
+                    </template>
                 </overlay-table>
             </tab>
             <tab title="WMS" :disabled="loading">
                 <webmap-overlay-form inline-template :volume-id="{{$volume->id}}">
                 @include('geo::volumes.edit.webmapOverlayForm')
                 </webmap-overlay-form>
+                <overlay-table :overlays="webmapOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                    <template v-slot:title>WebMap Overlays</template>
+                    <template v-slot:header>
+                        <th></th>
+                        <th>#</th>
+                        <th>Filename</th>
+                        <th>Browsing</th>
+                        <th>Context</th>
+                        <th>Delete</th>
+                    </template>
+                </overlay-table>
             </tab>
         </tabs>
     </div>
     <div v-else>
         <div v-if="hasOverlays('geotiffOverlays')">
-            <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
-            </overlay-table>
+            <!-- <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            <template v-slot:header>
+                <th></th>
+                <th>#</th>
+                <th>Filename</th>
+                <th>Browsing</th>
+                <th>Context</th>
+                <th>Delete</th>
+            </template>
+            </overlay-table> -->
         </div>
         <div v-if="hasOverlays('webmapOverlays')">
-                <!-- add webmap-overlay-table -->
+           <!-- TODO -->
         </div>
         <ul class="list-group" v-cloak>
             <li class="list-group-item text-muted" v-if="!hasOverlays('geotiffOverlays') && !hasOverlays('webmapOverlays')">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>

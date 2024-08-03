@@ -1,19 +1,14 @@
 <template>
     <div class="table-responsive">
         <table v-if="overlays.length !== 0" class="table table-sm" v-cloak>
-            <caption><b>GeoTIFF Table</b></caption>
+            <caption><b><slot name="title"></slot></b></caption>
             <thead>
                 <tr>
-                    <th></th>
-                    <th>#</th>
-                    <th>Filename</th>
-                    <th>Browsing</th>
-                    <th>Context</th>
-                    <th>Delete</th>
+                    <slot name="header"></slot>
                 </tr>
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle">
-                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="idx" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
+                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="idx" :overlay="overlay" :volume-id="volumeId" :overlay-type="overlayType" v-on:remove="$emit('remove', overlay);">
                 </tr>
             </draggable>
         </table>
@@ -46,7 +41,14 @@ export default {
             required: true,
         }
     },
-    methods: {
+    computed: {
+        overlayType() {
+            let fileExt = this.overlays[0].name.split('.').pop();
+            if(fileExt === 'tif') {
+                return 'geotiff';
+            }
+            return 'webmap';
+        }
     },
     watch: {
         overlays(overlays) {
@@ -71,13 +73,13 @@ export default {
             if(this.dataLoaded) {
                 let indexArray = sortedArray.map(x => x.id);
                 // save the new overlay-order in localStorage variable
-                window.localStorage.setItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`, JSON.stringify(indexArray));
+                window.localStorage.setItem(`${this.overlayType}-upload-order-${this.projectId}-${this.volumeId}`, JSON.stringify(indexArray));
             }
         }
     },
     mounted() {
         // initially retrieve the array of ordered overlay-ids 
-        let overlayOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+        let overlayOrder = JSON.parse(window.localStorage.getItem(`${this.overlayType}-upload-order-${this.projectId}-${this.volumeId}`));
         if(overlayOrder) {
             // add the overlays according to the specified order in overlayOrder-array
             for(let id of overlayOrder) {

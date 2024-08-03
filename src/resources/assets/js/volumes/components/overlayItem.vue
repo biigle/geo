@@ -38,7 +38,8 @@ export default {
     props: {
         overlay: {type: Object, required: true},
         volumeId: {type: Number, required: true,},
-        index: {type: Number, required: true}
+        index: {type: Number, required: true},
+        overlayType: {type: String, required: true},
     },
     computed: {
         classObject() {
@@ -58,16 +59,27 @@ export default {
         },
         // handle update of contextLayer & browsingLayer values in overlay
         toggleButton(dataKey) {
-            Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
-                layer_type: dataKey,
-                value: !this[dataKey],
-                })
+            this.update(dataKey)
                 .then((response) => {
                     if(response.status == 200) {
                         this[dataKey] = !this[dataKey];
                     }
                 })
                 .catch(handleErrorResponse);
+        },
+        update(dataKey) {
+            if(this.overlayType === 'geotiff') {
+                return Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
+                    layer_type: dataKey,
+                    value: !this[dataKey],
+                    });
+            } else {
+                //this.overlayType === 'webmap'
+                return Api.updateWebMap({id: this.volumeId, webmap_overlay_id: this.overlay.id}, {
+                    layer_type: dataKey,
+                    value: !this[dataKey],
+                    });
+            }
         },
         // checks if string is too long and returns truncated version
         truncateString(str) {
