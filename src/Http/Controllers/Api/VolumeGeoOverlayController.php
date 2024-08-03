@@ -6,7 +6,7 @@ use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
-use Biigle\Modules\Geo\Http\Requests\UpdateGeotiffOverlay;
+use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
 use Biigle\Volume;
 use Illuminate\Http\Request;
@@ -249,11 +249,11 @@ class VolumeGeoOverlayController extends Controller
      * browsing_layer: true
      * context_layer: false
      * 
-     * @param UpdateGeotiffOverlay $request
+     * @param UpdateOverlay $request
      * @param $geo_overlay_id
      */
 
-     public function updateGeoTiff(UpdateGeotiffOverlay $request)
+     public function updateGeoTiff(UpdateOverlay $request)
      {
         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
         if($request->filled('layer_type')) {

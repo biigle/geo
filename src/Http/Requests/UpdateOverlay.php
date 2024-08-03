@@ -5,7 +5,7 @@ namespace Biigle\Modules\Geo\Http\Requests;
 use Biigle\Volume;
 use Illuminate\Foundation\Http\FormRequest;
 
-class updateGeotiffOverlay extends FormRequest
+class UpdateOverlay extends FormRequest
 {
 
     /**
