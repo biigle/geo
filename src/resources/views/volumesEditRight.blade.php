@@ -51,6 +51,7 @@
     <div v-else>
         <div v-if="hasOverlays('geotiffOverlays')">
             <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            <template v-slot:title>GeoTIFF Overlays</template>
             <template v-slot:header>
                 <th></th>
                 <th>#</th>
