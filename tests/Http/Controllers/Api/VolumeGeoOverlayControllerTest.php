@@ -66,8 +66,8 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->beEditor();
         // 403: The client does not have access rights to the content
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
-            'browsing_layer' => true,
-            'context_layer' => false
+            'layer_type' => 'browsingLayer',
+            'value' => true
         ])
         ->assertStatus(403);
 
@@ -79,15 +79,15 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         // now test if updating with data will succeed with the correct values being returned
         $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
-            'browsing_layer' => true,
-            'context_layer' => false
+            'layer_type' => 'browsingLayer',
+            'value' => true
         ]);
         $response
             ->assertStatus(200)            
-            ->assertJson(fn (AssertableJson $json) =>
-                $json->where('browsing_layer', true)
-                    ->where('context_layer', false)
-            );
+            ->assertJson([
+                'browsing_layer' => true,
+                'context_layer' => false
+            ]);
     }
 
     public function testStoreGeotiff() 

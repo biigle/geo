@@ -71,4 +71,57 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals($overlay3->name, 'MSM96_EM122_IAP');
         $response3->assertJson($overlay3->toArray(), $exact=true);
     }
+
+    public function testUpdateWebMap()
+    {
+        $id = $this->volume()->id;
+    
+        // Create overlay-instance
+        $overlay = WebMapOverlayTest::create();
+        $overlay->save();
+       
+        $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/webmap/{$overlay->id}");
+
+        $this->beEditor();
+        // 403: The client does not have access rights to the content
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/webmap/{$overlay->id}", [
+            'layer_type' => 'browsingLayer',
+            'value' => false
+        ])
+        ->assertStatus(403);
+
+        $this->beAdmin();
+        // 422: The request was well-formed but was unable to be followed due to semantic errors.
+        // reason: no input data
+        $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/webmap/{$overlay->id}")
+        ->assertStatus(422);
+
+        // now test if updating with data will succeed with the correct values being returned
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/webmap/{$overlay->id}", [
+            'layer_type' => 'browsingLayer',
+            'value' => true
+        ]);
+        $response
+            ->assertStatus(200)            
+            ->assertJson([
+                'browsing_layer' => true,
+                'context_layer' => false
+            ]);
+    }
+
+    public function testDestroyWebMap()
+    {
+        $overlay = WebMapOverlayTest::create();
+        $overlay->volume_id = $this->volume()->id;
+        $overlay->save();
+        $id = $overlay->id;
+
+        $this->doTestApiRoute('DELETE', "/api/v1/web-map-overlays/{$id}");
+
+        $this->beEditor();
+        $this->delete("/api/v1/web-map-overlays/{$id}")->assertStatus(403);
+
+        $this->beAdmin();
+        $this->delete("/api/v1/web-map-overlays/{$id}")->assertStatus(200);
+    }
 }
