@@ -77,7 +77,7 @@ export default {
         },
         // checks if string is too long and returns truncated version
         truncateString(str) {
-            const n = 20;
+            const n = 22;
             const ext = str.substring(str.lastIndexOf("."));
 
             if(str.length > n) {
