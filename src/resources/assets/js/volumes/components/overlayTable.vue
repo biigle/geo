@@ -8,7 +8,7 @@
                 </tr>
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle">
-                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="idx" :overlay="overlay" :volume-id="volumeId" :overlay-type="overlayType" v-on:remove="$emit('remove', overlay);">
+                <tr is="overlay-item" v-for="(overlay, idx) in sortedOverlays" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="idx" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
                 </tr>
             </draggable>
         </table>
@@ -43,11 +43,8 @@ export default {
     },
     computed: {
         overlayType() {
-            let fileExt = this.overlays[0].name.split('.').pop();
-            if(fileExt === 'tif') {
-                return 'geotiff';
-            }
-            return 'webmap';
+            // infer type from first instance of the overlay-array
+            return this.overlays[0].type;
         }
     },
     watch: {

@@ -37,7 +37,11 @@ export default {
     methods: {
         addOverlay(overlay) {
             overlay.isNew = true;
-            this.geotiffOverlays.unshift(overlay);
+            if(overlay.type === 'geotiff') {
+                this.geotiffOverlays.unshift(overlay);
+            } else {
+                this.webmapOverlays.unshift(overlay);
+            }
             this.finishLoading();
         },
         handleRemove(overlay) {
@@ -48,16 +52,14 @@ export default {
                 .finally(this.finishLoading);
         },
         delete(overlay) {
-            let overlayType = this.checkType(overlay);
-            if(overlayType == 'geotiff') {
+            if(overlay.type === 'geotiff') {
                 return Api.deleteGeoTiff({id: overlay.id});
-            } else { // overlayType == 'webmap'
+            } else { // overlay.type == 'webmap'
                 return Api.deleteWebMap({id: overlay.id});
             }
         },
         overlayRemoved(overlay) {
-            let overlayType = this.checkType(overlay);
-            let overlays = overlayType === 'geotiff' ? this.geotiffOverlays : this.webmapOverlays;
+            let overlays = overlay.type === 'geotiff' ? this.geotiffOverlays : this.webmapOverlays;
             
             for (let i = overlays.length - 1; i >= 0; i--) {
                 if (overlays[i].id === overlay.id) {
@@ -70,14 +72,6 @@ export default {
         hasOverlays(dataKey) {
             return this[dataKey].length > 0;
         },
-        // determine the overlay-type at hand
-        checkType(overlay) {
-            let fileExt = overlay.name.split('.').pop();
-            if(fileExt === 'tif') {
-                return 'geotiff';
-            }
-            return 'webmap';
-        }
     },
     created() {
         this.geotiffOverlays = biigle.$require('volumes.geoOverlays');

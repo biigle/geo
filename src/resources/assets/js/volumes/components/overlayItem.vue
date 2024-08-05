@@ -18,7 +18,7 @@
             <button type="button" class="toggle-btn" :class="{active: contextLayer}" v-on:click="toggleButton('contextLayer')"><span class="fa fa-circle" aria-hidden="true"></span></button>
         </td>
         <td>
-            <button type="button" class="close" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" :title="title" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>
         </td>
     </tr>
 </template>
@@ -39,14 +39,8 @@ export default {
         overlay: {type: Object, required: true},
         volumeId: {type: Number, required: true,},
         index: {type: Number, required: true},
-        overlayType: {type: String, required: true},
     },
     computed: {
-        classObject() {
-            return {
-                'list-group-item-success': this.overlay.isNew,
-            };
-        },
         title() {
             return 'Delete overlay ' + this.overlay.name;
         },
@@ -68,13 +62,13 @@ export default {
                 .catch(handleErrorResponse);
         },
         update(dataKey) {
-            if(this.overlayType === 'geotiff') {
+            if(this.overlay.type === 'geotiff') {
                 return Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
                     layer_type: dataKey,
                     value: !this[dataKey],
                     });
             } else {
-                //this.overlayType === 'webmap'
+                //this.overlay.type === 'webmap'
                 return Api.updateWebMap({id: this.volumeId, webmap_overlay_id: this.overlay.id}, {
                     layer_type: dataKey,
                     value: !this[dataKey],
@@ -104,7 +98,8 @@ export default {
 };
 </script>
 <style scoped>
-tr:active {
+
+tr:has(.handle:active) {
     background-color: #7c7c7c;
 }
 </style>
