@@ -105,7 +105,7 @@ export default {
         toggleActive(varKey, id) {
             if(this[varKey].includes(id)) {
                 let index = this[varKey].indexOf(id);
-                this[varKey].splice(index);
+                this[varKey].splice(index, 1);
             } else {
                 this[varKey].push(id);
             }
@@ -186,6 +186,9 @@ export default {
         // provide overlays array (only those where browsing_overlay = true)
         this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
         this.webmapOverlays =biigle.$require('geo.webmapOverlays');
+        // initially fill activeIds with selected overlays
+        this.activeTifIds = this.geotiffOverlays.map(x => x.id);
+        this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
     },
 }
 </script>
