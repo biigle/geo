@@ -103,3 +103,8 @@ export default {
     }
 };
 </script>
+<style scoped>
+tr:active {
+    background-color: #7c7c7c;
+}
+</style>
