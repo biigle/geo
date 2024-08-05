@@ -15,11 +15,6 @@
     margin-bottom: 80px;
 }
 
-// align all row entries in center except the ones marked with "start"
-td:not(.start) {
-    text-align: center;
-}
-
 .toggle-btn {
     background-color: grey;
     text-decoration: none;

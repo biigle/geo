@@ -4,7 +4,14 @@
             <caption><b><slot name="title"></slot></b></caption>
             <thead>
                 <tr>
-                    <slot name="header"></slot>
+                    <slot name="header">
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </slot>
                 </tr>
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle">
@@ -104,6 +111,10 @@ export default {
     max-height: 300px;
     overflow-x: scroll;
     overflow-y: scroll;
+}
+
+table {
+    table-layout: auto;
 }
 
 th {

@@ -50,7 +50,7 @@
     </div>
     <div v-else>
         <div v-if="hasOverlays('geotiffOverlays')">
-            <!-- <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
             <template v-slot:header>
                 <th></th>
                 <th>#</th>
@@ -59,10 +59,12 @@
                 <th>Context</th>
                 <th>Delete</th>
             </template>
-            </overlay-table> -->
+            </overlay-table>
         </div>
         <div v-if="hasOverlays('webmapOverlays')">
-           <!-- TODO -->
+            <overlay-table :overlays="webmapOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                <template v-slot:title>WebMap Overlays</template>
+            </overlay-table>
         </div>
         <ul class="list-group" v-cloak>
             <li class="list-group-item text-muted" v-if="!hasOverlays('geotiffOverlays') && !hasOverlays('webmapOverlays')">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>

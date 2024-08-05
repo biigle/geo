@@ -1,6 +1,6 @@
 <template>
     <tr>
-        <td class="handle">
+        <td class="handle start">
             <i class="fas fa-grip-lines"></i>
         </td>
         <td scope="row" class="start">
@@ -98,8 +98,34 @@ export default {
 };
 </script>
 <style scoped>
-
+/* when row-handle is selected for dragging, highlight the entire row */
 tr:has(.handle:active) {
     background-color: #7c7c7c;
+}
+
+/* define the different column widths individually */
+td:nth-child(1) {
+    width: 30px;
+}
+td:nth-child(2) {
+    width: 35px;
+}
+td:nth-child(3) {
+    white-space: nowrap;
+    min-width: 200px;
+}
+td:nth-child(4) {
+    min-width: 90px;
+}
+td:nth-child(5) {
+    min-width: 80px;
+}
+td:nth-child(6) {
+    min-width: 65px;
+}
+
+/* align all row entries in center except the ones marked with "start" */
+td:not(.start) {
+    text-align: center;
 }
 </style>
