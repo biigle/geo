@@ -31,7 +31,7 @@
                 </overlay-table>
             </tab>
             <tab title="WMS" :disabled="loading">
-                <webmap-overlay-form inline-template :volume-id="{{$volume->id}}">
+                <webmap-overlay-form inline-template :volume-id="{{$volume->id}}"  v-on:success="addOverlay">
                 @include('geo::volumes.edit.webmapOverlayForm')
                 </webmap-overlay-form>
                 <overlay-table :overlays="webmapOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
