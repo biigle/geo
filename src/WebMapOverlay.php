@@ -4,6 +4,7 @@ namespace Biigle\Modules\Geo;
 
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Volume;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class WebMapOverlay extends Model
 {
@@ -36,6 +37,13 @@ class WebMapOverlay extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['type'];
+
+    /**
      * The volume, this overlay belongs to.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -43,5 +51,15 @@ class WebMapOverlay extends Model
     public function volume()
     {
         return $this->belongsTo(Volume::class);
+    }
+
+    /**
+     * Defines the type of overlay.
+     */
+    protected function type(): Attribute
+    {
+        return new Attribute(
+            get: fn () => 'webmap',
+        );
     }
 }

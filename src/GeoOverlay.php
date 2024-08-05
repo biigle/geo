@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Biigle\Volume;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Storage;
 
 class GeoOverlay extends Model
@@ -44,6 +45,13 @@ class GeoOverlay extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['type'];
+
+    /**
      * The "booting" method of the model.
      *
      * @return void
@@ -58,6 +66,16 @@ class GeoOverlay extends Model
         });
     }
 
+    /**
+     * Defines the type of overlay.
+     */
+    protected function type(): Attribute
+    {
+        return new Attribute(
+            get: fn () => 'geotiff',
+        );
+    }
+    
     /**
      * The volume, this overlay belongs to.
      *

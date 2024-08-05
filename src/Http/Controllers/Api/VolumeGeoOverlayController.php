@@ -217,6 +217,7 @@ class VolumeGeoOverlayController extends Controller
         $overlay->attrs = ["width" => $pixelDimensions[0],  "height" => $pixelDimensions[1]];
         $overlay->save();
         $overlay->storeFile($file);
+        $overlay->type = 'geotiff';
         $this->submitTileJob($overlay);
 
         return $overlay;

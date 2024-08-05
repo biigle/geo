@@ -93,7 +93,7 @@ class WebMapOverlayController extends Controller
             // save the WebMapOverlay to DB
             $overlay = $this->saveWebMapOverlay($volumeId, $baseUrl, $webmapTitle, $webmapLayers);
         }
-
+        
         return $overlay;
     }
 
@@ -117,6 +117,7 @@ class WebMapOverlayController extends Controller
         $overlay->browsing_layer = false;
         $overlay->context_layer = false;
         $overlay->save();
+        $overlay->type = 'webmap';
 
         return $overlay;
     }
