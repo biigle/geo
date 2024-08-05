@@ -8,16 +8,27 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays"></image-map>
+            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
         </div>
         <div class="cell cell-edit">
             <h4>Geo Overlays</h4>
             <p>Select an overlay from the list below to show on map.</p>
-            <div v-for="overlay in browsingOverlays" :key="overlay.id">
-                <button :id="overlay.id" :class="{active: activeLayerId === overlay.id}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)">
-                    <span class="ellipsis" v-text="overlay.name"></span>
-                </button>
-            </div> 
+            <div v-if="geotiffOverlays.length !== 0">
+                <p class="help-block">Geotiff Overlays</p>
+                <div v-for="tifOverlay in geotiffOverlays" :key="tifOverlay.id">
+                    <button :id="tifOverlay.id" :class="{active: activeTifIds.includes(tifOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeTifIds', tifOverlay.id)">
+                        <span class="ellipsis" v-text="tifOverlay.name"></span>
+                    </button>
+                </div> 
+            </div>
+            <div v-if="webmapOverlaysSorted.length !== 0">
+                <p class="help-block">WebMap Overlays</p>
+                <div v-for="wmsOverlay in webmapOverlaysSorted" :key="wmsOverlay.id">
+                    <button :id="wmsOverlay.id" :class="{active: activeWmsIds.includes(wmsOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeWmsIds', wmsOverlay.id)">
+                        <span class="ellipsis" v-text="wmsOverlay.name"></span>
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="cell cell-content">
             <p class="text-muted">
@@ -60,13 +71,16 @@ export default {
             images: [],
             disabled: true,
             imageIds: [],
-            activeLayerId: null,
-            overlay: null,
+            activeTifIds: [],
+            activeWmsIds: [],
             overlayUrlTemplate: '',
             overlays: [],
-            browsingOverlays: [],
             projectId: null,
-            overlayOrder: [],
+            geotiffOverlays: [],
+            webmapOverlays: [],
+            webmapOverlaysSorted: [],
+            geotiffOrder: [],
+            webmapOrder: [],
         }
     },
     methods: {
@@ -87,11 +101,13 @@ export default {
                 this.disabled = true;
             }
         },
-        toggleActive(id) {
-            if(id === this.activeLayerId) {
-                this.activeLayerId = null;
+        // varKey is either 'activeTifIds' or 'activeWmsIds' Array
+        toggleActive(varKey, id) {
+            if(this[varKey].includes(id)) {
+                let index = this[varKey].indexOf(id);
+                this[varKey].splice(index);
             } else {
-                this.activeLayerId = id;
+                this[varKey].push(id);
             }
         },
         // takes array of overlays as input and returns them as ol-tileLayers
@@ -104,7 +120,7 @@ export default {
                             extent: [
                                 0,
                                 0,
-                                overlay.attrs.width, 
+                                overlay.attrs.width,
                                 overlay.attrs.height
                                 // overlay.top_left_lng,
                                 // overlay.bottom_right_lat,
@@ -118,32 +134,34 @@ export default {
         }
     },
     watch: {
-        // select the geo overlay based on currently active id
-        activeLayerId(id) {
-            if(id === null) {
-                this.overlay = null;
-            } else {
-                this.overlay = this.browsingOverlays.find(x => x.id === id);
-            }
-        },
-        // 
-        browsingOverlays(browsingOverlays) {
+        geotiffOverlays(geotiffOverlays) {
             // adhere to the specific overlay order, if it has been defined in the volume settings
-            if(this.overlayOrder) {
-                for(let id of this.overlayOrder) {
+            if(this.geotiffOrder) {
+                for(let id of this.geotiffOrder) {
                     // call createOverlayTile-method with one overlay at a time
-                    let singleBrowsingOverlay = browsingOverlays.find(x => x.id === id);
-                    // handle case of missing id (not all overlays have to be marked as browsingOverlays)  
-                    if(typeof singleBrowsingOverlay !== 'undefined') {
-                        let overlayTileArr = this.createOverlayTile([singleBrowsingOverlay]);
+                    let idx = geotiffOverlays.findIndex(x => x.id === id);
+                    if(idx !== -1) {
+                        // call creatOverlayTile by wrapping the single overlay in an Array.
+                        // This way the method works for both cases (whether order exists or not)
+                        let overlayTileArr = this.createOverlayTile([geotiffOverlays[idx]]);
                         // add newly created overlayTile to overlays-array
                         this.overlays.push(...overlayTileArr);
                     }
                 }
             } else { // default case
                 // call createOverlayTile-method with complete overlays-array, as order does not matter
-                this.overlays = this.createOverlayTile(browsingOverlays)
+                this.overlays = this.createOverlayTile(geotiffOverlays)
             }
+        },
+        webmapOverlays(webmapOverlays) {
+            // adhere to the specific overlay order, if it has been defined in the volume settings
+            if(this.webmapOrder) {
+                // Sort the original webmapOverlays array according to the order of ids
+                this.webmapOverlaysSorted = webmapOverlays.toSorted((a, b) => {
+                    return this.webmapOrder.indexOf(a.id) - this.webmapOrder.indexOf(b.id)
+                });
+            }
+            this.webmapOverlaysSorted = [...webmapOverlays];
         }
     },
     created() {
@@ -163,9 +181,11 @@ export default {
 
         this.projectId = biigle.$require('geo.projectId');
         // retrieve the array of ordered overlay-ids
-        this.overlayOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+        this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+        this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
         // provide overlays array (only those where browsing_overlay = true)
-        this.browsingOverlays = biigle.$require('geo.browsingOverlays');
+        this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
+        this.webmapOverlays =biigle.$require('geo.webmapOverlays');
     },
 }
 </script>

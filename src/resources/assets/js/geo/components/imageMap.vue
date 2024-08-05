@@ -13,6 +13,7 @@ import ScaleLine from 'ol/control/ScaleLine';
 import Select from 'ol/interaction/Select';
 import Style from '../ol/style';
 import TileLayer from 'ol/layer/Tile';
+import TileWMS from 'ol/source/TileWMS.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
@@ -55,8 +56,14 @@ export default {
             type: Array,
             default() {
                 return [];
-            },
+            }
         },
+        webMapOverlays: {
+            type: Array,
+            default() {
+                return [];
+            }
+        }
     },
     data() {
         return {
@@ -134,6 +141,20 @@ export default {
             controls: defaultControls({zoom: this.interactive}),
         });
 
+        // include the WebMapService overlays as TileLayers
+        for(let wms of this.webMapOverlays) {
+            let wmsTileLayer =  new TileLayer({
+                source: new TileWMS({
+                    url: wms.url,
+                    params: {'LAYERS': wms.layers, 'TILED': true},
+                    serverType: 'geoserver',
+                    transition: 0,
+                }),
+            });
+            map.addLayer(wmsTileLayer);
+        }
+
+        // include the prepared geotiff Layers
         for(let layer of this.overlays) {
             map.addLayer(layer);
         }
