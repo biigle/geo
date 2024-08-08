@@ -11,22 +11,37 @@
             <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
         </div>
         <div class="cell cell-edit">
-            <h4>Geo Overlays</h4>
-            <p>Select an overlay from the list below to show on map.</p>
-            <div v-if="geotiffOverlays.length !== 0">
-                <p class="help-block">Geotiff Overlays</p>
-                <div v-for="tifOverlay in geotiffOverlays" :key="tifOverlay.id">
-                    <button :id="tifOverlay.id" :class="{active: activeTifIds.includes(tifOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeTifIds', tifOverlay.id)">
-                        <span class="ellipsis" v-text="tifOverlay.name"></span>
-                    </button>
-                </div> 
+            <div v-if="geotiffOverlays.length === 0 && webmapOverlaysSorted.length === 0">
+                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group" style="font-size: 1.5em;"></i></button>
+                <div class="layers" :class="{active: showLayers}">
+                    <h4>Geo Overlays</h4>
+                    <p class="text-danger">Currently no overlays uploaded / selected.</p>
+                    <p class="text-muted">
+                        <em>Hint:</em> In the volume-edit section, you can upload a geo-overlay and mark it as browsing-layer to make it available here.
+                    </p>
+                </div>
             </div>
-            <div v-if="webmapOverlaysSorted.length !== 0">
-                <p class="help-block">WebMap Overlays</p>
-                <div v-for="wmsOverlay in webmapOverlaysSorted" :key="wmsOverlay.id">
-                    <button :id="wmsOverlay.id" :class="{active: activeWmsIds.includes(wmsOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeWmsIds', wmsOverlay.id)">
-                        <span class="ellipsis" v-text="wmsOverlay.name"></span>
-                    </button>
+            <div v-else class="overlays-wrapper">
+                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group" style="font-size: 1.5em;"></i></button>
+                <div class="layers" :class="{active: showLayers}">
+                    <h4>Geo Overlays</h4>
+                    <p class="text-muted"><em>Hint:</em> Select an overlay from the list below to show on map.</p>
+                    <div v-if="geotiffOverlays.length !== 0">
+                        <p class="help-block">Geotiff Overlays</p>
+                        <div v-for="tifOverlay in geotiffOverlays" :key="tifOverlay.id">
+                            <button :id="tifOverlay.id" :class="{active: activeTifIds.includes(tifOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeTifIds', tifOverlay.id)">
+                                <span class="ellipsis" v-text="tifOverlay.name"></span>
+                            </button>
+                        </div> 
+                    </div>
+                    <div v-if="webmapOverlaysSorted.length !== 0">
+                        <p class="help-block">WebMap Overlays</p>
+                        <div v-for="wmsOverlay in webmapOverlaysSorted" :key="wmsOverlay.id">
+                            <button :id="wmsOverlay.id" :class="{active: activeWmsIds.includes(wmsOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeWmsIds', wmsOverlay.id)">
+                                <span class="ellipsis" v-text="wmsOverlay.name"></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,6 +83,7 @@ export default {
     data() {
         return {
             show: false,
+            showLayers: false,
             images: [],
             disabled: true,
             imageIds: [],
@@ -198,9 +214,10 @@ export default {
         padding-top: 10px;
     }
 
+    /* Grid settings */
     .content {
         display: grid;
-        grid-template-columns: auto 200px;
+        grid-template-columns: auto minmax(30px, auto);
         grid-auto-rows: max-content;
         grid-gap: 1rem;
         padding: 1rem;
@@ -221,6 +238,8 @@ export default {
     .cell-edit {
         grid-column: 2;
         grid-row: 1;
+        min-width: min(min-content, 200px);
+        max-width: 200px;
     }
 
     .cell-content {
@@ -229,7 +248,55 @@ export default {
         grid-column-end: 2;
     }
 
+    /* layer-items settings */
     .list-group-item.active {
-        background-color: rgba(255, 166, 0, 0.5);
+        background-color: #353535;
+        color: #ffffff;
     }
+
+    .layer-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: block;
+        background-color: var(--body-bg);
+        text-decoration: none;
+        border: none;
+        color: #aaaaaa;
+        padding: 15px;
+        z-index: 9;
+    }
+
+    .layer-button:active {
+        color: white;
+        transform: scale(.9);
+    }
+
+    .overlays-wrapper {
+        max-height: 320px;
+        overflow-y: scroll;
+    }
+
+    /* modify the grid cells upon active layers */
+    .layers {
+        display: none;
+    }
+
+    .layers.active {
+        display: block;
+    }
+
+    /* change cell-map to occupy only one col */
+    /* .layers.active + .cell-map {
+        grid-column: 1;
+        grid-row-start: 1;
+        grid-row-end: 2;
+    }
+
+    .layers.active + .cell-edit {
+        display: block;
+        grid-column: 2;
+        grid-row: 1;
+    } */
+
 </style>
