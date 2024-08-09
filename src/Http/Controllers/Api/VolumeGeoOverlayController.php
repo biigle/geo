@@ -63,10 +63,11 @@ class VolumeGeoOverlayController extends Controller
         }
     }
 
-    /**
+     /**
      * Returns an url template to the tile-storage directory of a geo-overlay
      * 
      *  @param int $id volume id
+     * @return string
      */
     public function getOverlayUrlTemplate($id) {
         $volume = Volume::findOrFail($id);

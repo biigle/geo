@@ -30,7 +30,7 @@
                         <p class="help-block">Geotiff Overlays</p>
                         <div v-for="tifOverlay in geotiffOverlays" :key="tifOverlay.id">
                             <button :id="tifOverlay.id" :class="{active: activeTifIds.includes(tifOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeTifIds', tifOverlay.id)">
-                                <span class="ellipsis" v-text="tifOverlay.name"></span>
+                                <span class="ellipsis" :title="tifOverlay.name" v-text="tifOverlay.name"></span>
                             </button>
                         </div> 
                     </div>
@@ -38,7 +38,7 @@
                         <p class="help-block">WebMap Overlays</p>
                         <div v-for="wmsOverlay in webmapOverlaysSorted" :key="wmsOverlay.id">
                             <button :id="wmsOverlay.id" :class="{active: activeWmsIds.includes(wmsOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeWmsIds', wmsOverlay.id)">
-                                <span class="ellipsis" v-text="wmsOverlay.name"></span>
+                                <span class="ellipsis" :title="wmsOverlay.name" v-text="wmsOverlay.name"></span>
                             </button>
                         </div>
                     </div>
@@ -134,20 +134,21 @@ export default {
                             url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                             size: [overlay.attrs.width, overlay.attrs.height],
                             extent: [
-                                0,
-                                0,
-                                overlay.attrs.width,
-                                overlay.attrs.height
-                                // overlay.top_left_lng,
-                                // overlay.bottom_right_lat,
-                                // overlay.bottom_right_lng,
-                                // overlay.top_left_lat,
-                            ]
-                    }),
-                    name: 'overlayTile-' + overlay.id
+                                // 0,
+                                // 0,
+                                // overlay.attrs.width,
+                                // overlay.attrs.height
+                                overlay.top_left_lng,
+                                overlay.bottom_right_lat,
+                                overlay.bottom_right_lng,
+                                overlay.top_left_lat,
+                            ],
+                            transition: 100,
+                            zDirection: -1
+                    })
                 });
             });
-        }
+    }
     },
     watch: {
         geotiffOverlays(geotiffOverlays) {
@@ -193,19 +194,19 @@ export default {
         GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
             .then((response) => {
                 this.overlayUrlTemplate = response.body;
-        });
-
-        this.projectId = biigle.$require('geo.projectId');
-        // retrieve the array of ordered overlay-ids
-        this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
-        this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
-        // provide overlays array (only those where browsing_overlay = true)
-        this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
-        this.webmapOverlays =biigle.$require('geo.webmapOverlays');
-        // initially fill activeIds with selected overlays
-        this.activeTifIds = this.geotiffOverlays.map(x => x.id);
-        this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
-    },
+            }).finally(() => {
+                this.projectId = biigle.$require('geo.projectId');
+                // retrieve the array of ordered overlay-ids
+                this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+                this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
+                // provide overlays array (only those where browsing_overlay = true)
+                this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
+                this.webmapOverlays =biigle.$require('geo.webmapOverlays');
+                // initially fill activeIds with selected overlays
+                this.activeTifIds = this.geotiffOverlays.map(x => x.id);
+                this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
+            });
+    }
 }
 </script>
 
