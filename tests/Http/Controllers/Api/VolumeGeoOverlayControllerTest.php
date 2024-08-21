@@ -99,6 +99,8 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $overlay = GeoOverlayTest::create();
         $overlayId = $overlay->id;
         $overlay->delete();
+        
+        // define the test-files
         $standard_gtiff = new UploadedFile(
             __DIR__."/../../../files/geotiff_standardEPSG2013.tif",
             'standardEPSG2013.tif',
@@ -116,6 +118,13 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $model_transform_gtiff = new UploadedFile(
             __DIR__."/../../../files/geotiff_modelTransform.tiff",
             'modelTransform.tiff',
+            'image/tiff',
+            null, 
+            true
+        );
+        $missing_transform_gtiff = new UploadedFile(
+            __DIR__."/../../../files/geotiff_missing_ModelTiePoint_and_ModelTransform.tiff",
+            'missingTransform.tiff',
             'image/tiff',
             null, 
             true
@@ -185,7 +194,17 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $response->assertJson($overlay2->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
 
-        // 3. testing upload of user-defined geoTIFF (GTModelType-Tag equals 32767)
+        // 3. testing upload of geoTIFF with missing PixelScale / ModelTiePoint as well as missing ModelTransform-Tags.
+        // Which means there is no way to transform the geotiff from raster- to model-space 
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+            'geotiff' => $missing_transform_gtiff,
+            'volumeId' => $id
+        ])
+        ->assertInvalid([
+            'affineTransformation' => 'The geoTIFF file does not have an affine transformation.',
+        ]);
+
+        // 4. testing upload of user-defined geoTIFF (GTModelType-Tag equals 32767)
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
             'geotiff' => $user_defined_gtiff,
             'volumeId' => $id
