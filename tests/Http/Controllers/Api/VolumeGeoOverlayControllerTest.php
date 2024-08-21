@@ -113,6 +113,13 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
             null, 
             true
         );
+        $model_transform_gtiff = new UploadedFile(
+            __DIR__."/../../../files/geotiff_modelTransform.tiff",
+            'modelTransform.tiff',
+            'image/tiff',
+            null, 
+            true
+        );
 
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
 
@@ -138,7 +145,7 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $this->assertFalse(GeoOverlay::exists());
         $this->assertFalse(Storage::disk('geo-overlays')->exists($overlay->path));
 
-        // test upload of standard geoTIFF (in form of projected-Coordinate-Reference-System and EPSG-code)
+        // 1. testing upload of standard geoTIFF (in form of projected-Coordinate-Reference-System and EPSG-code)
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
             'geotiff' => $standard_gtiff,
             'volumeId' => $id
@@ -158,7 +165,27 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
 
-        // testing upload of user-defined geoTIFF (GTModelType-Tag equals 32767)
+        // 2. testing upload of geoTIFF using the ModelTransform-Tag
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+            'geotiff' => $model_transform_gtiff,
+            'volumeId' => $id
+        ])
+        ->assertSuccessful();
+
+        $overlay2 = GeoOverlay::where('volume_id', $id)->where('id', $overlay->id + 1)->first();
+        $this->assertNotNull($overlay2);
+        $this->assertEqualsWithDelta($overlay2->top_left_lat, 46.4884400461342, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->top_left_lng, 11.3182638720361, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->bottom_right_lat, 46.5038380359582, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->bottom_right_lng, 11.3705327977256, 0.00001);
+        $this->assertEquals($overlay2->name, 'modelTransform.tiff');
+        $this->assertEquals($overlay2->browsing_layer, false);
+        $this->assertEquals($overlay2->context_layer, false);
+        $this->assertEquals($overlay2->attrs, ['width' => 396, 'height' => 183]);
+        $response->assertJson($overlay2->toArray(), $exact=false);
+        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
+
+        // 3. testing upload of user-defined geoTIFF (GTModelType-Tag equals 32767)
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
             'geotiff' => $user_defined_gtiff,
             'volumeId' => $id
