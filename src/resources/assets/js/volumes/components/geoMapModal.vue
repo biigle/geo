@@ -134,14 +134,14 @@ export default {
                             url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                             size: [overlay.attrs.width, overlay.attrs.height],
                             extent: [
-                                // 0,
-                                // 0,
-                                // overlay.attrs.width,
-                                // overlay.attrs.height
-                                overlay.top_left_lng,
-                                overlay.bottom_right_lat,
-                                overlay.bottom_right_lng,
-                                overlay.top_left_lat,
+                                0,
+                                0,
+                                overlay.attrs.width,
+                                overlay.attrs.height
+                                // overlay.top_left_lng,
+                                // overlay.bottom_right_lat,
+                                // overlay.bottom_right_lng,
+                                // overlay.top_left_lat,
                             ],
                             transition: 100,
                             zDirection: -1
@@ -182,7 +182,7 @@ export default {
             }
         }
     },
-    created() {
+    async created() {
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;
@@ -191,22 +191,22 @@ export default {
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
 
-        // provide overlay-url template string
-        GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
+            // provide overlay-url template string
+        await GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
             .then((response) => {
                 this.overlayUrlTemplate = response.body;
-            }).finally(() => {
-                this.projectId = biigle.$require('geo.projectId');
-                // retrieve the array of ordered overlay-ids
-                this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
-                this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
-                // provide overlays array (only those where browsing_overlay = true)
-                this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
-                this.webmapOverlays = biigle.$require('geo.webmapOverlays');
-                // initially fill activeIds with selected overlays
-                this.activeTifIds = this.geotiffOverlays.map(x => x.id);
-                this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
             });
+
+        this.projectId = biigle.$require('geo.projectId');
+        // retrieve the array of ordered overlay-ids
+        this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
+        this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
+        // provide overlays array (only those where browsing_overlay = true)
+        this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
+        this.webmapOverlays = biigle.$require('geo.webmapOverlays');
+        // initially fill activeIds with selected overlays
+        this.activeTifIds = this.geotiffOverlays.map(x => x.id);
+        this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
     }
 }
 </script>
