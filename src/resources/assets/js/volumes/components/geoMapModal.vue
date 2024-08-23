@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
+            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geotiffOverlays.length === 0 && webmapOverlaysSorted.length === 0">
@@ -145,27 +145,19 @@ export default {
                                 // overlay.top_left_lat,
                             ],
                             transition: 100,
-                            zDirection: -1
                     })
                 });
             });
-    }
+        }
     },
     watch: {
         geotiffOverlays(geotiffOverlays) {
             // adhere to the specific overlay order, if it has been defined in the volume settings
             if(this.geotiffOrder) {
-                for(let id of this.geotiffOrder) {
-                    // call createOverlayTile-method with one overlay at a time
-                    let idx = geotiffOverlays.findIndex(x => x.id === id);
-                    if(idx !== -1) {
-                        // call creatOverlayTile by wrapping the single overlay in an Array.
-                        // This way the method works for both cases (whether order exists or not)
-                        let overlayTileArr = this.createOverlayTile([geotiffOverlays[idx]]);
-                        // add newly created overlayTile to overlays-array
-                        this.overlays.push(...overlayTileArr);
-                    }
-                }
+                let geotiffOverlaysSorted = geotiffOverlays.toSorted((a, b) => {
+                    return this.geotiffOrder.indexOf(a.id) - this.geotiffOrder.indexOf(b.id);
+                });
+                this.overlays = this.createOverlayTile(geotiffOverlaysSorted);
             } else { // default case
                 // call createOverlayTile-method with complete overlays-array, as order does not matter
                 this.overlays = this.createOverlayTile(geotiffOverlays)
@@ -188,7 +180,7 @@ export default {
         this.startLoading();
         this.show = true;
         // get all image + coordinate information from volume-images
-        CoordApi.get({id: this.volumeId})
+        await CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
 

@@ -156,7 +156,9 @@ export default {
 
         // include the prepared geotiff Layers
         for(let i = this.overlays.length - 1; i >= 0; i--) {
-            map.addLayer(this.overlays[i]);
+            let tileLayer = this.overlays[i];
+            tileLayer.set('name', `geotiffTile_${i}`);
+            map.addLayer(tileLayer);
         }
         map.addLayer(vectorLayer);
 
