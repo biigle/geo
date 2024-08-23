@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
+            <image-map v-if="dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geotiffOverlays.length === 0 && webmapOverlaysSorted.length === 0">
@@ -83,6 +83,7 @@ export default {
     data() {
         return {
             show: false,
+            dataLoaded: false,
             showLayers: false,
             images: [],
             disabled: true,
@@ -206,7 +207,10 @@ export default {
         this.webmapOverlays = biigle.$require('geo.webmapOverlays');
         // initially fill activeIds with selected overlays
         this.activeTifIds = this.geotiffOverlays.map(x => x.id);
-        this.activeWmsIds = this.webmapOverlays.map(x => x.id); 
+        this.activeWmsIds = this.webmapOverlays.map(x => x.id);
+        
+        // prevent imageMap component from rendering before data is fetched
+        this.dataLoaded = true;
     }
 }
 </script>
