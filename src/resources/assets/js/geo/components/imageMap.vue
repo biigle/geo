@@ -141,12 +141,12 @@ export default {
             controls: defaultControls({zoom: this.interactive}),
         });
 
-        // include the WebMapService overlays as TileLayers
-        for(let wms of this.webMapOverlays) {
+        // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
+        for(let i = this.webMapOverlays.length -1; i >= 0; i--) {
             let wmsTileLayer =  new TileLayer({
                 source: new TileWMS({
-                    url: wms.url,
-                    params: {'LAYERS': wms.layers, 'TILED': true},
+                    url: this.webMapOverlays[i].url,
+                    params: {'LAYERS': this.webMapOverlays[i].layers, 'TILED': true},
                     serverType: 'geoserver',
                     transition: 0,
                 }),
@@ -155,8 +155,8 @@ export default {
         }
 
         // include the prepared geotiff Layers
-        for(let layer of this.overlays) {
-            map.addLayer(layer);
+        for(let i = this.overlays.length - 1; i >= 0; i--) {
+            map.addLayer(this.overlays[i]);
         }
         map.addLayer(vectorLayer);
 
