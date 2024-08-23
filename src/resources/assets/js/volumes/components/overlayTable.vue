@@ -46,12 +46,10 @@ export default {
         projectId: {
             type: Number,
             required: true,
-        }
-    },
-    computed: {
-        overlayType() {
-            // infer type from first instance of the overlay-array
-            return this.overlays[0].type;
+        },
+        overlayType: {
+            type: String,
+            required: true,
         }
     },
     watch: {
@@ -67,7 +65,7 @@ export default {
                 // remove the deleted overlay from sortedOverlays-array
                 let removedIdIndex = this.sortedOverlays.findIndex(x => x.id === removedId[0]);
                 this.sortedOverlays.splice(removedIdIndex, 1);
-            } else { 
+            } else {
                 // in case an overlay was added, find its Id and add the overlay to sortedOverlays-array 
                 let addedId = overlaysId.filter(x => !sortedOverlaysId.includes(x));
                 this.sortedOverlays.unshift(overlays.find(x => x.id === addedId[0]));

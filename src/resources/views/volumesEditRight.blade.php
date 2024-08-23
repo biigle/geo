@@ -18,7 +18,7 @@
                 <geotiff-overlay-form inline-template :volume-id="{{$volume->id}}" v-on:success="addOverlay">
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
-                <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                <overlay-table :overlays="geotiffOverlays" overlay-type="geotiff" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
                     <template v-slot:title>GeoTIFF Overlays</template>
                     <template v-slot:header>
                         <th></th>
@@ -34,7 +34,7 @@
                 <webmap-overlay-form inline-template :volume-id="{{$volume->id}}"  v-on:success="addOverlay">
                 @include('geo::volumes.edit.webmapOverlayForm')
                 </webmap-overlay-form>
-                <overlay-table :overlays="webmapOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+                <overlay-table :overlays="webmapOverlays" overlay-type="webmap" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
                     <template v-slot:title>WebMap Overlays</template>
                     <template v-slot:header>
                         <th></th>
@@ -50,7 +50,7 @@
     </div>
     <div v-else>
         <div v-if="hasOverlays('geotiffOverlays')">
-            <overlay-table :overlays="geotiffOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            <overlay-table :overlays="geotiffOverlays" overlay-type="geotiff" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
             <template v-slot:title>GeoTIFF Overlays</template>
             <template v-slot:header>
                 <th></th>
@@ -63,7 +63,7 @@
             </overlay-table>
         </div>
         <div v-if="hasOverlays('webmapOverlays')">
-            <overlay-table :overlays="webmapOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
+            <overlay-table :overlays="webmapOverlays" overlay-type="webmap" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
                 <template v-slot:title>WebMap Overlays</template>
             </overlay-table>
         </div>
