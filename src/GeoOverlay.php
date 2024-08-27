@@ -28,7 +28,9 @@ class GeoOverlay extends Model
 
     protected $fillable = [
         'browsing_layer',
-        'context_layer'
+        'context_layer',
+        'layer_index',
+        'type'
     ];
 
     /**
@@ -43,13 +45,6 @@ class GeoOverlay extends Model
         'bottom_right_lat' => 'float',
         'attrs' => 'array',
     ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
-    protected $appends = ['type'];
 
     /**
      * The "booting" method of the model.
