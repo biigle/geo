@@ -27,11 +27,8 @@ $router->group([
     $router->get('volumes/{id}/coordinates', [
         'uses' => 'FileCoordinatesController@index',
     ]);
-
-    $router->get('volumes/{id}/geo-overlays/{layer_type?}', [
-        'uses' => 'VolumeGeoOverlayController@index',
-    ]);
     
+    // GeoTIFF
     $router->post('volumes/{id}/geo-overlays/geotiff', [
         'uses' => 'VolumeGeoOverlayController@storeGeoTiff',
     ]);
@@ -40,12 +37,14 @@ $router->group([
         'uses' => 'VolumeGeoOverlayController@getOverlayUrlTemplate',
     ]);
 
-    $router->put('volumes/{id}/geo-overlays/geotiff/{geo_overlay_id}', [
-        'uses' => 'VolumeGeoOverlayController@updateGeoTiff',
-    ]);
-
+    // WebMap
     $router->post('volumes/{id}/geo-overlays/webmap', [
         'uses' => 'WebMapOverlayController@store',
+    ]);
+    
+    // GeoOverlays
+    $router->get('volumes/{id}/geo-overlays/{layer_type?}', [
+        'uses' => 'GeoOverlayController@index',
     ]);
 
     $router->resource('geo-overlays', 'GeoOverlayController', [
@@ -53,17 +52,11 @@ $router->group([
         'parameters' => ['geo-overlays' => 'id'],
     ]);
     
+    $router->put('volumes/{id}/geo-overlays/{geo_overlay_id}', [
+        'uses' => 'GeoOverlayController@updateGeoOverlay',
+    ]);
+
     $router->get('geo-overlays/{id}/file', [
         'uses' => 'GeoOverlayController@showFile',
     ]);
-
-    $router->put('volumes/{id}/geo-overlays/webmap/{webmap_overlay_id}', [
-        'uses' => 'WebMapOverlayController@update',
-    ]);
-
-    $router->resource('web-map-overlays', 'WebMapOverlayController', [
-        'only' => ['destroy'],
-        'parameters' => ['web-map-overlays' => 'id'],
-    ]);
-
 });

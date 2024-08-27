@@ -12,45 +12,6 @@ use Illuminate\Testing\Fluent\AssertableJson;
 
 class VolumeGeoOverlayControllerTest extends ApiTestCase
 {
-    public function testIndex()
-    {
-        Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::create();
-        $overlay->volume_id = $this->volume()->id;
-        // modify overlay context_layer value
-        $overlay->context_layer = true;
-        $overlay->save();
-
-        $overlay2 = GeoOverlayTest::create();
-        $overlay2->volume_id = $this->volume()->id;
-        // modify overlay2 browsing_layer value
-        $overlay2->browsing_layer = true;
-        $overlay2->save();
-
-        $id = $overlay->volume_id;
-
-        $this->beUser();
-        $response = $this->get("/api/v1/volumes/{$id}/geo-overlays");
-        $response->assertStatus(403);
-
-        $this->beGuest();
-        // check if base-case (without layer_type variable) works
-        $response = $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
-            ->assertJsonFragment([$overlay->toArray()], [$overlay2->toArray()]);
-        $response->assertStatus(200);
-
-        // check if layer_type=browsing_layer works as expected (return only second overlay)
-        $this->get("/api/v1/volumes/{$id}/geo-overlays/?layer_type=browsing_layer")
-            ->assertJsonFragment([$overlay2->toArray()])
-            ->assertJsonMissing([$overlay->toArray()])
-            ->assertStatus(200);
-        
-        // check if layer_type=context_layer works as expected (return only first overlay)
-        $this->get("/api/v1/volumes/{$id}/geo-overlays/?layer_type=context_layer")
-        ->assertJsonFragment([$overlay->toArray()])
-        ->assertJsonMissing([$overlay2->toArray()])
-        ->assertStatus(200);
-    }
 
     public function testUpdateGeotiff()
     {
