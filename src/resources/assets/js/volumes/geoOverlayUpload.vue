@@ -46,17 +46,10 @@ export default {
         },
         handleRemove(overlay) {
             this.startLoading();
-            this.delete(overlay)
+            Api.deleteGeoOverlay({id: overlay.id})
                 .then(() => this.overlayRemoved(overlay))
                 .catch(handleErrorResponse)
                 .finally(this.finishLoading);
-        },
-        delete(overlay) {
-            if(overlay.type === 'geotiff') {
-                return Api.deleteGeoTiff({id: overlay.id});
-            } else { // overlay.type == 'webmap'
-                return Api.deleteWebMap({id: overlay.id});
-            }
         },
         overlayRemoved(overlay) {
             let overlays = overlay.type === 'geotiff' ? this.geotiffOverlays : this.webmapOverlays;

@@ -62,18 +62,10 @@ export default {
                 .catch(handleErrorResponse);
         },
         update(dataKey) {
-            if(this.overlay.type === 'geotiff') {
-                return Api.updateGeoTiff({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
-                    layer_type: dataKey,
-                    value: !this[dataKey],
-                    });
-            } else {
-                //this.overlay.type === 'webmap'
-                return Api.updateWebMap({id: this.volumeId, webmap_overlay_id: this.overlay.id}, {
-                    layer_type: dataKey,
-                    value: !this[dataKey],
-                    });
-            }
+            return Api.updateGeoOverlay({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
+                layer_type: dataKey,
+                value: !this[dataKey],
+                });
         },
         // checks if string is too long and returns truncated version
         truncateString(str) {
