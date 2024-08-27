@@ -40,6 +40,7 @@ class GeoServiceProvider extends ServiceProvider
             'viewMixins' => [
                 'imagesIndex',
                 'manualTutorial',
+                'manualVolumes',
                 'volumesSidebar',
                 'volumesScripts',
                 'projectsShowTabs',
