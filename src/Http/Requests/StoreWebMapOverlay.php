@@ -2,8 +2,10 @@
 
 namespace Biigle\Modules\Geo\Http\Requests;
 
+use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreWebMapOverlay extends FormRequest
 {
@@ -13,6 +15,13 @@ class StoreWebMapOverlay extends FormRequest
      * @var Volume
      */
     public $volume;
+
+    /**
+     * Indicates if the validator should stop on the first rule failure.
+     *
+     * @var bool
+     */
+    protected $stopOnFirstFailure = true;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -32,7 +41,29 @@ class StoreWebMapOverlay extends FormRequest
     public function rules(): array
     {
         return [
-            'url' => 'required|unique:web_map_overlays|url:http,https|max:512'
+            'url' => 'required|url:http,https|max:512',
+        ];
+    }
+
+        
+    /**
+     * Get the "after" validation callables for the request.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $uploaded_attrs = GeoOverlay::where('volume_id', $this->volume['id'])->where('type', 'webmap')->pluck('attrs')->all();
+                $uploaded_urls = array_column($uploaded_attrs, 'url');
+                // dd($uploaded_urls);
+                
+                if(in_array($this->input('url'), $uploaded_urls)) {
+                    $validator->errors()->add(
+                        'url.unique',
+                        'The url has already been uploaded.'
+                    );
+                }
+            }
         ];
     }
 

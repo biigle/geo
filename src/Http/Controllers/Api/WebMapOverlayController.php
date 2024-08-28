@@ -2,31 +2,14 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Modules\Geo\WebMapOverlay;
-use Illuminate\Http\Request;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
-use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
 use Biigle\Modules\Geo\Services\Support\WebMapSource;
 use Illuminate\Validation\ValidationException;
 
 class WebMapOverlayController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -59,8 +42,9 @@ class WebMapOverlayController extends Controller
             }
 
             // check whether baseURL exists already in DB
-            $existingWms = WebMapOverlay::where('volume_id', $volumeId)->pluck('url', 'name')->all();
-            // $existingUrls
+            $existingWms = GeoOverlay::where('volume_id', $volumeId)->where('type', 'webmap')->pluck('attrs', 'name')->all();
+            // reduce attrs variable from array to only url-value
+            $existingWms = array_map(fn($attrs): string => $attrs['url'], $existingWms);
             if (in_array($webmapSource->baseUrl, array_values($existingWms))) {
                 // strip the url if too long
                 $urlShort = strlen($webmapSource->baseUrl) > 80 ? substr($webmapSource->baseUrl, 0, 80) . "..." : $webmapSource->baseUrl;
@@ -86,19 +70,22 @@ class WebMapOverlayController extends Controller
      * @param $title The title of the WMS resource (gets displayed to the user)
      * @param $layer The layer-name of the WMS resource
      *
-     * @return WebMapOverlay
+     * @return GeoOverlay
      */
     protected function saveWebMapOverlay($volumeId, $url, $title, $layers)
     {
-        $overlay = new WebMapOverlay;
+        $overlay = new Geooverlay;
         $overlay->volume_id = $volumeId;
-        $overlay->url = $url;
         $overlay->name = $title;
-        $overlay->layers = $layers;
+        $overlay->type = 'webmap';
         $overlay->browsing_layer = false;
         $overlay->context_layer = false;
+        $overlay->layer_index = null;
+        $overlay->attrs = [
+            'url' => $url,
+            'layers' => $layers,
+        ];
         $overlay->save();
-        $overlay->type = 'webmap';
 
         return $overlay;
     }
