@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 
-class VolumeGeoOverlayControllerTest extends ApiTestCase
+class GeoTiffOverlayControllerTest extends ApiTestCase
 {
 
     public function testStoreGeotiff() 

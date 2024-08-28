@@ -11,7 +11,7 @@ use Biigle\Volume;
 use Illuminate\Validation\ValidationException;
 use Storage;
 
-class VolumeGeoOverlayController extends Controller
+class GeoTiffOverlayController extends Controller
 {
 
      /**
