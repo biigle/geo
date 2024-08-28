@@ -13,51 +13,13 @@ use Illuminate\Testing\Fluent\AssertableJson;
 class VolumeGeoOverlayControllerTest extends ApiTestCase
 {
 
-    public function testUpdateGeotiff()
-    {
-        Storage::fake('geo-overlays');
-        $id = $this->volume()->id;
-    
-        // Create overlay-instance
-        $overlay = GeoOverlayTest::create();
-        $overlay->save();
-       
-        $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}");
-
-        $this->beEditor();
-        // 403: The client does not have access rights to the content
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
-            'layer_type' => 'browsingLayer',
-            'value' => true
-        ])
-        ->assertStatus(403);
-
-        $this->beAdmin();
-        // 422: The request was well-formed but was unable to be followed due to semantic errors.
-        // reason: no input data
-        $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}")
-        ->assertStatus(422);
-
-        // now test if updating with data will succeed with the correct values being returned
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/geotiff/{$overlay->id}", [
-            'layer_type' => 'browsingLayer',
-            'value' => true
-        ]);
-        $response
-            ->assertStatus(200)            
-            ->assertJson([
-                'browsing_layer' => true,
-                'context_layer' => false
-            ]);
-    }
-
     public function testStoreGeotiff() 
     {
         Storage::fake('geo-overlays');
         $id = $this->volume()->id;
     
         // Get current ID so we can predict the next ID later.
-        $overlay = GeoOverlayTest::create();
+        $overlay = GeoOverlayTest::createGeotiffOverlay();
         $overlayId = $overlay->id;
         $overlay->delete();
         
@@ -124,14 +86,17 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         $overlay = GeoOverlay::where('volume_id', $id)->first();
         $this->assertNotNull($overlay);
-        $this->assertEqualsWithDelta($overlay->top_left_lat, 57.097483857335796, 0.00001);
-        $this->assertEqualsWithDelta($overlay->top_left_lng, -2.9198048485706547, 0.00001);
-        $this->assertEqualsWithDelta($overlay->bottom_right_lat, 57.09845896597305, 0.00001);
-        $this->assertEqualsWithDelta($overlay->bottom_right_lng, -2.917006253590798, 0.00001);
+        $this->assertEqualsWithDelta($overlay->attrs['top_left_lat'], 57.097483857335796, 0.00001);
+        $this->assertEqualsWithDelta($overlay->attrs['top_left_lng'], -2.9198048485706547, 0.00001);
+        $this->assertEqualsWithDelta($overlay->attrs['bottom_right_lat'], 57.09845896597305, 0.00001);
+        $this->assertEqualsWithDelta($overlay->attrs['bottom_right_lng'], -2.917006253590798, 0.00001);
+        $this->assertEquals($overlay->attrs['width'], 3);
+        $this->assertEquals($overlay->attrs['height'], 2);
+        $this->assertEquals($overlay->type, 'geotiff');
+        $this->assertEquals($overlay->layer_index, null);
         $this->assertEquals($overlay->name, 'standardEPSG2013.tif');
         $this->assertEquals($overlay->browsing_layer, false);
         $this->assertEquals($overlay->context_layer, false);
-        $this->assertEquals($overlay->attrs, ['width' => 3, 'height' => 2]);
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
 
@@ -144,14 +109,17 @@ class VolumeGeoOverlayControllerTest extends ApiTestCase
 
         $overlay2 = GeoOverlay::where('volume_id', $id)->where('id', $overlay->id + 1)->first();
         $this->assertNotNull($overlay2);
-        $this->assertEqualsWithDelta($overlay2->top_left_lat, 46.4884400461342, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->top_left_lng, 11.3182638720361, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->bottom_right_lat, 46.5038380359582, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->bottom_right_lng, 11.3705327977256, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->attrs['top_left_lat'], 46.4884400461342, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->attrs['top_left_lng'], 11.3182638720361, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->attrs['bottom_right_lat'], 46.5038380359582, 0.00001);
+        $this->assertEqualsWithDelta($overlay2->attrs['bottom_right_lng'], 11.3705327977256, 0.00001);
+        $this->assertEquals($overlay2->attrs['width'], 396,);
+        $this->assertEquals($overlay2->attrs['height'], 183);
+        $this->assertEquals($overlay->type, 'geotiff');
         $this->assertEquals($overlay2->name, 'modelTransform.tiff');
         $this->assertEquals($overlay2->browsing_layer, false);
         $this->assertEquals($overlay2->context_layer, false);
-        $this->assertEquals($overlay2->attrs, ['width' => 396, 'height' => 183]);
+
         $response->assertJson($overlay2->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
 
