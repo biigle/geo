@@ -109,7 +109,14 @@ class GeoOverlayController extends Controller
      public function updateGeoOverlay(UpdateOverlay $request)
      {
         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
-        if($request->filled('layer_type')) {
+        
+        if($request->filled('layerIndex')) {
+            $overlay->update([
+                'layer_index' => $request->input('layerIndex')
+            ]);
+            return response($status=200);
+
+        } else if($request->filled('layer_type')) {
             if($request->input('layer_type') == 'contextLayer') {
                 $overlay->update([
                     'context_layer' => $request->input('value')

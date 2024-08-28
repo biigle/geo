@@ -25,6 +25,9 @@
 <script>
 import OverlayItem from './overlayItem';
 import draggable from 'vuedraggable';
+import GeoApi from '../api/geoOverlays';
+import {handleErrorResponse} from '../../geo/import';
+
 
 
 export default {
@@ -49,7 +52,8 @@ export default {
         },
         overlayType: {
             type: String,
-            required: true,
+            required: false,
+            default: null
         }
     },
     watch: {
@@ -73,23 +77,20 @@ export default {
         },
         sortedOverlays(sortedArray) {
             if(this.dataLoaded) {
-                let indexArray = sortedArray.map(x => x.id);
-                // save the new overlay-order in localStorage variable
-                window.localStorage.setItem(`${this.overlayType}-upload-order-${this.projectId}-${this.volumeId}`, JSON.stringify(indexArray));
+                // save the new overlay-order in geo_overlays table
+                for(let [idx, overlay] of sortedArray.entries()) {
+                    GeoApi.updateGeoOverlay({id: this.volumeId, geo_overlay_id: overlay.id}, {
+                        layerIndex: idx,
+                    })
+                    .catch(handleErrorResponse);
+                }
             }
         }
     },
     mounted() {
-        // initially retrieve the array of ordered overlay-ids 
-        let overlayOrder = JSON.parse(window.localStorage.getItem(`${this.overlayType}-upload-order-${this.projectId}-${this.volumeId}`));
-        if(overlayOrder) {
-            // add the overlays according to the specified order in overlayOrder-array
-            for(let id of overlayOrder) {
-                this.sortedOverlays.push(this.overlays.find(x => x.id === id));
-            }
-        } else { // default case
-            this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));
-        }
+        this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));
+        this.sortedOverlays.sort((a, b) => a.layer_index - b.layer_index);
+
         this.$nextTick(() => { //with this skip the first change of sortedOverlays
             this.dataLoaded = true;
         })
