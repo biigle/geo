@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Biigle\Volume;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Storage;
 
@@ -30,7 +31,13 @@ class GeoOverlay extends Model
         'browsing_layer',
         'context_layer',
         'layer_index',
-        'type'
+        'type',
+        'attrs->url',
+        'attrs->layers',
+        'attrs->top_left_lng',
+        'attrs->top_left_lat',
+        'attrs->bottom_right_lng',
+        'attrs->bottom_right_lat'
     ];
 
     /**
@@ -39,13 +46,27 @@ class GeoOverlay extends Model
      * @var array
      */
     protected $casts = [
-        'top_left_lng' => 'float',
-        'top_left_lat' => 'float',
-        'bottom_right_lng' => 'float',
-        'bottom_right_lat' => 'float',
         'attrs' => 'array',
+        'attrs->layers' => 'array',
+        'attrs->top_left_lng' => 'float',
+        'attrs->top_left_lat' => 'float',
+        'attrs->bottom_right_lng' => 'float',
+        'attrs->bottom_right_lat' => 'float',
     ];
 
+
+    /**
+     * Getter for the attrs json column
+     */
+    public function getPostAttribute()
+    {
+        $model = new $this;
+        $jsonToConvert = $this->attributes['attrs'];
+        $modelArray = $model->fromJson($jsonToConvert);
+
+        return $model->newInstance($modelArray);
+    }
+    
     /**
      * The "booting" method of the model.
      *
@@ -59,16 +80,6 @@ class GeoOverlay extends Model
         static::deleting(function ($overlay) {
             Storage::disk(config('geo.tiles.overlay_storage_disk'))->deleteDirectory($overlay->id);
         });
-    }
-
-    /**
-     * Defines the type of overlay.
-     */
-    protected function type(): Attribute
-    {
-        return new Attribute(
-            get: fn () => 'geotiff',
-        );
     }
     
     /**
