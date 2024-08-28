@@ -160,18 +160,21 @@ class VolumeGeoOverlayController extends Controller
         $overlay = new GeoOverlay;
         $overlay->volume_id = $volumeId;
         $overlay->name = $fileName;
-        $overlay->top_left_lng = number_format($coords[0], 13);
-        $overlay->top_left_lat = number_format($coords[1], 13);
-        $overlay->bottom_right_lng = number_format($coords[2], 13);
-        $overlay->bottom_right_lat = number_format($coords[3], 13);
         $overlay->browsing_layer = false;
         $overlay->context_layer = false;
-        $overlay->attrs = ["width" => $pixelDimensions[0],  "height" => $pixelDimensions[1]];
+        $overlay->type = 'geotiff';
+        $overlay->layer_index = null;
+        $overlay->attrs = [
+            "top_left_lng" => number_format($coords[0], 13),
+            "top_left_lat" => number_format($coords[1], 13),
+            "bottom_right_lng" => number_format($coords[2], 13),
+            "bottom_right_lat" => number_format($coords[3], 13),
+            "width" => $pixelDimensions[0],  
+            "height" => $pixelDimensions[1]
+        ];
         $overlay->save();
         $overlay->storeFile($file);
-        $overlay->type = 'geotiff';
         $this->submitTileJob($overlay);
-
         return $overlay;
     }
 
