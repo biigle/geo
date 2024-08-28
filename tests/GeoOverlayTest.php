@@ -55,10 +55,10 @@ class GeoOverlayTest extends TestCase
     {
         $geotiff = self::createGeotiffOverlay()->fresh();
         $this->assertNotNull($geotiff->name);
-        $this->assertTrue(is_float($geotiff->attrs['top_left_lng']));
-        $this->assertTrue(is_float($geotiff->attrs['top_left_lat']));
-        $this->assertTrue(is_float($geotiff->attrs['bottom_right_lng']));
-        $this->assertTrue(is_float($geotiff->attrs['bottom_right_lat']));
+        $this->assertTrue(is_float(floatval($geotiff->attrs['top_left_lng'])));
+        $this->assertTrue(is_float(floatval($geotiff->attrs['top_left_lat'])));
+        $this->assertTrue(is_float(floatval($geotiff->attrs['bottom_right_lng'])));
+        $this->assertTrue(is_float(floatval($geotiff->attrs['bottom_right_lat'])));
         $this->assertNull($geotiff->created_at);
         $this->assertNull($geotiff->updated_at);
         $this->assertTrue(is_int($geotiff->attrs['width']));

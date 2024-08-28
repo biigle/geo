@@ -47,26 +47,30 @@ class GeoOverlay extends Model
      */
     protected $casts = [
         'attrs' => 'array',
-        'attrs->layers' => 'array',
-        'attrs->top_left_lng' => 'float',
-        'attrs->top_left_lat' => 'float',
-        'attrs->bottom_right_lng' => 'float',
-        'attrs->bottom_right_lat' => 'float',
+        'attrs->layers' => 'array'
     ];
 
 
     /**
      * Getter for the attrs json column
      */
-    public function getPostAttribute()
-    {
-        $model = new $this;
-        $jsonToConvert = $this->attributes['attrs'];
-        $modelArray = $model->fromJson($jsonToConvert);
+    protected function attrs(): Attribute {
+        
+        return Attribute::make(
+            get: function (mixed $value): array {
+            $value = json_decode($value, true);
+            $float_array = ['top_left_lng', 'top_left_lat', 'bottom_right_lng', 'bottom_right_lat'];
+            
+            foreach($value as $entry) {
+                if (in_array($entry, $float_array)) {
+                    $value[$entry] = floatval($value[$entry]);
+                }
+            }
 
-        return $model->newInstance($modelArray);
+            return $value;
+        });
     }
-    
+
     /**
      * The "booting" method of the model.
      *
