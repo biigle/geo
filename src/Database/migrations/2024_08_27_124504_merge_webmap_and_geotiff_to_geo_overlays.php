@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('type', 10)->nullable();
             $table->boolean('browsing_layer')->default(0);
             $table->boolean('context_layer')->default(0);
-            $table->json('layer_index')->nullable();
+            $table->integer('layer_index')->nullable();
             $table->json('attrs')->default('{}');
         });
     }
