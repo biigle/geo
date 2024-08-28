@@ -13,7 +13,7 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
     // GeoOverlay
     updateGeoOverlay: {
         method: 'PUT',
-        url: 'api/v1/volumes{/id}/geo-overlays/{/geo_overlay_id}',
+        url: 'api/v1/volumes{/id}/geo-overlays{/geo_overlay_id}',
     },
     deleteGeoOverlay: {
         method: 'DELETE',
