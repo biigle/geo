@@ -8,10 +8,10 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="overlays" :web-map-overlays="webmapOverlaysSorted"></image-map>
+            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate"></image-map>
         </div>
         <div class="cell cell-edit">
-            <div v-if="geotiffOverlays.length === 0 && webmapOverlaysSorted.length === 0">
+            <div v-if="geoOverlays.length === 0">
                 <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group" style="font-size: 1.5em;"></i></button>
                 <div class="layers" :class="{active: showLayers}">
                     <h4>Geo Overlays</h4>
@@ -26,21 +26,13 @@
                 <div class="layers" :class="{active: showLayers}">
                     <h4>Geo Overlays</h4>
                     <p class="text-muted"><em>Hint:</em> Select an overlay from the list below to show on map.</p>
-                    <div v-if="geotiffOverlays.length !== 0">
-                        <p class="help-block">Geotiff Overlays</p>
-                        <div v-for="tifOverlay in geotiffOverlays" :key="tifOverlay.id">
-                            <button :id="tifOverlay.id" :class="{active: activeTifIds.includes(tifOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeTifIds', tifOverlay.id)">
-                                <span class="ellipsis" :title="tifOverlay.name" v-text="tifOverlay.name"></span>
+                    <div v-if="geoOverlays.length !== 0">
+                        <p class="help-block">Geo Overlays</p>
+                        <div v-for="overlay in geoOverlays" :key="overlay.id">
+                            <button :id="overlay.id" :class="{active: activeIds.includes(overlay.id)}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)">
+                                <span class="ellipsis" :title="overlay.name" v-text="overlay.name"></span>
                             </button>
                         </div> 
-                    </div>
-                    <div v-if="webmapOverlaysSorted.length !== 0">
-                        <p class="help-block">WebMap Overlays</p>
-                        <div v-for="wmsOverlay in webmapOverlaysSorted" :key="wmsOverlay.id">
-                            <button :id="wmsOverlay.id" :class="{active: activeWmsIds.includes(wmsOverlay.id)}" class="list-group-item custom" v-on:click="toggleActive('activeWmsIds', wmsOverlay.id)">
-                                <span class="ellipsis" :title="wmsOverlay.name" v-text="wmsOverlay.name"></span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -64,8 +56,6 @@ import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
 import GeoApi from '../api/geoOverlays';
 import {LoaderMixin} from '../import';
-import TileLayer from 'ol/layer/Tile';
-import ZoomifySource from 'ol/source/Zoomify';
 
 
 export default {
@@ -88,16 +78,10 @@ export default {
             images: [],
             disabled: true,
             imageIds: [],
-            activeTifIds: [],
-            activeWmsIds: [],
+            activeIds: [],
             overlayUrlTemplate: '',
-            overlays: [],
             projectId: null,
-            geotiffOverlays: [],
-            webmapOverlays: [],
-            webmapOverlaysSorted: [],
-            geotiffOrder: [],
-            webmapOrder: [],
+            geoOverlays: [],
         }
     },
     methods: {
@@ -118,62 +102,14 @@ export default {
                 this.disabled = true;
             }
         },
-        // varKey is either 'activeTifIds' or 'activeWmsIds' Array
-        toggleActive(varKey, id) {
-            if(this[varKey].includes(id)) {
-                let index = this[varKey].indexOf(id);
-                this[varKey].splice(index, 1);
+        toggleActive(id) {
+            if(this.activeIds.includes(id)) {
+                let index = this.activeIds.indexOf(id);
+                this.activeIds.splice(index, 1);
             } else {
-                this[varKey].push(id);
+                this.activeIds.push(id);
             }
         },
-        // takes array of overlays as input and returns them as ol-tileLayers
-        createOverlayTile(overlays) {
-            return overlays.map((overlay) => {
-                return new TileLayer({
-                    source: new ZoomifySource({
-                            url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
-                            size: [overlay.attrs.width, overlay.attrs.height],
-                            extent: [
-                                0,
-                                0,
-                                overlay.attrs.width,
-                                overlay.attrs.height
-                                // overlay.top_left_lng,
-                                // overlay.bottom_right_lat,
-                                // overlay.bottom_right_lng,
-                                // overlay.top_left_lat,
-                            ],
-                            transition: 100,
-                    })
-                });
-            });
-        }
-    },
-    watch: {
-        geotiffOverlays(geotiffOverlays) {
-            // adhere to the specific overlay order, if it has been defined in the volume settings
-            if(this.geotiffOrder) {
-                let geotiffOverlaysSorted = geotiffOverlays.toSorted((a, b) => {
-                    return this.geotiffOrder.indexOf(a.id) - this.geotiffOrder.indexOf(b.id);
-                });
-                this.overlays = this.createOverlayTile(geotiffOverlaysSorted);
-            } else { // default case
-                // call createOverlayTile-method with complete overlays-array, as order does not matter
-                this.overlays = this.createOverlayTile(geotiffOverlays)
-            }
-        },
-        webmapOverlays(webmapOverlays) {
-            // adhere to the specific overlay order, if it has been defined in the volume settings
-            if(this.webmapOrder) {
-                // Sort the original webmapOverlays array according to the order of ids
-                this.webmapOverlaysSorted = webmapOverlays.toSorted((a, b) => {
-                    return this.webmapOrder.indexOf(a.id) - this.webmapOrder.indexOf(b.id)
-                });
-            } else {
-                this.webmapOverlaysSorted = [...webmapOverlays];
-            }
-        }
     },
     async created() {
         // show the modal upon trigger-event
@@ -184,22 +120,17 @@ export default {
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
 
-            // provide overlay-url template string
+        // provide overlay-url template string
         await GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
             .then((response) => {
                 this.overlayUrlTemplate = response.body;
             });
 
         this.projectId = biigle.$require('geo.projectId');
-        // retrieve the array of ordered overlay-ids
-        this.geotiffOrder = JSON.parse(window.localStorage.getItem(`geotiff-upload-order-${this.projectId}-${this.volumeId}`));
-        this.webmapOrder = JSON.parse(window.localStorage.getItem(`webmap-upload-order-${this.projectId}-${this.volumeId}`));
         // provide overlays array (only those where browsing_overlay = true)
-        this.geotiffOverlays = biigle.$require('geo.geotiffOverlays');
-        this.webmapOverlays = biigle.$require('geo.webmapOverlays');
+        this.geoOverlays = biigle.$require('geo.geoOverlays');
         // initially fill activeIds with selected overlays
-        this.activeTifIds = this.geotiffOverlays.map(x => x.id);
-        this.activeWmsIds = this.webmapOverlays.map(x => x.id);
+        this.activeIds = this.geoOverlays.map(x => x.id);
         
         // prevent imageMap component from rendering before data is fetched
         this.dataLoaded = true;

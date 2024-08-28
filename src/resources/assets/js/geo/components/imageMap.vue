@@ -23,6 +23,8 @@ import {defaults as defaultInteractions} from 'ol/interaction';
 import {Events} from '../import';
 import {fromLonLat} from 'ol/proj';
 import {platformModifierKeyOnly} from 'ol/events/condition';
+import ZoomifySource from 'ol/source/Zoomify';
+
 
 /**
  * An element displaying the position of a single image on a map.
@@ -58,10 +60,10 @@ export default {
                 return [];
             }
         },
-        webMapOverlays: {
-            type: Array,
+        overlayUrlTemplate: {
+            type: String,
             default() {
-                return [];
+                return '';
             }
         }
     },
@@ -96,6 +98,22 @@ export default {
         parseSelectedFeatures(features) {
             return features.getArray().map((feature) => feature.get('id'));
         },
+        // takes array of overlays as input and returns them as ol-tileLayers
+        createOverlayTile(overlay) {
+            return new TileLayer({
+                source: new ZoomifySource({
+                        url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
+                        size: [overlay.attrs.width, overlay.attrs.height],
+                        extent: [
+                            overlay.attrs.top_left_lng,
+                            overlay.attrs.bottom_right_lat,
+                            overlay.attrs.bottom_right_lng,
+                            overlay.attrs.top_left_lat,
+                        ],
+                        transition: 100,
+                })
+            });
+        }
     },
     watch: {
         features(features) {
@@ -124,7 +142,11 @@ export default {
         // Array.prototype.push.apply(layers, this.overlays);
         // layers.push(vectorLayer);
 
-        let map = new Map({
+        // TODO:
+        // this.map --> überall verfügbar (ohne reactive)
+        // keine reactive variablen hinzufügen
+        // Layer "unsichtbar" machen über opacity oder active
+        this.map = new Map({
             target: this.$el,
             layers: [tileLayer],
             view: new View(),
@@ -142,41 +164,42 @@ export default {
         });
 
         // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
-        for(let i = this.webMapOverlays.length -1; i >= 0; i--) {
-            let wmsTileLayer =  new TileLayer({
-                source: new TileWMS({
-                    url: this.webMapOverlays[i].url,
-                    params: {'LAYERS': this.webMapOverlays[i].layers, 'TILED': true},
-                    serverType: 'geoserver',
-                    transition: 0,
-                }),
-            });
-            map.addLayer(wmsTileLayer);
+        for(let overlay of this.overlays) {
+            if(overlay.type == 'webmap') {
+                let wmsTileLayer =  new TileLayer({
+                    source: new TileWMS({
+                        url: overlay.attrs.url,
+                        params: {'LAYERS': overlay.attrs.layers, 'TILED': true},
+                        serverType: 'geoserver',
+                        transition: 0,
+                    }),
+                });
+                this.map.addLayer(wmsTileLayer);
+            } else { // if overlay.type == 'geotiff'
+                // include the geotiff Layers as ol-tileLayer
+                let tileLayer = this.createOverlayTile(overlay);
+                tileLayer.set('name', `geotiffTile_${overlay.id}`);
+                this.map.addLayer(tileLayer);
+            }
         }
 
-        // include the prepared geotiff Layers
-        for(let i = this.overlays.length - 1; i >= 0; i--) {
-            let tileLayer = this.overlays[i];
-            tileLayer.set('name', `geotiffTile_${i}`);
-            map.addLayer(tileLayer);
-        }
-        map.addLayer(vectorLayer);
+        this.map.addLayer(vectorLayer);
 
-        map.getView().fit(extent, map.getSize());
+        this.map.getView().fit(extent, this.map.getSize());
 
         if (this.zoom) {
-            map.getView().setZoom(this.zoom);
+            this.map.getView().setZoom(this.zoom);
         }
 
         if (this.interactive) {
-            map.addControl(new ScaleLine());
+            this.map.addControl(new ScaleLine());
 
-            map.addControl(new ZoomToExtent({
+            this.map.addControl(new ZoomToExtent({
                 extent: extent,
                 label: '\uf066'
             }));
 
-            map.addControl(new OverviewMap({
+            this.map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
                 layers: [tileLayer],
@@ -190,13 +213,13 @@ export default {
                 features: this.features.filter((feature) => feature.get('preselected')),
             });
             let selectedFeatures = selectInteraction.getFeatures();
-            map.addInteraction(selectInteraction);
+            this.map.addInteraction(selectInteraction);
             selectInteraction.on('select', () => {
                 this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
             });
 
             let dragBox = new DragBox({condition: platformModifierKeyOnly});
-            map.addInteraction(dragBox);
+            this.map.addInteraction(dragBox);
             dragBox.on('boxend', () => {
                 selectedFeatures.clear();
                 this.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
@@ -207,14 +230,14 @@ export default {
         }
 
         Events.$on('sidebar.toggle', function () {
-            map.updateSize();
+            this.map.updateSize();
         });
 
         // Update once to get the correct map size in case the map is used in combination
         // with other Components (like the sidebar). Else the select interaction may not
         // work correctly.
         this.$nextTick(function () {
-            map.updateSize();
+            this.map.updateSize();
         });
     },
 };
