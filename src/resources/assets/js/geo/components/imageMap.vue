@@ -164,12 +164,12 @@ export default {
         });
 
         // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
-        for(let overlay of this.overlays) {
-            if(overlay.type == 'webmap') {
+        for(let i = this.overlays.length - 1; i >= 0; i--) {
+            if(this.overlays[i].type == 'webmap') {
                 let wmsTileLayer =  new TileLayer({
                     source: new TileWMS({
-                        url: overlay.attrs.url,
-                        params: {'LAYERS': overlay.attrs.layers, 'TILED': true},
+                        url: this.overlays[i].attrs.url,
+                        params: {'LAYERS': this.overlays[i].attrs.layers, 'TILED': true},
                         serverType: 'geoserver',
                         transition: 0,
                     }),
@@ -177,8 +177,8 @@ export default {
                 this.map.addLayer(wmsTileLayer);
             } else { // if overlay.type == 'geotiff'
                 // include the geotiff Layers as ol-tileLayer
-                let tileLayer = this.createOverlayTile(overlay);
-                tileLayer.set('name', `geotiffTile_${overlay.id}`);
+                let tileLayer = this.createOverlayTile(this.overlays[i]);
+                tileLayer.set('name', `geotiffTile_${this.overlays[i].id}`);
                 this.map.addLayer(tileLayer);
             }
         }
