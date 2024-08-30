@@ -24,7 +24,7 @@ import {Events} from '../import';
 import {fromLonLat} from 'ol/proj';
 import {platformModifierKeyOnly} from 'ol/events/condition';
 import ZoomifySource from 'ol/source/Zoomify';
-
+import LayerGroup from 'ol/layer/Group';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -64,6 +64,12 @@ export default {
             type: String,
             default() {
                 return '';
+            }
+        },
+        activeIds: {
+            type: Array,
+            default() {
+                return [];
             }
         }
     },
@@ -120,6 +126,16 @@ export default {
             this.source.clear();
             this.source.addFeatures(features);
         },
+        // set the visibility of overlay-layer based on activeIds Array
+        activeIds(idArray) {
+            this.overlayGroup.getLayers().forEach((layer) => {
+                if(idArray.includes(layer.getProperties().id)) {
+                    layer.setVisible(true);
+                } else {
+                    layer.setVisible(false);
+                }
+            });
+        }
     },
     created() {
         // Set this directly so it is not made reactive.
@@ -129,7 +145,7 @@ export default {
         this.source.addFeatures(this.features);
         let extent = this.source.getExtent();
 
-        let tileLayer = new TileLayer({source: new OSMSource()});
+        let basemap = new TileLayer({source: new OSMSource()});
 
         let vectorLayer = new VectorLayer({
             source: this.source,
@@ -138,29 +154,9 @@ export default {
             updateWhileInteracting: true,
         });
 
-        // let layers = [tileLayer];
-        // Array.prototype.push.apply(layers, this.overlays);
-        // layers.push(vectorLayer);
-
-        // TODO:
-        // this.map --> überall verfügbar (ohne reactive)
-        // keine reactive variablen hinzufügen
-        // Layer "unsichtbar" machen über opacity oder active
-        this.map = new Map({
-            target: this.$el,
-            layers: [tileLayer],
-            view: new View(),
-            interactions: defaultInteractions({
-                altShiftDragRotate: false,
-                doubleClickZoom: this.interactive,
-                keyboard: this.interactive,
-                mouseWheelZoom: this.interactive,
-                shiftDragZoom: false,
-                dragPan: this.interactive,
-                pinchRotate: false,
-                pinchZoom: this.interactive,
-            }),
-            controls: defaultControls({zoom: this.interactive}),
+        this.overlayGroup = new LayerGroup({
+                layers: [],
+                name: 'overlayGroup'
         });
 
         // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
@@ -174,14 +170,34 @@ export default {
                         transition: 0,
                     }),
                 });
-                this.map.addLayer(wmsTileLayer);
+                wmsTileLayer.set('id', this.overlays[i].id);
+                this.overlayGroup.getLayers().push(wmsTileLayer);
             } else { // if overlay.type == 'geotiff'
                 // include the geotiff Layers as ol-tileLayer
                 let tileLayer = this.createOverlayTile(this.overlays[i]);
                 tileLayer.set('name', `geotiffTile_${this.overlays[i].id}`);
-                this.map.addLayer(tileLayer);
+                tileLayer.set('id', this.overlays[i].id);
+                this.overlayGroup.getLayers().push(tileLayer);
             }
         }
+       
+        // this.map makes map available in methods without being reactive
+        this.map = new Map({
+            target: this.$el,
+            layers: [basemap, this.overlayGroup],
+            view: new View(),
+            interactions: defaultInteractions({
+                altShiftDragRotate: false,
+                doubleClickZoom: this.interactive,
+                keyboard: this.interactive,
+                mouseWheelZoom: this.interactive,
+                shiftDragZoom: false,
+                dragPan: this.interactive,
+                pinchRotate: false,
+                pinchZoom: this.interactive,
+            }),
+            controls: defaultControls({zoom: this.interactive}),
+        });
 
         this.map.addLayer(vectorLayer);
 
@@ -202,7 +218,7 @@ export default {
             this.map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
-                layers: [tileLayer],
+                layers: [basemap],
                 view: new View({zoom: 1, maxZoom: 1})
             }));
         }

@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate"></image-map>
+            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
