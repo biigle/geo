@@ -1,0 +1,1 @@
+export let SettingsTabPlugins = biigle.$require('annotations.components.settingsTabPlugins');
