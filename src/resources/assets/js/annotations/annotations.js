@@ -1,1 +1,1 @@
-import './annotationsSettingsTabPlugins';
+import './settingsTabPlugins';

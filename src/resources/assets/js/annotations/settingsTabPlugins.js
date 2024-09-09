@@ -1,4 +1,4 @@
-import Plugin from './components/annotationsSettingsTabPlugin';
+import Plugin from './components/settingsTabPlugin';
 import {SettingsTabPlugins} from './import';
 
 /**
