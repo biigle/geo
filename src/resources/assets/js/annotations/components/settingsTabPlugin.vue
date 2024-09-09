@@ -37,9 +37,6 @@ export default {
         },
     },
     created() {
-        console.log("CREATED Plugin");
-        console.log(this.opacity);
-        
         this.volumeId = biigle.$require('annotations.volumeId');
 
         if (this.settings.has('contextLayerOpacity')) {
