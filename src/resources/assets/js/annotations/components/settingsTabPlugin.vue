@@ -14,6 +14,8 @@ export default {
     data() {
         return {
             opacityValue: '1',
+            volumeId: null,
+            overlays: null,
         }
     },
     computed: {
@@ -38,9 +40,17 @@ export default {
     },
     created() {
         this.volumeId = biigle.$require('annotations.volumeId');
+        this.overlays = biigle.$require('annotations.overlays');
 
-        if (this.settings.has('contextLayerOpacity')) {
-            this.opacityValue = this.settings.get('contextLayerOpacity');
+        // check if there are context-overlays
+        if(this.overlays.length !== 0) {
+            // check if an opacity preference is available in settings and change it in case
+            if (this.settings.has('contextLayerOpacity')) {
+                this.opacityValue = this.settings.get('contextLayerOpacity');
+            }
+        } else {
+            // if no context-overlays available
         }
     }
 };
+</script>
