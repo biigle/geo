@@ -114,7 +114,6 @@ class WebMapSource
         $layers = $this->xml->xpath('//*[local-name()="Layer"][not(.//*[local-name()="Layer"])]');
         // loop over layers and return first valid layer title and name
         foreach($layers as $layer) {
-            if((string) $layer['queryable'] === "1") {
                 $webmapTitle = (string) $layer->Title;
                 // Excerpt from OpenGIS 'Web Map Server Implementation Specification':
                 // If, and only if, a layer has a <Name>, then it is a map layer that can be requested
@@ -124,7 +123,6 @@ class WebMapSource
                     $webmapLayers = [(string) $layer->Name];
                     return [$webmapTitle, $webmapLayers];
                 }
-            }
         }
         throw ValidationException::withMessages(
             [
