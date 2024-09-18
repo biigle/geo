@@ -34,7 +34,6 @@ export default {
     },
     methods: {
         toggleActive(id) {
-            console.log('triggered: ', id);
             if(this.activeId === id) {
                 // do nothing
             } else {
@@ -66,8 +65,6 @@ export default {
             if (this.settings.has('contextLayerOpacity')) {
                 this.opacityValue = this.settings.get('contextLayerOpacity');
             }
-        } else {
-            // if no context-overlays available
         }
     },
 };
