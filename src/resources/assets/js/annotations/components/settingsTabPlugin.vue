@@ -48,10 +48,13 @@ export default {
             } else {
                 this.settings.delete('contextLayerOpacity');
             }
-
             // TODO: Implement OL-layer that shows mosaic
             // this.layer.setOpacity(opacity);
         },
+        // save the ID of the currently selected overlay in settings
+        activeId(activeId) {
+            this.settings.set('contextLayerId', activeId);
+        }
     },
     created() {
         this.volumeId = biigle.$require('annotations.volumeId');
