@@ -5,10 +5,12 @@
 <script>
 import DragBox from 'ol/interaction/DragBox';
 import Feature from 'ol/Feature';
+import LayerGroup from 'ol/layer/Group';
 import Map from 'ol/Map';
 import OSMSource from 'ol/source/OSM';
 import OverviewMap from 'ol/control/OverviewMap';
 import Point from 'ol/geom/Point';
+import Projection from 'ol/proj/Projection';
 import ScaleLine from 'ol/control/ScaleLine';
 import Select from 'ol/interaction/Select';
 import Style from '../ol/style';
@@ -17,14 +19,13 @@ import TileWMS from 'ol/source/TileWMS.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
+import ZoomifySource from 'ol/source/Zoomify';
 import ZoomToExtent from 'ol/control/ZoomToExtent';
 import {defaults as defaultControls} from 'ol/control';
 import {defaults as defaultInteractions} from 'ol/interaction';
 import {Events} from '../import';
 import {fromLonLat} from 'ol/proj';
 import {platformModifierKeyOnly} from 'ol/events/condition';
-import ZoomifySource from 'ol/source/Zoomify';
-import LayerGroup from 'ol/layer/Group';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -106,17 +107,32 @@ export default {
         },
         // takes array of overlays as input and returns them as ol-tileLayers
         createOverlayTile(overlay) {
+            let top_left = fromLonLat([
+                overlay.attrs.top_left_lng,
+                overlay.attrs.top_left_lat,
+            ]);
+            let bottom_right = fromLonLat([
+                overlay.attrs.bottom_right_lng,
+                overlay.attrs.bottom_right_lat,
+            ]);
+
+            let projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'degrees',
+                extent: [
+                    top_left[0],
+                    top_left[1],
+                    bottom_right[0],
+                    bottom_right[1],
+                ],
+            });
+
             return new TileLayer({
                 source: new ZoomifySource({
-                        url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
-                        size: [overlay.attrs.width, overlay.attrs.height],
-                        extent: [
-                            overlay.attrs.top_left_lng,
-                            overlay.attrs.bottom_right_lat,
-                            overlay.attrs.bottom_right_lng,
-                            overlay.attrs.top_left_lat,
-                        ],
-                        transition: 100,
+                    url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
+                    size: [overlay.attrs.width, overlay.attrs.height],
+                    transition: 100,
+                    projection: projection,
                 })
             });
         }
