@@ -70,8 +70,8 @@ class GeoTiffOverlayController extends Controller
         $volumeId = $request->volumeId;
 
         // check whether file exists alread in DB 
-        $existingFileNames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
-        if (in_array($fileName, $existingFileNames)) {
+        $overlayExists = GeoOverlay::where('volume_id', $volumeId)->where('name', $fileName)->exists();
+        if ($overlayExists) {
             // strip the name if too long
             $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
             throw ValidationException::withMessages(

@@ -9,11 +9,6 @@
     </div>
     <div class="panel-body" v-if="editing" v-cloak>
         <tabs>
-            {{-- <tab header="Plain" title="Upload a geo overlay in plain format" :disabled="loading">
-                <plain-overlay-form inline-template v-on:loading-start="startLoading" v-on:error="finishLoading" v-on:success="addOverlay">
-                    @include('geo::volumes.edit.plainOverlayForm')
-                </plain-overlay-form>
-            </tab> --}}
             <tab title="geoTIFF" :disabled="loading">
                 <geotiff-overlay-form inline-template :volume-id="{{$volume->id}}" v-on:success="addOverlay">
                     @include('geo::volumes.edit.geotiffOverlayForm')
