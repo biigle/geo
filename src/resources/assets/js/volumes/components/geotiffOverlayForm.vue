@@ -53,13 +53,13 @@ export default {
             return Api.saveGeoTiff({id: this.volumeId}, data);
         },
         uploadGeoTiff(event) {
-            this.startLoading();
+            this.$emit('upload', true);
             let data = new FormData();
             data.append('geotiff', event.target.files[0]);
             data.append('volumeId', this.volumeId);
             this.upload(data)
                 .then(this.handleSuccess, this.handleError)
-                .finally(this.finishLoading);
+                .finally(this.$emit('upload', false));
         },
     }
 }
