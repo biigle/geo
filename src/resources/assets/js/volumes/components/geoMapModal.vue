@@ -136,6 +136,10 @@ export default {
 </script>
 
 <style scoped>
+    .image-map {
+        height: 450px;
+    }
+
     p {
         padding-top: 10px;
     }
@@ -227,3 +231,4 @@ export default {
     } */
 
 </style>
+

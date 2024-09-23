@@ -1,7 +1,7 @@
-import Circle from 'ol/style/Circle';
-import Fill from 'ol/style/Fill';
-import Stroke from 'ol/style/Stroke';
-import Style from 'ol/style/Style';
+import Circle from '@biigle/ol/style/Circle';
+import Fill from '@biigle/ol/style/Fill';
+import Stroke from '@biigle/ol/style/Stroke';
+import Style from '@biigle/ol/style/Style';
 
 let style = {
     colors: {
