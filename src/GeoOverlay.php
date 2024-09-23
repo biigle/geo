@@ -103,7 +103,7 @@ class GeoOverlay extends Model
      */
     public function getPathAttribute()
     {
-        return "{$this->id}/{$this->id}_original";
+        return "{$this->id}/{$this->id}_original.tif";
     }
 
     /**
@@ -114,6 +114,6 @@ class GeoOverlay extends Model
     public function storeFile(UploadedFile $file)
     {
         Storage::disk(config('geo.tiles.overlay_storage_disk'))
-            ->putFileAs($this->id, $file, "{$this->id}_original");
+            ->putFileAs($this->id, $file, "{$this->id}_original.tif");
     }
 }

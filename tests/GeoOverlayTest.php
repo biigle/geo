@@ -84,6 +84,6 @@ class GeoOverlayTest extends TestCase
     public function testPathAttribute()
     {
         $model = self::createGeotiffOverlay();
-        $this->assertEquals("{$model->id}/{$model->id}_original", $model->getPathAttribute());
+        $this->assertEquals("{$model->id}/{$model->id}_original.tif", $model->getPathAttribute());
     }
 }
