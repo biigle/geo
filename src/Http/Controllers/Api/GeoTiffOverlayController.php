@@ -165,10 +165,10 @@ class GeoTiffOverlayController extends Controller
         $overlay->type = 'geotiff';
         $overlay->layer_index = null;
         $overlay->attrs = [
-            "top_left_lng" => number_format($coords[0], 13),
-            "top_left_lat" => number_format($coords[1], 13),
-            "bottom_right_lng" => number_format($coords[2], 13),
-            "bottom_right_lat" => number_format($coords[3], 13),
+            "top_left_lng" => round($coords[0], 13),
+            "top_left_lat" => round($coords[1], 13),
+            "bottom_right_lng" => round($coords[2], 13),
+            "bottom_right_lat" => round($coords[3], 13),
             "width" => $pixelDimensions[0],  
             "height" => $pixelDimensions[1]
         ];
