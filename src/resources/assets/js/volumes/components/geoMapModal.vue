@@ -12,7 +12,7 @@
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
-                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group" style="font-size: 1.5em;"></i></button>
+                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group"></i></button>
                 <div class="layers" :class="{active: showLayers}">
                     <h4>Geo Overlays</h4>
                     <p class="text-danger">Currently no overlays uploaded / selected.</p>
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div v-else class="overlays-wrapper">
-                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group" style="font-size: 1.5em;"></i></button>
+                <button class="layer-button" @click="showLayers = !showLayers" title="Show available geo-overlays"><i class="fas fa-layer-group"></i></button>
                 <div class="layers" :class="{active: showLayers}">
                     <h4>Geo Overlays</h4>
                     <p class="text-muted"><em>Hint:</em> Select an overlay from the list below to show on map.</p>
@@ -54,7 +54,6 @@
 import Modal from 'uiv/dist/Modal';
 import ImageMap from '../../geo/components/imageMap';
 import CoordApi from '../api/volumeImageWithCoord';
-import GeoApi from '../api/geoOverlays';
 import {LoaderMixin} from '../import';
 
 
@@ -79,9 +78,13 @@ export default {
             disabled: true,
             imageIds: [],
             activeIds: [],
-            overlayUrlTemplate: '',
             projectId: null,
             geoOverlays: [],
+        }
+    },
+    computed: {
+        overlayUrlTemplate() {
+            return biigle.$require('geo.overlayUrlTemplate').replace(':id', this.volumeId);
         }
     },
     methods: {
@@ -119,12 +122,6 @@ export default {
         await CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
-
-        // provide overlay-url template string
-        await GeoApi.getGeoTiffOverlayUrlTemplate({id: this.volumeId})
-            .then((response) => {
-                this.overlayUrlTemplate = response.body;
-            });
 
         this.projectId = biigle.$require('geo.projectId');
         // provide overlays array (only those where browsing_overlay = true)
@@ -190,6 +187,7 @@ export default {
         display: block;
         background-color: var(--body-bg);
         text-decoration: none;
+        font-size: 1.5em;
         border: none;
         color: #aaaaaa;
         padding: 15px;
