@@ -80,11 +80,7 @@ export default {
             activeIds: [],
             projectId: null,
             geoOverlays: [],
-        }
-    },
-    computed: {
-        overlayUrlTemplate() {
-            return biigle.$require('geo.overlayUrlTemplate').replace(':id', this.volumeId);
+            overlayUrlTemplate: '',
         }
     },
     methods: {
@@ -122,6 +118,13 @@ export default {
         await CoordApi.get({id: this.volumeId})
             .then(response => this.images = response.body, this.handleErrorResponse)
             .finally(this.finishLoading);
+
+        // get the overlayUrlTemplate string
+        this.overlayUrlTemplate = await fetch(biigle.$require('geo.overlayUrlTemplate')).then((response) => {
+            return response.json().then((body) => {
+                return body.url;
+            });
+        });
 
         this.projectId = biigle.$require('geo.projectId');
         // provide overlays array (only those where browsing_overlay = true)

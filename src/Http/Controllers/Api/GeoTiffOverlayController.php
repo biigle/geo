@@ -23,9 +23,11 @@ class GeoTiffOverlayController extends Controller
     public function getOverlayUrlTemplate($id) {
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);
+        $response = [
+            'url' => Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/'),
+        ];
 
-        return Storage::disk(config('geo.tiles.overlay_storage_disk'))
-                ->url(':id/:id_tiles/');
+        return $response;
     }
 
     /**
