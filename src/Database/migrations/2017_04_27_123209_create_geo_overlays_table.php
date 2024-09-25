@@ -28,13 +28,10 @@ class CreateGeoOverlaysTable extends Migration
             // A short description of the overlay.
             $table->string('name', 512);
 
-            // lat is bounded by +-90 and lng by +-180 so if we take a float with 11
-            // digits and 8 after the decimal point we can store all coordinates with
-            // a resolution up to a mm (http://stackoverflow.com/a/9059066/1796523)
-            $table->float('top_left_lat', 11, 8);
-            $table->float('top_left_lng', 11, 8);
-            $table->float('bottom_right_lat', 11, 8);
-            $table->float('bottom_right_lng', 11, 8);
+            $table->float('top_left_lat');
+            $table->float('top_left_lng');
+            $table->float('bottom_right_lat');
+            $table->float('bottom_right_lng');
 
             $table->integer('volume_id')->unsigned()->index();
             $table->foreign('volume_id')

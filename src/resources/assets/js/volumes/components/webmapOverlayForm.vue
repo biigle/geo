@@ -11,13 +11,13 @@ export default {
   },
   mixins: [
         LoaderMixin,
-    ],
-    props: {
-        volumeId: {
-            type: Number,
-            required: true,
-        },
-    },
+  ],
+  props: {
+      volumeId: {
+          type: Number,
+          required: true,
+      },
+  },
   methods: {
     handleSuccess(response) {
         this.error = false;
@@ -40,13 +40,13 @@ export default {
         }
     },
     submitWebMap(event) {
-        this.startLoading();
+        this.$emit('upload', true);
         let data = new FormData();
         data.append('url', event.target[0].value); 
         data.append('volumeId', this.volumeId);
         geoApi.saveWebMap({id: this.volumeId}, data)
           .then(this.handleSuccess, this.handleError)
-          .finally(this.finishLoading)
+          .finally(this.$emit('upload', false))
       },
     },
 };

@@ -33,10 +33,6 @@ $router->group([
         'uses' => 'GeoTiffOverlayController@storeGeoTiff',
     ]);
 
-    $router->get('volumes/{id}/geo-overlays/geotiff/url', [
-        'uses' => 'GeoTiffOverlayController@getOverlayUrlTemplate',
-    ]);
-
     // WebMap
     $router->post('volumes/{id}/geo-overlays/webmap', [
         'uses' => 'WebMapOverlayController@store',

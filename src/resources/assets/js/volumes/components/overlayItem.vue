@@ -11,11 +11,19 @@
         </td>
         <td>
             <!-- browsing-layer -->
-            <button type="button" class="toggle-btn" :class="{active: browsingLayer}" v-on:click="toggleButton('browsingLayer')"><span class="fa fa-circle" aria-hidden="true"></span></button>
+            <span class="power-toggle">
+                <button class="btn btn-default btn-sm" :class="{'active btn-info': browsingLayer}" v-on:click="toggleButton('browsingLayer')" title="Add overlay to geo-selection filter">
+                    <i class="fa fa-fw fa-power-off"></i>
+                </button>
+            </span>
         </td>
         <td>
             <!-- context layer -->
-            <button type="button" class="toggle-btn" :class="{active: contextLayer}" v-on:click="toggleButton('contextLayer')"><span class="fa fa-circle" aria-hidden="true"></span></button>
+            <span class="power-toggle">
+                <button class="btn btn-default btn-sm" :class="{'active btn-info': contextLayer}" v-on:click="toggleButton('contextLayer')" title="Add overlay to geo-selection filter">
+                    <i class="fa fa-fw fa-power-off"></i>
+                </button>
+            </span>
         </td>
         <td>
             <button type="button" class="close" :title="title" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>

@@ -3,28 +3,29 @@
 </template>
 
 <script>
-import DragBox from 'ol/interaction/DragBox';
-import Feature from 'ol/Feature';
-import Map from 'ol/Map';
-import OSMSource from 'ol/source/OSM';
-import OverviewMap from 'ol/control/OverviewMap';
-import Point from 'ol/geom/Point';
-import ScaleLine from 'ol/control/ScaleLine';
-import Select from 'ol/interaction/Select';
+import DragBox from '@biigle/ol/interaction/DragBox';
+import Feature from '@biigle/ol/Feature';
+import LayerGroup from '@biigle/ol/layer/Group';
+import Map from '@biigle/ol/Map';
+import OSMSource from '@biigle/ol/source/OSM';
+import OverviewMap from '@biigle/ol/control/OverviewMap';
+import Point from '@biigle/ol/geom/Point';
+import Projection from '@biigle/ol/proj/Projection';
+import ScaleLine from '@biigle/ol/control/ScaleLine';
+import Select from '@biigle/ol/interaction/Select';
 import Style from '../ol/style';
-import TileLayer from 'ol/layer/Tile';
-import TileWMS from 'ol/source/TileWMS.js';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import View from 'ol/View';
-import ZoomToExtent from 'ol/control/ZoomToExtent';
-import {defaults as defaultControls} from 'ol/control';
-import {defaults as defaultInteractions} from 'ol/interaction';
+import TileLayer from '@biigle/ol/layer/Tile';
+import TileWMS from '@biigle/ol/source/TileWMS.js';
+import VectorLayer from '@biigle/ol/layer/Vector';
+import VectorSource from '@biigle/ol/source/Vector';
+import View from '@biigle/ol/View';
+import ZoomifySource from '@biigle/ol/source/Zoomify';
+import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
+import {defaults as defaultControls} from '@biigle/ol/control';
+import {defaults as defaultInteractions} from '@biigle/ol/interaction';
 import {Events} from '../import';
-import {fromLonLat} from 'ol/proj';
-import {platformModifierKeyOnly} from 'ol/events/condition';
-import ZoomifySource from 'ol/source/Zoomify';
-import LayerGroup from 'ol/layer/Group';
+import {fromLonLat} from '@biigle/ol/proj';
+import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -106,17 +107,32 @@ export default {
         },
         // takes array of overlays as input and returns them as ol-tileLayers
         createOverlayTile(overlay) {
+            let top_left = fromLonLat([
+                overlay.attrs.top_left_lng,
+                overlay.attrs.top_left_lat,
+            ]);
+            let bottom_right = fromLonLat([
+                overlay.attrs.bottom_right_lng,
+                overlay.attrs.bottom_right_lat,
+            ]);
+
+            let projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'degrees',
+                extent: [
+                    top_left[0],
+                    top_left[1],
+                    bottom_right[0],
+                    bottom_right[1],
+                ],
+            });
+
             return new TileLayer({
                 source: new ZoomifySource({
-                        url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
-                        size: [overlay.attrs.width, overlay.attrs.height],
-                        extent: [
-                            overlay.attrs.top_left_lng,
-                            overlay.attrs.bottom_right_lat,
-                            overlay.attrs.bottom_right_lng,
-                            overlay.attrs.top_left_lat,
-                        ],
-                        transition: 100,
+                    url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
+                    size: [overlay.attrs.width, overlay.attrs.height],
+                    transition: 100,
+                    projection: projection,
                 })
             });
         }
@@ -185,7 +201,7 @@ export default {
         this.map = new Map({
             target: this.$el,
             layers: [basemap, this.overlayGroup],
-            view: new View(),
+            view: new View({padding: [10, 10, 10, 10]}),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,
                 doubleClickZoom: this.interactive,
@@ -218,7 +234,7 @@ export default {
             this.map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
-                layers: [basemap],
+                layers: [new TileLayer({source: basemap.getSource()})],
                 view: new View({zoom: 1, maxZoom: 1})
             }));
         }
@@ -226,8 +242,10 @@ export default {
         if (this.selectable) {
             let selectInteraction = new Select({
                 style: Style.selected,
-                features: this.features.filter((feature) => feature.get('preselected')),
             });
+            selectInteraction
+                .getFeatures()
+                .extend(this.features.filter(feature => feature.get('preselected')));
             let selectedFeatures = selectInteraction.getFeatures();
             this.map.addInteraction(selectInteraction);
             selectInteraction.on('select', () => {

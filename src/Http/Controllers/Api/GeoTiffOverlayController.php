@@ -13,21 +13,6 @@ use Storage;
 
 class GeoTiffOverlayController extends Controller
 {
-
-     /**
-     * Returns an url template to the tile-storage directory of a geo-overlay
-     * 
-     *  @param int $id volume id
-     * @return string
-     */
-    public function getOverlayUrlTemplate($id) {
-        $volume = Volume::findOrFail($id);
-        $this->authorize('access', $volume);
-
-        return Storage::disk(config('geo.tiles.overlay_storage_disk'))
-                ->url(':id/:id_tiles/');
-    }
-
     /**
      * Stores a new geo overlay that was uploaded with the geotiff method.
      *
@@ -70,8 +55,8 @@ class GeoTiffOverlayController extends Controller
         $volumeId = $request->volumeId;
 
         // check whether file exists alread in DB 
-        $existingFileNames = GeoOverlay::where('volume_id', $volumeId)->pluck('name')->toArray();
-        if (in_array($fileName, $existingFileNames)) {
+        $overlayExists = GeoOverlay::where('volume_id', $volumeId)->where('name', $fileName)->exists();
+        if ($overlayExists) {
             // strip the name if too long
             $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
             throw ValidationException::withMessages(
@@ -165,10 +150,10 @@ class GeoTiffOverlayController extends Controller
         $overlay->type = 'geotiff';
         $overlay->layer_index = null;
         $overlay->attrs = [
-            "top_left_lng" => number_format($coords[0], 13),
-            "top_left_lat" => number_format($coords[1], 13),
-            "bottom_right_lng" => number_format($coords[2], 13),
-            "bottom_right_lat" => number_format($coords[3], 13),
+            "top_left_lng" => round($coords[0], 13),
+            "top_left_lat" => round($coords[1], 13),
+            "bottom_right_lng" => round($coords[2], 13),
+            "bottom_right_lat" => round($coords[3], 13),
             "width" => $pixelDimensions[0],  
             "height" => $pixelDimensions[1]
         ];

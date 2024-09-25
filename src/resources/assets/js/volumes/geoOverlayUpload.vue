@@ -3,9 +3,7 @@ import Api from './api/geoOverlays';
 import GeotiffOverlayForm from './components/geotiffOverlayForm';
 import WebmapOverlayForm from './components/webmapOverlayForm';
 import OverlayTable from './components/overlayTable';
-import {EditorMixin} from './import';
-import {handleErrorResponse} from './import';
-import {LoaderMixin} from './import';
+import {handleErrorResponse, LoaderMixin, EditorMixin} from './import';
 import Tabs from 'uiv/dist/Tabs';
 import Tab from 'uiv/dist/Tab';
 
@@ -58,6 +56,13 @@ export default {
         hasOverlays(dataKey) {
             return this[dataKey].length > 0;
         },
+        handleUpload(uploadInProgress) {
+            if(uploadInProgress) {
+                this.startLoading();
+            } else {
+                this.finishLoading();
+            }
+        }
     },
     created() {
         this.geoOverlays = biigle.$require('volumes.geoOverlays');

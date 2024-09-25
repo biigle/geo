@@ -86,17 +86,17 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
 
         $overlay = GeoOverlay::where('volume_id', $id)->first();
         $this->assertNotNull($overlay);
-        $this->assertEqualsWithDelta($overlay->attrs['top_left_lat'], 57.097483857335796, 0.00001);
-        $this->assertEqualsWithDelta($overlay->attrs['top_left_lng'], -2.9198048485706547, 0.00001);
-        $this->assertEqualsWithDelta($overlay->attrs['bottom_right_lat'], 57.09845896597305, 0.00001);
-        $this->assertEqualsWithDelta($overlay->attrs['bottom_right_lng'], -2.917006253590798, 0.00001);
-        $this->assertEquals($overlay->attrs['width'], 3);
-        $this->assertEquals($overlay->attrs['height'], 2);
-        $this->assertEquals($overlay->type, 'geotiff');
-        $this->assertEquals($overlay->layer_index, null);
-        $this->assertEquals($overlay->name, 'standardEPSG2013.tif');
-        $this->assertEquals($overlay->browsing_layer, false);
-        $this->assertEquals($overlay->context_layer, false);
+        $this->assertSame($overlay->attrs['top_left_lat'], 57.0974838573358);
+        $this->assertSame($overlay->attrs['top_left_lng'], -2.9198048485707);
+        $this->assertSame($overlay->attrs['bottom_right_lat'], 57.0984589659731);
+        $this->assertSame($overlay->attrs['bottom_right_lng'], -2.9170062535908);
+        $this->assertSame($overlay->attrs['width'], 3);
+        $this->assertSame($overlay->attrs['height'], 2);
+        $this->assertSame($overlay->type, 'geotiff');
+        $this->assertSame($overlay->layer_index, null);
+        $this->assertSame($overlay->name, 'standardEPSG2013.tif');
+        $this->assertSame($overlay->browsing_layer, false);
+        $this->assertSame($overlay->context_layer, false);
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
 
@@ -109,16 +109,16 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
 
         $overlay2 = GeoOverlay::where('volume_id', $id)->where('id', $overlay->id + 1)->first();
         $this->assertNotNull($overlay2);
-        $this->assertEqualsWithDelta($overlay2->attrs['top_left_lat'], 46.4884400461342, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->attrs['top_left_lng'], 11.3182638720361, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->attrs['bottom_right_lat'], 46.5038380359582, 0.00001);
-        $this->assertEqualsWithDelta($overlay2->attrs['bottom_right_lng'], 11.3705327977256, 0.00001);
-        $this->assertEquals($overlay2->attrs['width'], 396,);
-        $this->assertEquals($overlay2->attrs['height'], 183);
-        $this->assertEquals($overlay->type, 'geotiff');
-        $this->assertEquals($overlay2->name, 'modelTransform.tiff');
-        $this->assertEquals($overlay2->browsing_layer, false);
-        $this->assertEquals($overlay2->context_layer, false);
+        $this->assertSame($overlay2->attrs['top_left_lat'], 46.4884400461342);
+        $this->assertSame($overlay2->attrs['top_left_lng'], 11.3182638720361);
+        $this->assertSame($overlay2->attrs['bottom_right_lat'], 46.5038380359582);
+        $this->assertSame($overlay2->attrs['bottom_right_lng'], 11.3705327977256);
+        $this->assertSame($overlay2->attrs['width'], 396,);
+        $this->assertSame($overlay2->attrs['height'], 183);
+        $this->assertSame($overlay->type, 'geotiff');
+        $this->assertSame($overlay2->name, 'modelTransform.tiff');
+        $this->assertSame($overlay2->browsing_layer, false);
+        $this->assertSame($overlay2->context_layer, false);
 
         $response->assertJson($overlay2->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
