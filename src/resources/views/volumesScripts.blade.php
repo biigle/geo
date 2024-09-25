@@ -2,7 +2,7 @@
 <script type="text/javascript">
         biigle.$declare('geo.geoOverlays', {!! \Biigle\Modules\Geo\GeoOverlay::where('volume_id', $volume->id)->where('browsing_layer', true)->orderBy('layer_index')->get() !!});
         biigle.$declare('geo.projectId', {!! $volume->projects->pluck('id')->first() !!});
-        biigle.$declare('geo.overlayUrlTemplate', '{!! url('api/v1/volumes/' . $volume->id . '/geo-overlays/geotiff/url') !!}');
+        biigle.$declare('geo.overlayUrlTemplate', '{!! Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/') !!}');
 </script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/volumes.js') }}"></script>
 @endif

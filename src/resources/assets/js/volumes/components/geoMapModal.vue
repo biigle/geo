@@ -120,12 +120,7 @@ export default {
             .finally(this.finishLoading);
 
         // get the overlayUrlTemplate string
-        this.overlayUrlTemplate = await fetch(biigle.$require('geo.overlayUrlTemplate')).then((response) => {
-            return response.json().then((body) => {
-                return body.url;
-            });
-        });
-
+        this.overlayUrlTemplate = biigle.$require('geo.overlayUrlTemplate');
         this.projectId = biigle.$require('geo.projectId');
         // provide overlays array (only those where browsing_overlay = true)
         this.geoOverlays = biigle.$require('geo.geoOverlays');
