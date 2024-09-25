@@ -1,6 +1,6 @@
 <script>
-import TileLayer from 'ol/layer/Tile';
-import TileWMS from 'ol/source/TileWMS';
+import TileLayer from '@biigle/ol/layer/Tile';
+import TileWMS from '@biigle/ol/source/TileWMS';
 
 
 
