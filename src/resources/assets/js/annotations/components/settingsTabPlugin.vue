@@ -1,5 +1,9 @@
 <script>
 import { Collapse } from 'uiv';
+import {Events} from '../import';
+import TileLayer from '@biigle/ol/layer/Tile';
+import TileWMS from '@biigle/ol/source/TileWMS.js';
+
 /**
  * The plugin component to edit the context-layer appearance.
  *
@@ -22,6 +26,7 @@ export default {
             overlays: null,
             showLayers: false,
             activeId: null,
+            currentImage: null,
         }
     },
     computed: {
@@ -31,6 +36,25 @@ export default {
         shown() {
             return this.opacity > 0;
         },
+        // Implement OL-layer that shows mosaic
+        layer() {
+            let activeOverlay = this.overlays.find(x => x.id === this.activeId);
+
+            if(activeOverlay.type == 'webmap') {
+                let wmsTileLayer =  new TileLayer({
+                        source: new TileWMS({
+                            url: activeOverlay.attrs.url,
+                            params: {'LAYERS': activeOverlay.attrs.layers, 'TILED': true},
+                            serverType: 'geoserver',
+                            transition: 0,
+                        }),
+                    });
+                    wmsTileLayer.set('id', activeOverlay.id);
+                    return wmsTileLayer;
+            } else {
+                // TODO: implement geoTIFF layer
+            }
+        }
     },
     methods: {
         toggleActive(id) {
@@ -39,7 +63,15 @@ export default {
             } else {
                 this.activeId = id;
             }
-        }
+        },
+        updateCurrentImage(id, image) {
+            this.currentImage = image;
+        },
+        extendMap(map) {
+            map.addLayer(this.layer);
+            // map.addInteraction(this.drawInteraction);
+            // map.addInteraction(this.modifyInteraction);
+        },
     },
     watch: {
         opacity(opacity) {
@@ -48,13 +80,8 @@ export default {
             } else {
                 this.settings.delete('contextLayerOpacity');
             }
-            // TODO: Implement OL-layer that shows mosaic
-            // this.layer.setOpacity(opacity);
+            this.layer.setOpacity(opacity);
         },
-        // save the ID of the currently selected overlay in settings
-        activeId(activeId) {
-            this.settings.set('contextLayerId', activeId);
-        }
     },
     created() {
         this.volumeId = biigle.$require('annotations.volumeId');
@@ -69,6 +96,9 @@ export default {
                 this.opacityValue = this.settings.get('contextLayerOpacity');
             }
         }
+
+        Events.$on('images.change', this.updateCurrentImage);
+        Events.$on('annotations.map.init', this.extendMap);
     },
 };
 </script>
