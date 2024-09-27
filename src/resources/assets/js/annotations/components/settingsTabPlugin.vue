@@ -54,6 +54,7 @@ export default {
             } else {
                 // TODO: implement geoTIFF layer
             }
+            return null;
         }
     },
     methods: {
