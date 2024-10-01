@@ -76,7 +76,7 @@ export default {
     },
     data() {
         return {
-            //
+            extent: [],
         };
     },
     computed: {
@@ -116,25 +116,41 @@ export default {
                 overlay.attrs.bottom_right_lat,
             ]);
 
+            // let extentPixels = [0, 0, overlay.attrs.width, overlay.attrs.height];
+            let extentEPSG4326 = [
+                overlay.attrs.top_left_lng, 
+                overlay.attrs.top_left_lat, 
+                overlay.attrs.bottom_right_lng, 
+                overlay.attrs.bottom_right_lat
+            ];
+            let extentEPSG3857 = [
+                top_left[0],
+                top_left[1],
+                bottom_right[0],
+                bottom_right[1]
+            ];
+            
             let projection = new Projection({
-                code: 'EPSG:3857',
+                code: 'EPSG:4326',
                 units: 'degrees',
-                extent: [
-                    top_left[0],
-                    top_left[1],
-                    bottom_right[0],
-                    bottom_right[1],
-                ],
             });
 
-            return new TileLayer({
-                source: new ZoomifySource({
+            let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                     size: [overlay.attrs.width, overlay.attrs.height],
-                    transition: 100,
                     projection: projection,
-                })
+                    extent: extentEPSG4326
+                });
+            
+            let tileLayer = new TileLayer({
+                source: sourceLayer,
             });
+
+            this.extent = extentEPSG3857;
+            // console.log('zoomify-extent: ', sourceLayer.getTileGrid().getExtent());
+            // console.log('zoomify-resolutions: ', sourceLayer.getTileGrid().getResolutions());
+
+            return tileLayer;
         }
     },
     watch: {
@@ -201,7 +217,10 @@ export default {
         this.map = new Map({
             target: this.$el,
             layers: [basemap, this.overlayGroup],
-            view: new View({padding: [10, 10, 10, 10]}),
+            view: new View({
+                projection: 'EPSG:3857',
+                padding: [10, 10, 10, 10],
+            }),
             interactions: defaultInteractions({
                 altShiftDragRotate: false,
                 doubleClickZoom: this.interactive,
@@ -217,7 +236,7 @@ export default {
 
         this.map.addLayer(vectorLayer);
 
-        this.map.getView().fit(extent, this.map.getSize());
+        this.map.getView().fit(this.extent, this.map.getSize());
 
         if (this.zoom) {
             this.map.getView().setZoom(this.zoom);
