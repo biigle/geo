@@ -26,6 +26,7 @@ import {defaults as defaultInteractions} from '@biigle/ol/interaction';
 import {Events} from '../import';
 import {fromLonLat} from '@biigle/ol/proj';
 import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
+import TileGrid from '@biigle/ol/tilegrid/TileGrid.js';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -131,16 +132,34 @@ export default {
             ];
             
             let projection = new Projection({
-                code: 'EPSG:4326',
-                units: 'degrees',
+                code: 'EPSG:3857',
+                units: 'm',
             });
 
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                     size: [overlay.attrs.width, overlay.attrs.height],
-                    projection: projection,
-                    extent: extentEPSG4326
-                });
+                    // projection: projection,
+                    // extent: extentEPSG3857
+            });
+
+            let maxZoom = sourceLayer.getTileGrid().getMaxZoom();
+            let res = []
+            let i = 0;
+            // calculate full size resolution
+            let resolution = (bottom_right[0] - top_left[0]) / overlay.attrs.width;
+            while(i <= maxZoom) {
+                res.unshift(resolution);
+                resolution *= 2;
+                ++i;
+            }
+
+            let tileGrid = new TileGrid({
+                extent: extentEPSG3857,
+                resolutions: res,
+                maxZoom: maxZoom
+            });
+            sourceLayer.setTileGridForProjection('EPSG:3857', tileGrid);
             
             let tileLayer = new TileLayer({
                 source: sourceLayer,
@@ -149,6 +168,8 @@ export default {
             this.extent = extentEPSG3857;
             // console.log('zoomify-extent: ', sourceLayer.getTileGrid().getExtent());
             // console.log('zoomify-resolutions: ', sourceLayer.getTileGrid().getResolutions());
+            // console.log('zoomify-tileGrid: ', sourceLayer.getTileGrid());
+
 
             return tileLayer;
         }
