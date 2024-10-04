@@ -10,12 +10,11 @@ import Map from '@biigle/ol/Map';
 import OSMSource from '@biigle/ol/source/OSM';
 import OverviewMap from '@biigle/ol/control/OverviewMap';
 import Point from '@biigle/ol/geom/Point';
-import Projection from '@biigle/ol/proj/Projection';
 import ScaleLine from '@biigle/ol/control/ScaleLine';
 import Select from '@biigle/ol/interaction/Select';
 import Style from '../ol/style';
 import TileLayer from '@biigle/ol/layer/Tile';
-import TileWMS from '@biigle/ol/source/TileWMS.js';
+import TileWMS from '@biigle/ol/source/TileWMS';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
 import View from '@biigle/ol/View';
@@ -24,9 +23,9 @@ import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
 import {defaults as defaultControls} from '@biigle/ol/control';
 import {defaults as defaultInteractions} from '@biigle/ol/interaction';
 import {Events} from '../import';
-import {fromLonLat} from '@biigle/ol/proj';
 import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
-import TileGrid from '@biigle/ol/tilegrid/TileGrid.js';
+import {Projection, addCoordinateTransforms, fromLonLat, transformExtent} from '@biigle/ol/proj';
+import {getHeight, getWidth} from '@biigle/ol/extent';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -108,68 +107,60 @@ export default {
         },
         // takes array of overlays as input and returns them as ol-tileLayers
         createOverlayTile(overlay) {
-            let top_left = fromLonLat([
-                overlay.attrs.top_left_lng,
-                overlay.attrs.top_left_lat,
-            ]);
-            let bottom_right = fromLonLat([
-                overlay.attrs.bottom_right_lng,
-                overlay.attrs.bottom_right_lat,
-            ]);
-
-            // let extentPixels = [0, 0, overlay.attrs.width, overlay.attrs.height];
-            let extentEPSG4326 = [
-                overlay.attrs.top_left_lng, 
-                overlay.attrs.top_left_lat, 
-                overlay.attrs.bottom_right_lng, 
-                overlay.attrs.bottom_right_lat
-            ];
-            let extentEPSG3857 = [
-                top_left[0],
-                top_left[1],
-                bottom_right[0],
-                bottom_right[1]
-            ];
-            
+            // define a projection for each overlay (thus included id)
             let projection = new Projection({
-                code: 'EPSG:3857',
+                code: 'zoomify-' + overlay.id,
                 units: 'm',
             });
 
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                     size: [overlay.attrs.width, overlay.attrs.height],
-                    // projection: projection,
-                    // extent: extentEPSG3857
+                    crossOrigin: 'anonymous',
+                    zDirection: -1, // Ensure we get a tile with the screen resolution or higher
+                    projection: projection
             });
 
-            let maxZoom = sourceLayer.getTileGrid().getMaxZoom();
-            let res = []
-            let i = 0;
-            // calculate full size resolution
-            let resolution = (bottom_right[0] - top_left[0]) / overlay.attrs.width;
-            while(i <= maxZoom) {
-                res.unshift(resolution);
-                resolution *= 2;
-                ++i;
-            }
+            let extentEPSG4326 = [
+                overlay.attrs.top_left_lng, 
+                overlay.attrs.top_left_lat, 
+                overlay.attrs.bottom_right_lng, 
+                overlay.attrs.bottom_right_lat
+            ];
+            // define the source extent (units = pixels) and targetExtent (EPSG:3857, units = meters)
+            let extent = sourceLayer.getTileGrid().getExtent();
+            let targetExtent = transformExtent(extentEPSG4326, 'EPSG:4326', 'EPSG:3857');
 
-            let tileGrid = new TileGrid({
-                extent: extentEPSG3857,
-                resolutions: res,
-                maxZoom: maxZoom
-            });
-            sourceLayer.setTileGridForProjection('EPSG:3857', tileGrid);
+            // specify the point resolution in meters through custom function 
+            // (default transforms the point from pixel to EPSG:4326, units = degrees)
+            projection.setGetPointResolution(
+                (r) => r * Math.max(
+                            getWidth(targetExtent) / getWidth(extent),
+                            getHeight(targetExtent) / getHeight(extent)
+                        )
+            );
+
+            // add coordinate transforms between the source-projection and target projection (same as view-projection)
+            addCoordinateTransforms(
+                projection,
+                'EPSG:3857',
+                ([x, y]) => [
+                    targetExtent[0] +
+                    ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent),
+                    targetExtent[1] +
+                    ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent),
+                ],
+                ([x, y]) => [
+                    extent[0] +
+                    ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent),
+                    extent[1] +
+                    ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent),
+                ]
+            );
             
             let tileLayer = new TileLayer({
                 source: sourceLayer,
             });
-
-            this.extent = extentEPSG3857;
-            // console.log('zoomify-extent: ', sourceLayer.getTileGrid().getExtent());
-            // console.log('zoomify-resolutions: ', sourceLayer.getTileGrid().getResolutions());
-            // console.log('zoomify-tileGrid: ', sourceLayer.getTileGrid());
-
 
             return tileLayer;
         }
@@ -257,7 +248,7 @@ export default {
 
         this.map.addLayer(vectorLayer);
 
-        this.map.getView().fit(this.extent, this.map.getSize());
+        this.map.getView().fit(extent, this.map.getSize());
 
         if (this.zoom) {
             this.map.getView().setZoom(this.zoom);
