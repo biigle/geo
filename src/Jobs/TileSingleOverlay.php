@@ -7,6 +7,7 @@ use Biigle\Jobs\TileSingleObject;
 use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
 use File;
+use Jcupitt\Vips;
 
 class TileSingleOverlay extends TileSingleObject
 {
@@ -54,5 +55,24 @@ class TileSingleOverlay extends TileSingleObject
         } finally {
             File::deleteDirectory($this->tempPath);
         }
+    }
+
+     /**
+     * Generate tiles for the object and put them to temporary storage.
+     *
+     * @param File $file
+     * @param string $path Path to the cached image file.
+     */
+    public function generateTiles($file, $path)
+    {
+        $vipsImage = $this->getVipsImage($path);
+        $sourceSpace = Vips\FFI::vips()->vips_image_guess_interpretation($vipsImage);
+        // dd($sourceSpace);
+
+        $vipsImage->colourspace(Vips\Interpretation::RGB16)->dzsave($this->tempPath, [
+            'layout' => 'zoomify',
+            'container' => 'fs',
+            'strip' => true,
+        ]);
     }
 }
