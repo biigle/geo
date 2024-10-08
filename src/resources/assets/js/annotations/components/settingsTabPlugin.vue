@@ -36,24 +36,28 @@ export default {
         shown() {
             return this.opacity > 0;
         },
+        // return the geo-overlay matching the currently active ID
+        activeOverlay() {
+            return this.overlays.find(x => x.id === this.activeId);
+        },
         // Implement OL-layer that shows mosaic
         layer() {
-            let activeOverlay = this.overlays.find(x => x.id === this.activeId);
-
-            if(activeOverlay.type == 'webmap') {
+            if(this.activeOverlay.type === 'webmap') {
                 let wmsTileLayer =  new TileLayer({
                         source: new TileWMS({
-                            url: activeOverlay.attrs.url,
-                            params: {'LAYERS': activeOverlay.attrs.layers, 'TILED': true},
+                            url: this.activeOverlay.attrs.url,
+                            params: {'LAYERS': this.activeOverlay.attrs.layers, 'TILED': true},
                             serverType: 'geoserver',
                             transition: 0,
                         }),
                     });
-                    wmsTileLayer.set('id', activeOverlay.id);
+                    wmsTileLayer.set('id', this.activeOverlay.id);
                     return wmsTileLayer;
             } else {
                 // TODO: implement geoTIFF layer
+
             }
+            // console.log('NULL!!!');
             return null;
         }
     },
@@ -75,26 +79,37 @@ export default {
         },
     },
     watch: {
+        // save the ID of the currently selected overlay in settings
+        activeId(activeId) {
+            this.settings.set(`${this.volumeId}-contextLayerId`, activeId);
+        },
         opacity(opacity) {
             if (opacity < 1) {
-                this.settings.set('contextLayerOpacity', opacity);
+                this.settings.set(`${this.volumeId}-contextLayerOpacity`, opacity);
             } else {
-                this.settings.delete('contextLayerOpacity');
+                this.settings.delete(`${this.volumeId}-contextLayerOpacity`);
             }
-            this.layer.setOpacity(opacity);
+            // this.layer.setOpacity(opacity);
         },
     },
     created() {
         this.volumeId = biigle.$require('annotations.volumeId');
         this.overlays = biigle.$require('annotations.overlays');
 
+        // define the names on volume-basis
+        const contextLayerId = `${this.volumeId}-contextLayerId`;
+        const contextLayerOpacity = `${this.volumeId}-contextLayerOpacity`;
         // check if there are context-overlays
         if(this.overlays.length !== 0) {
-            // initially set activeId to first overlay
-            this.activeId = this.overlays[0].id;
+            if(this.settings.has(contextLayerId)) {
+                this.activeId = this.settings.get(contextLayerId);
+            } else {
+                // initially set activeId to first overlay
+                this.activeId = this.overlays[0].id;
+            }
             // check if an opacity preference is available in settings and change it in case
-            if (this.settings.has('contextLayerOpacity')) {
-                this.opacityValue = this.settings.get('contextLayerOpacity');
+            if (this.settings.has(contextLayerOpacity)) {
+                this.opacityValue = this.settings.get(contextLayerOpacity);
             }
         }
 
