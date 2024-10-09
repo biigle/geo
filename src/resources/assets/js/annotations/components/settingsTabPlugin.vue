@@ -3,6 +3,8 @@ import { Collapse } from 'uiv';
 import {Events} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
+import ZoomifySource from '@biigle/ol/source/Zoomify';
+import {Projection} from '@biigle/ol/proj';
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -27,6 +29,8 @@ export default {
             showLayers: false,
             activeId: null,
             currentImage: null,
+            overlayUrlTemplate: '',
+            loaded: false,
         }
     },
     computed: {
@@ -38,27 +42,35 @@ export default {
         },
         // return the geo-overlay matching the currently active ID
         activeOverlay() {
-            return this.overlays.find(x => x.id === this.activeId);
+            if(this.overlays !== null) {
+                return this.overlays.find(x => x.id === this.activeId);
+            }
+            return null;
         },
         // Implement OL-layer that shows mosaic
         layer() {
-            if(this.activeOverlay.type === 'webmap') {
-                let wmsTileLayer =  new TileLayer({
-                        source: new TileWMS({
-                            url: this.activeOverlay.attrs.url,
-                            params: {'LAYERS': this.activeOverlay.attrs.layers, 'TILED': true},
-                            serverType: 'geoserver',
-                            transition: 0,
-                        }),
-                    });
-                    wmsTileLayer.set('id', this.activeOverlay.id);
-                    return wmsTileLayer;
-            } else {
-                // TODO: implement geoTIFF layer
+            let tileLayer = null;
 
+            if(this.activeOverlay !== null) {
+                if(this.activeOverlay.type === 'webmap') {
+                    tileLayer =  new TileLayer({
+                            source: new TileWMS({
+                                url: this.activeOverlay.attrs.url,
+                                params: {'LAYERS': this.activeOverlay.attrs.layers, 'TILED': true},
+                                serverType: 'geoserver',
+                                transition: 0,
+                            }),
+                        });
+                } else {
+                    // geoTIFF layer
+                    tileLayer = this.createOverlayTile(this.activeOverlay);
+                }
+                tileLayer.set('id', this.activeOverlay.id);
+                tileLayer.set('name', 'contextLayer');
+                tileLayer.setOpacity(this.opacity);
             }
-            // console.log('NULL!!!');
-            return null;
+
+            return tileLayer;
         }
     },
     methods: {
@@ -69,14 +81,75 @@ export default {
                 this.activeId = id;
             }
         },
+        // takes an overlay as input and returns ol-tileLayer in pixel-projection
+        createOverlayTile(overlay) {
+            // define a projection for each overlay (thus included id)
+            let projection = new Projection({
+                code: 'biigle-image',
+                units: 'pixels',
+            });
+
+            let sourceLayer = new ZoomifySource({
+                    url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
+                    size: [overlay.attrs.width, overlay.attrs.height],
+                    crossOrigin: 'anonymous',
+                    zDirection: -1, // Ensure we get a tile with the screen resolution or higher
+                    projection: projection
+            });
+
+            // let extentPixel = [
+            // $top_left = [0, 0];
+            // $bottom_left = [0, $height];
+            // $top_right = [$width, 0];
+            // $bottom_right = [$width, $height];
+            // ];
+
+            // let extentEPSG4326 = [
+            //     overlay.attrs.top_left_lng, 
+            //     overlay.attrs.top_left_lat, 
+            //     overlay.attrs.bottom_right_lng, 
+            //     overlay.attrs.bottom_right_lat
+            // ];
+            // define the source extent (units = pixels) and targetExtent (EPSG:3857, units = meters)
+            // let extent = sourceLayer.getTileGrid().getExtent();
+            // let targetExtent = sourceLayer.getTileGrid().getExtent();
+
+            // // specify the point resolution in meters through custom function 
+            // // (default transforms the point from pixel to EPSG:4326, units = degrees)
+            // projection.setGetPointResolution(
+            //     (r) => r * Math.max(
+            //                 getWidth(targetExtent) / getWidth(extent),
+            //                 getHeight(targetExtent) / getHeight(extent)
+            //             )
+            // );
+
+            // // add coordinate transforms between the source-projection and target projection (same as view-projection)
+            // addCoordinateTransforms(
+            //     projection,
+            //     'EPSG:3857',
+            //     ([x, y]) => [
+            //         targetExtent[0] +
+            //         ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent),
+            //         targetExtent[1] +
+            //         ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent),
+            //     ],
+            //     ([x, y]) => [
+            //         extent[0] +
+            //         ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent),
+            //         extent[1] +
+            //         ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent),
+            //     ]
+            // );
+            
+            let tileLayer = new TileLayer({
+                source: sourceLayer,
+            });
+
+            return tileLayer;
+        },
         updateCurrentImage(id, image) {
             this.currentImage = image;
-        },
-        extendMap(map) {
-            map.addLayer(this.layer);
-            // map.addInteraction(this.drawInteraction);
-            // map.addInteraction(this.modifyInteraction);
-        },
+        }
     },
     watch: {
         // save the ID of the currently selected overlay in settings
@@ -89,12 +162,19 @@ export default {
             } else {
                 this.settings.delete(`${this.volumeId}-contextLayerOpacity`);
             }
-            // this.layer.setOpacity(opacity);
         },
+        // change layer on map instance upon changes
+        layer(layer) {
+            if(layer !== null) {
+                this.map.addLayer(layer);
+            }
+        }
     },
     created() {
         this.volumeId = biigle.$require('annotations.volumeId');
         this.overlays = biigle.$require('annotations.overlays');
+        this.overlayUrlTemplate = biigle.$require('annotations.overlayUrlTemplate');
+        this.map = null;
 
         // define the names on volume-basis
         const contextLayerId = `${this.volumeId}-contextLayerId`;
@@ -114,7 +194,9 @@ export default {
         }
 
         Events.$on('images.change', this.updateCurrentImage);
-        Events.$on('annotations.map.init', this.extendMap);
+        Events.$on('annotations.map.init', (map) => {
+            this.map = map;
+        });
     },
 };
 </script>
