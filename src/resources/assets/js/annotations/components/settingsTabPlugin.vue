@@ -149,7 +149,7 @@ export default {
         },
         updateCurrentImage(id, image) {
             this.currentImage = image;
-        }
+        },
     },
     watch: {
         // save the ID of the currently selected overlay in settings
@@ -166,7 +166,24 @@ export default {
         // change layer on map instance upon changes
         layer(layer) {
             if(layer !== null) {
-                this.map.addLayer(layer);
+                let layerExists = false;
+                
+                this.map.getLayers().forEach((layer) => {
+                    if(layer.get('name') === 'contextLayer') {
+                        // set visibility of contextLayers false (except currently active layer)
+                        if(layer.get('id') !== this.activeOverlay.id) {
+                            layer.setVisible(false);
+                        } else {
+                            layerExists = true;
+                            layer.setOpacity(this.opacity);
+                            layer.setVisible(true);
+                        }
+                    }
+                });
+                // if layer does not exist yet, add it to map
+                if(!layerExists) {
+                    this.map.addLayer(this.layer);
+                }
             }
         }
     },
