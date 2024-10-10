@@ -85,6 +85,7 @@ export default {
         createOverlayTile(overlay) {
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
+                //needs to be same code as in annotationCanvas.vue in biigle/core
                 code: 'biigle-image',
                 units: 'pixels',
             });
@@ -167,7 +168,7 @@ export default {
         layer(layer) {
             if(layer !== null) {
                 let layerExists = false;
-                
+
                 this.map.getLayers().forEach((layer) => {
                     if(layer.get('name') === 'contextLayer') {
                         // set visibility of contextLayers false (except currently active layer)
