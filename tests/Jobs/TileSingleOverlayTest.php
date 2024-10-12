@@ -6,6 +6,7 @@ use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 use Biigle\FileCache\GenericFile;
 use File;
+use FileCache;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Jcupitt\Vips\Image;
@@ -20,7 +21,14 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlayTest::createGeotiffOverlay();
 
         // save fake UploadedFile to geo-overlay storage
-        $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
+        // $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
+        $overlayFile = new UploadedFile(
+            __DIR__."/../files/geotiff_standardEPSG2013.tif",
+            'standardEPSG2013.tif',
+            'image/tiff',
+            null, 
+            true
+        );
         $overlay->storeFile($overlayFile);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
         
@@ -29,19 +37,10 @@ class TileSingleOverlayTest extends TestCase
         $file = new GenericFile("{$disk}://{$overlay->path}");
         
         $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
-        $job = new TileSingleOverlayStub($overlay, $disk, $targetPath);
-        $mock = Mockery::mock(Image::class);
-        $mock->shouldReceive('dzsave')
-            ->once()
-            ->with($job->tempPath, [
-                'layout' => 'zoomify',
-                'container' => 'fs',
-                'strip' => true,
-            ]);
+        $job = new TileSingleOverlay($overlay, $disk, $targetPath);
 
-        $job->mock = $mock;
-
-        $job->generateTiles($file, '');
+        $tempPath = config('geo.tiles.tmp_dir')."/{$overlay->id}";
+        FileCache::getOnce($file, [$job, 'generateTiles']);
     }
 
     public function testUploadOverlayToStorage()

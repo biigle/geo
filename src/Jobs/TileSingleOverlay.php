@@ -7,7 +7,7 @@ use Biigle\Jobs\TileSingleObject;
 use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
 use File;
-use Jcupitt\Vips;
+use Jcupitt\Vips\Image as VipsImage;
 
 class TileSingleOverlay extends TileSingleObject
 {
@@ -66,13 +66,45 @@ class TileSingleOverlay extends TileSingleObject
     public function generateTiles($file, $path)
     {
         $vipsImage = $this->getVipsImage($path);
-        $sourceSpace = Vips\FFI::vips()->vips_image_guess_interpretation($vipsImage);
-        // dd($sourceSpace);
+        $min = $vipsImage->min();
+        $max = $vipsImage->max();
 
-        $vipsImage->colourspace(Vips\Interpretation::RGB16)->dzsave($this->tempPath, [
-            'layout' => 'zoomify',
-            'container' => 'fs',
-            'strip' => true,
-        ]);
+        if($min < 0 || $max > 255) {
+            $this->imageNormalization($vipsImage, $min, $max)->dzsave($this->tempPath, [
+                'layout' => 'zoomify',
+                'container' => 'fs',
+                'strip' => true,
+            ]);
+        } else {
+            parent::generateTiles($file, $path);
+        }
+
+    }
+
+    /**
+     * Get the vips image instance.
+     *
+     * @param string $path
+     *
+     * @return \Jcupitt\Vips\Image
+     */
+    protected function getVipsImage($path)
+    {
+        return VipsImage::newFromFile($path);
+    }
+
+    /**
+     * Normalize the image band to 0 to 255
+     * 
+     * @param \Jcupitt\Vips\Image $vipsImage
+     * @param float $min minimum value of color-level of the input image
+     * @param float $max maximum value of color-level of the input image
+     * 
+     * @return \Jcupitt\Vips\Image
+     */
+    protected function imageNormalization($vipsImage, $min, $max)
+    {
+        // band intensity normalization x' = (x - $min * (255 / ($max - $min))
+        return $vipsImage->subtract($min)->multiply(255 / ($max - $min));
     }
 }
