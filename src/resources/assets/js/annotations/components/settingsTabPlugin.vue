@@ -1,10 +1,11 @@
 <script>
 import { Collapse } from 'uiv';
-import {Events} from '../import';
+import {Events, handleErrorResponse} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
 import {Projection} from '@biigle/ol/proj';
+import MetaApi from '../api/imageMetadata.js'
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -31,6 +32,7 @@ export default {
             currentImage: null,
             overlayUrlTemplate: '',
             loaded: false,
+            metadata: [],
         }
     },
     computed: {
@@ -150,6 +152,9 @@ export default {
         },
         updateCurrentImage(id, image) {
             this.currentImage = image;
+            // fetch the image metadata
+            MetaApi.get({id: this.volumeId, image_id: id})
+                .then(response => this.metadata = response.body, handleErrorResponse);
         },
     },
     watch: {

@@ -27,6 +27,10 @@ $router->group([
     $router->get('volumes/{id}/coordinates', [
         'uses' => 'FileCoordinatesController@index',
     ]);
+    // Images
+    $router->get('volumes/{id}/images/metadata/{image_id}', [
+        'uses' => 'ImageMetadataController@getImageMetadata'
+    ]);
     
     // GeoTIFF
     $router->post('volumes/{id}/geo-overlays/geotiff', [
