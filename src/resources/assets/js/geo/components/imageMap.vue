@@ -295,7 +295,9 @@ export default {
         }
 
         Events.$on('sidebar.toggle', function () {
-            this.map.updateSize();
+            if(this.map) {
+                this.map.updateSize();
+            }
         });
 
         // Update once to get the correct map size in case the map is used in combination

@@ -19,6 +19,7 @@ mix.setPublicPath('src/public');
 
 mix.js('src/resources/assets/js/geo/main.js', 'assets/scripts').vue()
     .js('src/resources/assets/js/volumes/volumes.js', 'assets/scripts').vue()
+    .js('src/resources/assets/js/annotations/annotations.js', 'assets/scripts').vue()
     .sass('src/resources/assets/sass/main.scss', 'assets/styles')
     .publish({
         provider: 'Biigle\\Modules\\Geo\\GeoServiceProvider',
