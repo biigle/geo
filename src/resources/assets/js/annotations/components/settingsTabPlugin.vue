@@ -6,6 +6,7 @@ import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
 import {Projection} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
+import {getHeight, getWidth} from '@biigle/ol/extent';
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -53,7 +54,7 @@ export default {
         layer() {
             let tileLayer = null;
 
-            if(this.activeOverlay !== null) {
+            if(this.activeOverlay !== null && this.currentImage !== null) {
                 if(this.activeOverlay.type === 'webmap') {
                     tileLayer =  new TileLayer({
                             source: new TileWMS({
@@ -83,8 +84,36 @@ export default {
                 this.activeId = id;
             }
         },
+        calculateExtent(overlay) {
+            let lat = this.currentImage.lat;
+            let lng = this.currentImage.lng;
+            let width = overlay.attrs.width;
+            let height = overlay.attrs.height;
+            
+            // define the source extent (EPSG:4326, units = degrees) and targetExtent (units = pixels)
+            let targetExtent = [0, 0, width, height];
+            let extent = [
+                overlay.attrs.top_left_lng, 
+                overlay.attrs.top_left_lat, 
+                overlay.attrs.bottom_right_lng, 
+                overlay.attrs.bottom_right_lat
+            ];
+
+            // transform the image coordinate from lat,lng to pixel
+            let imagePosX = ( lng - extent[0] ) / getWidth(extent) * getWidth(targetExtent);
+            let imagePosY = (lat - extent[1]) / getHeight(extent) * getHeight(targetExtent);
+            
+            // shift the mosaic extent to fit to image coordinate 
+            let shiftedTargetExtent = targetExtent.map(function(item, idx) {
+                // [-imagePosX, -imagePosY, (max_x - imagePosX), (max_y - imagePosY)]
+                return idx % 2 === 0 ? (item - imagePosX) : (item - imagePosY);
+            });
+
+            return shiftedTargetExtent;
+        },
         // takes an overlay as input and returns ol-tileLayer in pixel-projection
         createOverlayTile(overlay) {
+
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
                 //needs to be same code as in annotationCanvas.vue in biigle/core
@@ -92,33 +121,22 @@ export default {
                 units: 'pixels',
             });
 
+            // calculate the target extent based on coordinate of image
+            let targetExtent = this.calculateExtent(overlay);
+
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                     size: [overlay.attrs.width, overlay.attrs.height],
                     crossOrigin: 'anonymous',
                     zDirection: -1, // Ensure we get a tile with the screen resolution or higher
-                    projection: projection
+                    projection: projection,
+                    extent: targetExtent,
             });
 
-            // let extentPixel = [
-            // $top_left = [0, 0];
-            // $bottom_left = [0, $height];
-            // $top_right = [$width, 0];
-            // $bottom_right = [$width, $height];
-            // ];
+            // console.log(sourceLayer.getTileGrid().getExtent());
 
-            // let extentEPSG4326 = [
-            //     overlay.attrs.top_left_lng, 
-            //     overlay.attrs.top_left_lat, 
-            //     overlay.attrs.bottom_right_lng, 
-            //     overlay.attrs.bottom_right_lat
-            // ];
-            // define the source extent (units = pixels) and targetExtent (EPSG:3857, units = meters)
-            // let extent = sourceLayer.getTileGrid().getExtent();
-            // let targetExtent = sourceLayer.getTileGrid().getExtent();
-
-            // // specify the point resolution in meters through custom function 
-            // // (default transforms the point from pixel to EPSG:4326, units = degrees)
+            // specify the point resolution in meters through custom function 
+            // (default transforms the point from pixel to EPSG:4326, units = degrees)
             // projection.setGetPointResolution(
             //     (r) => r * Math.max(
             //                 getWidth(targetExtent) / getWidth(extent),
@@ -126,35 +144,16 @@ export default {
             //             )
             // );
 
-            // // add coordinate transforms between the source-projection and target projection (same as view-projection)
-            // addCoordinateTransforms(
-            //     projection,
-            //     'EPSG:3857',
-            //     ([x, y]) => [
-            //         targetExtent[0] +
-            //         ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent),
-            //         targetExtent[1] +
-            //         ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent),
-            //     ],
-            //     ([x, y]) => [
-            //         extent[0] +
-            //         ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent),
-            //         extent[1] +
-            //         ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent),
-            //     ]
-            // );
-            
             let tileLayer = new TileLayer({
                 source: sourceLayer,
             });
 
             return tileLayer;
         },
-        updateCurrentImage(id, image) {
-            this.currentImage = image;
+        updateCurrentImage(id, ) {
             // fetch the image metadata
             MetaApi.get({id: this.volumeId, image_id: id})
-                .then(response => this.metadata = response.body, handleErrorResponse);
+                .then(response => this.currentImage = response.body, handleErrorResponse);
         },
     },
     watch: {
@@ -172,24 +171,31 @@ export default {
         // change layer on map instance upon changes
         layer(layer) {
             if(layer !== null) {
-                let layerExists = false;
+                // let layerExists = false;
 
-                this.map.getLayers().forEach((layer) => {
-                    if(layer.get('name') === 'contextLayer') {
-                        // set visibility of contextLayers false (except currently active layer)
-                        if(layer.get('id') !== this.activeOverlay.id) {
-                            layer.setVisible(false);
-                        } else {
-                            layerExists = true;
-                            layer.setOpacity(this.opacity);
-                            layer.setVisible(true);
-                        }
-                    }
-                });
-                // if layer does not exist yet, add it to map
-                if(!layerExists) {
-                    this.map.addLayer(this.layer);
-                }
+                // this.map.getLayers().forEach((mapLayer) => {
+                //     if(mapLayer.get('name') === 'contextLayer') {
+                //         // set visibility of contextLayers false (except currently active mapLayer)
+                //         if(mapLayer.get('id') !== this.activeOverlay.id) {
+                //             mapLayer.setVisible(false);
+                //         } else {
+                //             layerExists = true;
+                //             // TODO: Does not update the layer in map view... 
+                //             // refresh the source to update the mapLayer extent
+                //             // this.$nextTick(function() {
+                //             //     mapLayer.changed();
+                //             //     mapLayer.getSource().refresh();
+                //             // });
+                //             layer.setOpacity(this.opacity);
+                //             layer.setVisible(true);
+                //         }
+                //     }
+                // });
+                // // if layer does not exist yet, add it to map
+                // if(!layerExists) {
+                this.map.getLayers().removeAt(0);
+                this.map.getLayers().insertAt(0, this.layer);
+                // }
             }
         }
     },
