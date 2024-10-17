@@ -4,9 +4,10 @@ import {Events, handleErrorResponse} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
-import {Projection} from '@biigle/ol/proj';
+import {Projection, addProjection, addCoordinateTransforms} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
-import {getHeight, getWidth} from '@biigle/ol/extent';
+import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
+import {rotate} from '@biigle/ol/coordinate';
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -84,6 +85,36 @@ export default {
                 this.activeId = id;
             }
         },
+        // helper function to rotate coordinates
+        rotateCoordinate(coordinate, angle, anchor) {
+            let coord = rotate([coordinate[0] - anchor[0], coordinate[1] - anchor[1]], angle);
+            return [coord[0] + anchor[0], coord[1] + anchor[1]];
+        },
+        rotateProjection(projection, angle, extent) {
+            let rotateTransform = (coordinate) => {
+                return this.rotateCoordinate(coordinate, angle, getCenter(extent))
+            }
+            let normalTransform = (coordinate) => {
+                return this.rotateCoordinate(coordinate, -angle, getCenter(extent))
+            }
+            
+            let rotatedProjection = new Projection({
+                code: projection.getCode(), //+ ':rotation:' + angle.toString(),
+                units: projection.getUnits(),
+                extent: extent,
+            });
+
+            addProjection(rotatedProjection);
+
+            addCoordinateTransforms(
+                projection,
+                rotatedProjection,
+                rotateTransform,
+                normalTransform
+            );
+
+            return rotatedProjection;
+        },
         calculateExtent(extent, targetExtent) {
             let lat = this.currentImage.lat;
             let lng = this.currentImage.lng;
@@ -115,13 +146,15 @@ export default {
 
             // calculate the target extent based on coordinate of image
             let shiftedTargetExtent = this.calculateExtent(extent, targetExtent);
-
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
                 //needs to be same code as in annotationCanvas.vue in biigle/core
                 code: 'biigle-image',
                 units: 'pixels',
+                extent: shiftedTargetExtent
             });
+            // define addCoordinateTransform function for rotation of layer
+            let angle = this.currentImage.attrs.metadata.yaw;
 
             // specify the point resolution in meters through custom function 
             // (default transforms the point from pixel to EPSG:4326, units = degrees)
@@ -137,12 +170,10 @@ export default {
                     size: [overlay.attrs.width, overlay.attrs.height],
                     crossOrigin: 'anonymous',
                     zDirection: -1, // Ensure we get a tile with the screen resolution or higher
-                    projection: projection,
+                    projection: angle ? this.rotateProjection(projection, angle, shiftedTargetExtent) : projection,
                     extent: shiftedTargetExtent,
             });
-
-            // center = getCenter(sourceLayer.getExtent());
-
+            
             // console.log(sourceLayer.getTileGrid().getExtent());
 
             let tileLayer = new TileLayer({
