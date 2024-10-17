@@ -84,20 +84,9 @@ export default {
                 this.activeId = id;
             }
         },
-        calculateExtent(overlay) {
+        calculateExtent(extent, targetExtent) {
             let lat = this.currentImage.lat;
             let lng = this.currentImage.lng;
-            let width = overlay.attrs.width;
-            let height = overlay.attrs.height;
-            
-            // define the source extent (EPSG:4326, units = degrees) and targetExtent (units = pixels)
-            let targetExtent = [0, 0, width, height];
-            let extent = [
-                overlay.attrs.top_left_lng, 
-                overlay.attrs.top_left_lat, 
-                overlay.attrs.bottom_right_lng, 
-                overlay.attrs.bottom_right_lat
-            ];
 
             // transform the image coordinate from lat,lng to pixel
             let imagePosX = ( lng - extent[0] ) / getWidth(extent) * getWidth(targetExtent);
@@ -113,6 +102,19 @@ export default {
         },
         // takes an overlay as input and returns ol-tileLayer in pixel-projection
         createOverlayTile(overlay) {
+            let width = overlay.attrs.width;
+            let height = overlay.attrs.height;
+            // define the source extent (EPSG:4326, units = degrees) and targetExtent (units = pixels)
+            let targetExtent = [0, 0, width, height];
+            let extent = [
+                overlay.attrs.top_left_lng, 
+                overlay.attrs.top_left_lat, 
+                overlay.attrs.bottom_right_lng, 
+                overlay.attrs.bottom_right_lat
+            ];
+
+            // calculate the target extent based on coordinate of image
+            let shiftedTargetExtent = this.calculateExtent(extent, targetExtent);
 
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
@@ -121,8 +123,14 @@ export default {
                 units: 'pixels',
             });
 
-            // calculate the target extent based on coordinate of image
-            let targetExtent = this.calculateExtent(overlay);
+            // specify the point resolution in meters through custom function 
+            // (default transforms the point from pixel to EPSG:4326, units = degrees)
+            projection.setGetPointResolution(
+                (r) => r * Math.max(
+                            getWidth(targetExtent) / getWidth(extent),
+                            getHeight(targetExtent) / getHeight(extent)
+                        )
+            );
 
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
@@ -130,19 +138,12 @@ export default {
                     crossOrigin: 'anonymous',
                     zDirection: -1, // Ensure we get a tile with the screen resolution or higher
                     projection: projection,
-                    extent: targetExtent,
+                    extent: shiftedTargetExtent,
             });
 
-            // console.log(sourceLayer.getTileGrid().getExtent());
+            // center = getCenter(sourceLayer.getExtent());
 
-            // specify the point resolution in meters through custom function 
-            // (default transforms the point from pixel to EPSG:4326, units = degrees)
-            // projection.setGetPointResolution(
-            //     (r) => r * Math.max(
-            //                 getWidth(targetExtent) / getWidth(extent),
-            //                 getHeight(targetExtent) / getHeight(extent)
-            //             )
-            // );
+            // console.log(sourceLayer.getTileGrid().getExtent());
 
             let tileLayer = new TileLayer({
                 source: sourceLayer,
