@@ -128,4 +128,9 @@ td:nth-child(6) {
 td:not(.start) {
     text-align: center;
 }
+
+/* center the delete button */
+.close {
+    float: none;
+}
 </style>

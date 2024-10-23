@@ -23,7 +23,6 @@
     </div>
     <div v-if="hasOverlays('geoOverlays')">
         <overlay-table :overlays="geoOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
-        <template v-slot:title>Geo Overlays</template>
         <template v-slot:header>
             <th></th>
             <th>#</th>

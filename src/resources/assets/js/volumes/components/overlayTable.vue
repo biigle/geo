@@ -1,7 +1,6 @@
 <template>
     <div class="table-responsive">
         <table v-if="overlays.length !== 0" class="table table-sm" v-cloak>
-            <caption><b><slot name="title"></slot></b></caption>
             <thead>
                 <tr>
                     <slot name="header">
@@ -114,6 +113,7 @@ export default {
 
 table {
     table-layout: auto;
+    margin-bottom: 0px;
 }
 
 th {
