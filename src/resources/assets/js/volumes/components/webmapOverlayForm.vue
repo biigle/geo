@@ -1,6 +1,5 @@
 <script>
 import geoApi from '../api/geoOverlays';
-import {LoaderMixin} from '../import';
 
 export default {
   data() {
@@ -9,9 +8,6 @@ export default {
         success: false,
     };
   },
-  mixins: [
-        LoaderMixin,
-  ],
   props: {
       volumeId: {
           type: Number,
@@ -46,7 +42,7 @@ export default {
         data.append('volumeId', this.volumeId);
         geoApi.saveWebMap({id: this.volumeId}, data)
           .then(this.handleSuccess, this.handleError)
-          .finally(this.$emit('upload', false))
+          .finally(() => this.$emit('upload', false))
       },
     },
 };
