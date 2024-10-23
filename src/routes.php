@@ -23,7 +23,36 @@ $router->group([
     $router->get('projects/{id}/images/filter/annotation-label/{id2}', [
         'uses' => 'ProjectImageAnnotationLabelController@index',
     ]);
+
     $router->get('volumes/{id}/coordinates', [
         'uses' => 'FileCoordinatesController@index',
+    ]);
+    
+    // GeoTIFF
+    $router->post('volumes/{id}/geo-overlays/geotiff', [
+        'uses' => 'GeoTiffOverlayController@storeGeoTiff',
+    ]);
+
+    // WebMap
+    $router->post('volumes/{id}/geo-overlays/webmap', [
+        'uses' => 'WebMapOverlayController@store',
+    ]);
+    
+    // GeoOverlays
+    $router->get('volumes/{id}/geo-overlays/{layer_type?}', [
+        'uses' => 'GeoOverlayController@index',
+    ]);
+
+    $router->resource('geo-overlays', 'GeoOverlayController', [
+        'only' => ['destroy'],
+        'parameters' => ['geo-overlays' => 'id'],
+    ]);
+    
+    $router->put('volumes/{id}/geo-overlays/{geo_overlay_id}', [
+        'uses' => 'GeoOverlayController@updateGeoOverlay',
+    ]);
+
+    $router->get('geo-overlays/{id}/file', [
+        'uses' => 'GeoOverlayController@showFile',
     ]);
 });
