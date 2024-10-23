@@ -7,7 +7,4 @@
         </div>
     </form>
     <div class="alert alert-danger" v-if="error" v-text="error" v-cloak></div>
-    <div class="alert alert-success" v-if="success" v-cloak>
-        The geoTIFF-file was successfully uploaded.
-    </div>
 </div>

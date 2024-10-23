@@ -24,10 +24,6 @@ export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
         method: 'POST',
         url: 'api/v1/volumes{/id}/geo-overlays/geotiff',
     },
-    getGeoTiffOverlayUrlTemplate: {
-        method: 'GET',
-        url: 'api/v1/volumes{/id}/geo-overlays/geotiff/url',
-    },
     // WebMap
     saveWebMap: {
         method: 'POST',
