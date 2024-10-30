@@ -4,10 +4,10 @@ import {Events, handleErrorResponse} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
-import {Projection, addProjection, addCoordinateTransforms} from '@biigle/ol/proj';
+import {Projection} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
 import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
-import {rotate} from '@biigle/ol/coordinate';
+import {getRenderPixel} from '@biigle/ol/render';
 
 
 /**
@@ -88,95 +88,6 @@ export default {
                 this.activeId = id;
             }
         },
-        // georeference coordinate (pixel -> CRS)
-        transformCoordinate(extent, width, height, x, y) {
-            // Compute the parameters of the georeference affine transformation
-            let A = (extent[2] - extent[0]) / width; // pixel size in the x-direction in map units/pixel
-            let B = 0; // rotation about x-axis
-            let C = extent[0]; // x-coordinate of the center of the upper left pixel
-            let D = 0; // rotation about y-axis
-            let E = -(extent[3] - extent[1]) / height; // pixel size in the y-direction in map units, almost always negative
-            let F = extent[3]; // y-coordinate of the center of the upper left pixel
-
-            // transform x,y pixel-coordinate in CRS coordinate
-            let geoX = A*x + B*y + C;
-            let geoY = D*x + E*y + F;
-
-            return [geoX, geoY];
-        },
-        // helper function to rotate coordinates
-        rotateCoordinate(coordinate, angle, anchor) {
-            let coord = rotate([coordinate[0] - anchor[0], coordinate[1] - anchor[1]], angle);
-            return [coord[0] + anchor[0], coord[1] + anchor[1]];
-        },
-        rotateProjection(projection, angle, targetExtent, extent) {
-            let rotateTransform = (coordinate) => {
-                return this.rotateCoordinate(coordinate, angle, getCenter(targetExtent))
-            }
-            let normalTransform = (coordinate) => {
-                return this.rotateCoordinate(coordinate, -angle, getCenter(targetExtent))
-            }
-            
-            let rotatedProjection = new Projection({
-                code: 'biigle-image', // + ':rotation:' + angle.toString(),
-                units: projection.getUnits(),
-                extent: targetExtent,
-                getPointResolution: (r) => r * Math.max(
-                    getWidth(targetExtent) / getWidth(extent),
-                    getHeight(targetExtent) / getHeight(extent)
-                ),
-            });
-
-            addProjection(rotatedProjection);
-
-            addCoordinateTransforms(
-                projection,
-                rotatedProjection,
-                rotateTransform,
-                normalTransform
-            );
-
-            // addCoordinateTransforms(
-            //     projection,
-            //     'EPSG:4326',
-            //     ([x, y]) => [
-            //         targetExtent[0] +
-            //         ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent),
-            //         targetExtent[1] +
-            //         ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent),
-            //     ],
-            //     ([x, y]) => [
-            //         extent[0] +
-            //         ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent),
-            //         extent[1] +
-            //         ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent),
-            //     ],
-            // );
-
-            // addCoordinateTransforms(
-            //     "EPSG:4326",
-            //     rotatedProjection,
-            //     function(coordinate) {
-            //         return rotateTransform(transform(coordinate, "EPSG:4326", projection));
-            //     },
-            //     function(coordinate) {
-            //         return transform(normalTransform(coordinate), projection, "EPSG:4326");
-            //     }
-            // );
-
-            // addCoordinateTransforms(
-            //     'EPSG:3857',
-            //     rotatedProjection,
-            //     function (coordinate) {
-            //     return rotateTransform(transform(coordinate, 'EPSG:3857', projection));
-            //     },
-            //     function (coordinate) {
-            //     return transform(normalTransform(coordinate), projection, 'EPSG:3857');
-            //     }
-            // );
-
-            return rotatedProjection;
-        },
         calculateExtent(targetExtent, imagePosX, imagePosY) {
             // shift the mosaic extent to fit to image coordinate 
             let shiftedTargetExtent = targetExtent.map(function(item, idx) {
@@ -190,73 +101,84 @@ export default {
         createOverlayTile(overlay) {
             let width = overlay.attrs.width;
             let height = overlay.attrs.height;
+            // define the targetExtent (units = pixels)
+            let extent = [0, 0, width, height];
             // define the source extent (EPSG:4326, units = degrees)
-            let extent = [
+            let targetExtent = [
                 overlay.attrs.top_left_lng, 
                 overlay.attrs.top_left_lat, 
                 overlay.attrs.bottom_right_lng, 
                 overlay.attrs.bottom_right_lat
             ];
             
-            // get unit/pixel ratio of mosaic and image
-            let mosaicRatio = (extent[2] - extent[0]) / width;
-            let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
-            
-            // define the targetExtent (units = pixels)
-            let targetExtent = [0, 0, width, height];
-
-            // console.log(getWidth(extent), ' / ', width, ' = ', mosaicRatio);
-            // console.log('mosaic: ', mosaicRatio);
-            // console.log('image: ', imageRatio);
-
             // get the image geo-coordinates
             let lat = this.currentImage.lat;
             let lng = this.currentImage.lng;
-            // define addCoordinateTransform function for rotation of layer
-            let angle = this.currentImage.attrs.metadata.yaw;
             // transform the image coordinate from lat,lng to pixel
-            let imagePosX = ((lng - extent[0]) / getWidth(extent)) * getWidth(targetExtent);
-            let imagePosY = ((lat - extent[1]) / getHeight(extent)) * getHeight(targetExtent);
-            
-            // shift the target extent based on coordinate of image
-            let shiftedTargetExtent = this.calculateExtent(targetExtent, imagePosX, imagePosY);
-            
+            let imagePosX = ((lng - targetExtent[0]) / getWidth(targetExtent)) * getWidth(extent);
+            let imagePosY = ((lat - targetExtent[1]) / getHeight(targetExtent)) * getHeight(extent);
+            // shift the extent by the calculated x,y position of the image
+            let shiftedExtent = this.calculateExtent(extent, imagePosX, imagePosY); 
+
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
                 //needs to be same code as in annotationCanvas.vue in biigle/core
                 code: 'biigle-image',
                 units: 'pixels',
-                extent: shiftedTargetExtent,
-                getPointResolution: (r) => r * Math.max(
-                    getWidth(targetExtent) / getWidth(extent),
-                    getHeight(targetExtent) / getHeight(extent)
-                ),
             });
-
-            // specify the point resolution in meters through custom function 
-            // (default transforms the point from pixel to EPSG:4326, units = degrees)
-
+            
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
                     size: [overlay.attrs.width, overlay.attrs.height],
                     crossOrigin: 'anonymous',
                     zDirection: -1, // Ensure we get a tile with the screen resolution or higher
-                    projection: angle ? this.rotateProjection(projection, angle, shiftedTargetExtent, extent) : projection,
-                    extent: shiftedTargetExtent,
+                    projection: projection,
+                    extent: shiftedExtent,
             });
-            
+
+            // specify the point resolution in degrees through custom function 
             // set pointResolution on map-View manually
-            // const currentView = this.map.getView();
-            // const currentProjection = currentView.getProjection();
-            // currentProjection.setGetPointResolution(
-            //     (r) => r * Math.max(
-            //         getWidth(targetExtent) / getWidth(extent),
-            //         getHeight(targetExtent) / getHeight(extent)
-            //     ),
-            // );
+            projection.setGetPointResolution(
+                (r) => r * Math.max(
+                    getWidth(targetExtent) / getWidth(extent),
+                    getHeight(targetExtent) / getHeight(extent)
+                ),
+            );
 
             let tileLayer = new TileLayer({
                 source: sourceLayer,
+            });
+
+
+            // get unit/pixel ratio of mosaic and image
+            let mosaicRatio = (targetExtent[2] - targetExtent[0]) / width;
+            let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
+            // define addCoordinateTransform function for rotation of layer
+            let angle = this.currentImage.attrs.metadata.yaw;
+         
+            // console.log('mosaic: ', mosaicRatio);
+            // console.log('image: ', imageRatio);
+            // console.log(angle);
+            // console.log([imagePosX, imagePosY]);
+            // console.log(getCenter(shiftedExtent));
+
+            // handle rotation
+            tileLayer.on('prerender', (evt) => {
+            let ratio = evt.frameState.pixelRatio;
+            let mapPixel = this.map.getPixelFromCoordinate(getCenter(shiftedExtent));
+            let ctx = evt.context;
+            ctx.save();
+            let canvasPixel = getRenderPixel(evt, mapPixel);
+            ctx.translate(canvasPixel[0], canvasPixel[1]);
+            //ctx.translate(pixel[0] * ratio, pixel[1] * ratio);
+            ctx.rotate(-angle);
+            ctx.translate(-canvasPixel[0], -canvasPixel[1]);
+            //ctx.translate(-pixel[0] * ratio, -pixel[1] * ratio);
+            });
+
+            tileLayer.on('postrender', (evt) => {
+            let ctx = evt.context;
+            ctx.restore();
             });
 
             return tileLayer;
