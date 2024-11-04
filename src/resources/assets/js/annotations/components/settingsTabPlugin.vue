@@ -57,7 +57,7 @@ export default {
         layer() {
             let tileLayer = null;
 
-            if(this.activeOverlay !== null && this.currentImage !== null) {
+            if(this.activeOverlay != null && this.currentImage != null) {
                 if(this.activeOverlay.type === 'webmap') {
                     tileLayer = new TileLayer({
                             source: new TileWMS({
