@@ -4,10 +4,17 @@ import {Events, handleErrorResponse} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
-import {Projection} from '@biigle/ol/proj';
+import {Projection, getPointResolution, addCoordinateTransforms, transformExtent} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
 import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
 import {getRenderPixel} from '@biigle/ol/render';
+import {Icon, Style} from '@biigle/ol/style.js';
+import Feature from '@biigle/ol/Feature.js';
+import Point from '@biigle/ol/geom/Point.js'
+import {Vector as VectorSource} from '@biigle/ol/source.js';
+import VectorLayer from '@biigle/ol/layer/Vector.js';
+import View from '@biigle/ol/View.js';
+
 
 
 /**
@@ -118,14 +125,35 @@ export default {
             let imagePosX = ((lng - targetExtent[0]) / getWidth(targetExtent)) * getWidth(extent);
             let imagePosY = ((lat - targetExtent[1]) / getHeight(targetExtent)) * getHeight(extent);
             // shift the extent by the calculated x,y position of the image
-            let shiftedExtent = this.calculateExtent(extent, imagePosX, imagePosY); 
-
+            // let shiftedExtent = this.calculateExtent(extent, imagePosX, imagePosY);
+            
+            
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
                 //needs to be same code as in annotationCanvas.vue in biigle/core
                 code: 'biigle-image',
                 units: 'pixels',
             });
+
+            // add coordinate transforms between the source-projection and target projection (subtract image-coordinate)
+            addCoordinateTransforms(
+                'EPSG:4326',
+                projection,
+                ([x, y]) => [
+                    (extent[0] +
+                    ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent)) - imagePosX,
+                    (extent[1] +
+                    ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent)) - imagePosY,
+                ],
+                ([x, y]) => [
+                    (targetExtent[0] +
+                    ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent)) - lng,
+                    (targetExtent[1] +
+                    ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent)) - lat,
+                ],
+            );
+            // calculate shifted extent
+            let shiftedExtent = transformExtent(targetExtent, 'EPSG:4326', projection);
             
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
@@ -153,27 +181,83 @@ export default {
             // get unit/pixel ratio of mosaic and image
             let mosaicRatio = (targetExtent[2] - targetExtent[0]) / width;
             let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
+            let scaleX = imageRatio / mosaicRatio;
+            
             // define addCoordinateTransform function for rotation of layer
             let angle = this.currentImage.attrs.metadata.yaw;
-         
-            // console.log('mosaic: ', mosaicRatio);
-            // console.log('image: ', imageRatio);
-            // console.log(angle);
-            // console.log([imagePosX, imagePosY]);
-            // console.log(getCenter(shiftedExtent));
+            
+            const lowLeft = new Feature({
+                geometry: new Point([0, 0]),
+            });
+
+            const centerExt = new Feature({
+                geometry: new Point(getCenter(shiftedExtent)),
+            });
+
+            lowLeft.setStyle(
+                new Style({
+                    image: new Icon({
+                    color: 'rgba(255, 0, 0, 1)',
+                    crossOrigin: 'anonymous',
+                    src: 'https://img.icons8.com/?size=100&id=10028&format=png&color=FF0000',
+                    scale: 0.2,
+                    }),
+                }),
+            );
+
+            centerExt.setStyle(
+                new Style({
+                    image: new Icon({
+                    // color: 'rgba(255, 0, 0, 1)',
+                    crossOrigin: 'anonymous',
+                    src: 'https://img.icons8.com/?size=100&id=10028&format=png&color=00FF00',
+                    scale: 0.2,
+                    }),
+                }),
+            );
+
+            const vectorSource = new VectorSource({
+                features: [lowLeft, centerExt],
+            });
+
+            const vectorLayer = new VectorLayer({
+                source: vectorSource,
+            });
+            this.map.addLayer(vectorLayer);
+
+            // this.map.getView().setCenter([0, 0]);
+            // this.map.getView().fit(shiftedExtent , this.map.getSize());
+
+            // console.log('mosaic-ratio: ', mosaicRatio);
+            // console.log('image-ratio: ', imageRatio);
+            // console.log('scale-ratio', scaleX);
+
+            // console.log('shiftedExtent: ', shiftedExtent);
+            // console.log('map-size: ', this.map.getSize());
+            // console.log('map-extent (after): ', this.map.getView().calculateExtent(this.map.getSize()));
+            // console.log('shiftedExtent-center: ' , getCenter(shiftedExtent));
+            // console.log('img-center: ', this.map.getView().getCenter());
+            // console.log('angle: ', angle);
+            // console.log('imageCoords: ', [imagePosX, imagePosY]);
+            // console.log('shiftedExt-size: ', this.map.getView().calculateExtent([width, height]));
 
             // handle rotation
             tileLayer.on('prerender', (evt) => {
             let ratio = evt.frameState.pixelRatio;
-            let mapPixel = this.map.getPixelFromCoordinate(getCenter(shiftedExtent));
+            // this.map.getView().getCenter() <-- center of image
+            let imageCenter = this.map.getView().getCenter();
+            let mapPixel = this.map.getPixelFromCoordinate(imageCenter);
+            // console.log('map: ', mapPixel);
             let ctx = evt.context;
             ctx.save();
             let canvasPixel = getRenderPixel(evt, mapPixel);
+            // console.log(canvasPixel);
             ctx.translate(canvasPixel[0], canvasPixel[1]);
-            //ctx.translate(pixel[0] * ratio, pixel[1] * ratio);
-            ctx.rotate(-angle);
-            ctx.translate(-canvasPixel[0], -canvasPixel[1]);
-            //ctx.translate(-pixel[0] * ratio, -pixel[1] * ratio);
+            // ctx.translate(mapPixel[0] * ratio, mapPixel[1] * ratio);
+            // ctx.scale(1.5, 1.5, canvasPixel);
+            // ctx.rotate(-20);
+            // ctx.translate(-canvasPixel[0], -canvasPixel[1]);
+            // //ctx.translate(-pixel[0] * ratio, -pixel[1] * ratio);
             });
 
             tileLayer.on('postrender', (evt) => {
@@ -188,10 +272,11 @@ export default {
             MetaApi.get({id: this.volumeId, image_id: id})
                 .then(response => this.currentImage = response.body, handleErrorResponse);
 
-            // // retrieve the current image-layer
+            // retrieve the current image-layer
             // this.map.getLayers().forEach((mapLayer) => {
             //         if(mapLayer.get('name') === 'imageRegular' || mapLayer.get('name') === 'imageTile') {
             //             this.imageLayer = mapLayer;
+            //             console.log('imageLayer-settingsTab: ', this.imageLayer.getExtent());
             //         }
             // });
         },
@@ -235,25 +320,6 @@ export default {
                 // if(!layerExists) {
                 this.map.getLayers().removeAt(0);
                 this.map.getLayers().insertAt(0, this.layer);
-
-                // SET MAP VIEW
-                // const currentView = this.map.getView();
-                // const currentProjection = currentView.getProjection();
-                // const currentResolution = currentView.getResolution();
-                // const currentCenter = this.map.getView().getCenter();
-                // let scale = 6.0 / this.currentImage.attrs.metadata.gps_altitude;
-                // let currentPointResolution = getPointResolution(currentProjection, 1 / scale, currentCenter, 'm') * scale;
-                // const newPointResolution = getPointResolution(this.layer.getSource().getProjection(), 1 / scale, currentCenter, 'm') * scale;
-                // const newResolution = (currentResolution * currentPointResolution) / newPointResolution;
-                
-                // console.log('scale: ', scale);
-                // console.log('curr-point-resolution: ', currentPointResolution);
-                // console.log('new-point-resolution: ', newPointResolution);
-                // console.log('currRes: ', currentResolution);
-                // console.log('newRes:', newResolution);
-                // set new resolution based on image scale
-                // this.map.updateSize();
-                // this.map.getView().setResolution(scaleResolution);
             }
         }
     },
