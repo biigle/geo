@@ -66,9 +66,9 @@ class TileSingleOverlay extends TileSingleObject
     public function generateTiles($file, $path)
     {
         $vipsImage = $this->getVipsImage($path);
-        $min = $vipsImage->min();
+        // exclude the NoData values (-99999) of the geoTIFF file when searching the min
+        $min = $vipsImage->equal(-99999)->ifthenelse(0, $vipsImage)->min();
         $max = $vipsImage->max();
-
 
         if($min < 0 || $min > 255 || $max < 0 || $max > 255) {
             $this->imageNormalization($vipsImage, $min, $max)->dzsave($this->tempPath, [
