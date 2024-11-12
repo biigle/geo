@@ -11,13 +11,11 @@ export default {
     data() {
         return {
             error: false,
-            success: false,
         };
     },
     methods: {
         handleSuccess(response) {
             this.error = false;
-            this.success = true;
             this.$emit('success', response.data);
         },
         handleError(response) {
