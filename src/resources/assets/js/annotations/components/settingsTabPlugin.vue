@@ -4,16 +4,10 @@ import {Events, handleErrorResponse} from '../import';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS.js';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
-import {Projection, getPointResolution, addCoordinateTransforms, transformExtent} from '@biigle/ol/proj';
+import {Projection} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
 import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
 import {getRenderPixel} from '@biigle/ol/render';
-import {Icon, Style} from '@biigle/ol/style.js';
-import Feature from '@biigle/ol/Feature.js';
-import Point from '@biigle/ol/geom/Point.js'
-import {Vector as VectorSource} from '@biigle/ol/source.js';
-import VectorLayer from '@biigle/ol/layer/Vector.js';
-import View from '@biigle/ol/View.js';
 
 
 
@@ -95,11 +89,17 @@ export default {
                 this.activeId = id;
             }
         },
-        calculateExtent(targetExtent, imagePosX, imagePosY) {
+        // calculateExtent Parameters:
+        // targetExtent = extent of the tiled context layer
+        // imagePosX = x position of the image (in pixel)
+        // imagePosY = y position of the image (in pixel)
+        // imageCenter = the center coordinate of the currently active image (experimental!)
+        calculateExtent(targetExtent, imagePosX, imagePosY, imageCenter) {
             // shift the mosaic extent to fit to image coordinate 
+            // subtract the image-coordinate (lower left corner)
             let shiftedTargetExtent = targetExtent.map(function(item, idx) {
                 // [-imagePosX, -imagePosY, (max_x - imagePosX), (max_y - imagePosY)]
-                return idx % 2 === 0 ? (item - imagePosX) : (item - imagePosY);
+                return idx % 2 === 0 ? (item - imagePosX - imageCenter[0]) : (item - imagePosY - imageCenter[1]);
             });
 
             return shiftedTargetExtent;
@@ -117,17 +117,18 @@ export default {
                 overlay.attrs.bottom_right_lng, 
                 overlay.attrs.bottom_right_lat
             ];
-            
+            // define the image extent of the currently displayed image
+            let imageExtent = [0, 0, this.currentImage.attrs.width, this.currentImage.attrs.height];
             // get the image geo-coordinates
             let lat = this.currentImage.lat;
             let lng = this.currentImage.lng;
             // transform the image coordinate from lat,lng to pixel
             let imagePosX = ((lng - targetExtent[0]) / getWidth(targetExtent)) * getWidth(extent);
             let imagePosY = ((lat - targetExtent[1]) / getHeight(targetExtent)) * getHeight(extent);
-            // shift the extent by the calculated x,y position of the image
-            // let shiftedExtent = this.calculateExtent(extent, imagePosX, imagePosY);
+            // shift the mosaic extent by the calculated x,y position of the image
+            let shiftedExtent = this.calculateExtent(extent, imagePosX, imagePosY, getCenter(imageExtent));
             
-            
+
             // define a projection for each overlay (thus included id)
             let projection = new Projection({
                 //needs to be same code as in annotationCanvas.vue in biigle/core
@@ -135,25 +136,26 @@ export default {
                 units: 'pixels',
             });
 
-            // add coordinate transforms between the source-projection and target projection (subtract image-coordinate)
-            addCoordinateTransforms(
-                'EPSG:4326',
-                projection,
-                ([x, y]) => [
-                    (extent[0] +
-                    ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent)) - imagePosX,
-                    (extent[1] +
-                    ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent)) - imagePosY,
-                ],
-                ([x, y]) => [
-                    (targetExtent[0] +
-                    ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent)) - lng,
-                    (targetExtent[1] +
-                    ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent)) - lat,
-                ],
-            );
-            // calculate shifted extent
-            let shiftedExtent = transformExtent(targetExtent, 'EPSG:4326', projection);
+            // Commented code below produces same result as using calculateExtent() method:
+            // add coordinate transforms between the source-projection and target projection (subtract image-coordinate and distance to image center)
+            // addCoordinateTransforms(
+            //     'EPSG:4326',
+            //     projection,
+            //     ([x, y]) => [
+            //         (extent[0] +
+            //         ((x - targetExtent[0]) * getWidth(extent)) / getWidth(targetExtent)) - imagePosX - getCenter(imageExtent)[0],
+            //         (extent[1] +
+            //         ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent)) - imagePosY - getCenter(imageExtent)[1],
+            //     ],
+            //     ([x, y]) => [
+            //         (targetExtent[0] +
+            //         ((x - extent[0]) * getWidth(targetExtent)) / getWidth(extent)) - lng,
+            //         (targetExtent[1] +
+            //         ((y - extent[1]) * getHeight(targetExtent)) / getHeight(extent)) - lat,
+            //     ],
+            // );
+            // // calculate shifted extent
+            // let shiftedExtent = transformExtent(targetExtent, 'EPSG:4326', projection);
             
             let sourceLayer = new ZoomifySource({
                     url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
@@ -177,92 +179,45 @@ export default {
                 source: sourceLayer,
             });
 
-
-            // get unit/pixel ratio of mosaic and image
-            let mosaicRatio = (targetExtent[2] - targetExtent[0]) / width;
-            let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
-            let scaleX = imageRatio / mosaicRatio;
-            
-            // define addCoordinateTransform function for rotation of layer
-            let angle = this.currentImage.attrs.metadata.yaw;
-            
-            const lowLeft = new Feature({
-                geometry: new Point([0, 0]),
-            });
-
-            const centerExt = new Feature({
-                geometry: new Point(getCenter(shiftedExtent)),
-            });
-
-            lowLeft.setStyle(
-                new Style({
-                    image: new Icon({
-                    color: 'rgba(255, 0, 0, 1)',
-                    crossOrigin: 'anonymous',
-                    src: 'https://img.icons8.com/?size=100&id=10028&format=png&color=FF0000',
-                    scale: 0.2,
-                    }),
-                }),
-            );
-
-            centerExt.setStyle(
-                new Style({
-                    image: new Icon({
-                    // color: 'rgba(255, 0, 0, 1)',
-                    crossOrigin: 'anonymous',
-                    src: 'https://img.icons8.com/?size=100&id=10028&format=png&color=00FF00',
-                    scale: 0.2,
-                    }),
-                }),
-            );
-
-            const vectorSource = new VectorSource({
-                features: [lowLeft, centerExt],
-            });
-
-            const vectorLayer = new VectorLayer({
-                source: vectorSource,
-            });
-            this.map.addLayer(vectorLayer);
-
-            // this.map.getView().setCenter([0, 0]);
-            // this.map.getView().fit(shiftedExtent , this.map.getSize());
-
+            // Experimental calculation of scaling factor, given the pixel-to-unit-ratio of the image and the mosaic:
+            // Get pixel/unit ratio of mosaic and image
+            // let mosaicRatio = (targetExtent[2] - targetExtent[0]) / width;
+            // let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
+            // let scaleX = imageRatio / mosaicRatio;
             // console.log('mosaic-ratio: ', mosaicRatio);
             // console.log('image-ratio: ', imageRatio);
             // console.log('scale-ratio', scaleX);
+            
+            // calculate angle (given in degrees) as radians
+            let radians = this.currentImage.attrs.metadata.yaw * (Math.PI / 180);
+
 
             // console.log('shiftedExtent: ', shiftedExtent);
             // console.log('map-size: ', this.map.getSize());
             // console.log('map-extent (after): ', this.map.getView().calculateExtent(this.map.getSize()));
             // console.log('shiftedExtent-center: ' , getCenter(shiftedExtent));
             // console.log('img-center: ', this.map.getView().getCenter());
-            // console.log('angle: ', angle);
+            // console.log('radians: ', radians);
             // console.log('imageCoords: ', [imagePosX, imagePosY]);
             // console.log('shiftedExt-size: ', this.map.getView().calculateExtent([width, height]));
 
             // handle rotation
             tileLayer.on('prerender', (evt) => {
-            let ratio = evt.frameState.pixelRatio;
-            // this.map.getView().getCenter() <-- center of image
-            let imageCenter = this.map.getView().getCenter();
-            let mapPixel = this.map.getPixelFromCoordinate(imageCenter);
-            // console.log('map: ', mapPixel);
-            let ctx = evt.context;
-            ctx.save();
-            let canvasPixel = getRenderPixel(evt, mapPixel);
-            // console.log(canvasPixel);
-            ctx.translate(canvasPixel[0], canvasPixel[1]);
-            // ctx.translate(mapPixel[0] * ratio, mapPixel[1] * ratio);
-            // ctx.scale(1.5, 1.5, canvasPixel);
-            // ctx.rotate(-20);
-            // ctx.translate(-canvasPixel[0], -canvasPixel[1]);
-            // //ctx.translate(-pixel[0] * ratio, -pixel[1] * ratio);
+                // [0, 0] image-coordinate position in the shifted mosaic extent
+                // this coordinate functions as an anchor around which the mosaic is rotated
+                let mapPixel = this.map.getPixelFromCoordinate([0, 0]);
+                let ctx = evt.context;
+                ctx.save();
+                let canvasPixel = getRenderPixel(evt, mapPixel);
+                ctx.translate(canvasPixel[0], canvasPixel[1]);
+                ctx.rotate(radians);
+                // ctx.scale(1.0, 1.0, canvasPixel);
+                ctx.translate(-canvasPixel[0], -canvasPixel[1]);
             });
 
             tileLayer.on('postrender', (evt) => {
-            let ctx = evt.context;
-            ctx.restore();
+                let ctx = evt.context;
+                ctx.restore();
             });
 
             return tileLayer;
