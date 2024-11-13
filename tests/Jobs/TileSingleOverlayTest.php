@@ -4,8 +4,10 @@ namespace Biigle\Tests\Modules\Geo\Jobs;
 
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
+use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\FileCache\GenericFile;
 use File;
+use FileCache;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Jcupitt\Vips\Image;
@@ -20,28 +22,28 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlayTest::createGeotiffOverlay();
 
         // save fake UploadedFile to geo-overlay storage
-        $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
+        // $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
+        $overlayFile = new UploadedFile(
+            __DIR__."/../files/geotiff_standardEPSG2013.tif",
+            'standardEPSG2013.tif',
+            'image/tiff',
+            null, 
+            true
+        );
+
+        $disk = config('geo.tiles.overlay_storage_disk');
         $overlay->storeFile($overlayFile);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
+        // $testCorrectFile = Storage::disk('geo-overlays')->path($overlay->path);
+        // dd("{$disk}://{$overlay->path}", $testCorrectFile);
         
-        // retreive fake UploadedFile from geo-overlay storage and cast to GenericFile
-        $disk = config('geo.tiles.overlay_storage_disk');
+        
+        // retreive UploadedFile from geo-overlay storage and cast to GenericFile
         $file = new GenericFile("{$disk}://{$overlay->path}");
-        
         $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
-        $job = new TileSingleOverlayStub($overlay, $disk, $targetPath);
-        $mock = Mockery::mock(Image::class);
-        $mock->shouldReceive('dzsave')
-            ->once()
-            ->with($job->tempPath, [
-                'layout' => 'zoomify',
-                'container' => 'fs',
-                'strip' => true,
-            ]);
+        $job = new TileSingleOverlay($overlay, $disk, $targetPath);
 
-        $job->mock = $mock;
-
-        $job->generateTiles($file, '');
+        FileCache::getOnce($file, [$job, 'generateTiles']);
     }
 
     public function testUploadOverlayToStorage()
