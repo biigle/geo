@@ -8,7 +8,6 @@ import {Projection} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
 import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
 import {getRenderPixel} from '@biigle/ol/render';
-import MouseWheelZoom from '@biigle/ol/interaction/MouseWheelZoom.js';
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -93,7 +92,6 @@ export default {
         // If edit mode on, deactivate the normal scroll interaction on map
         toggleEditing() {
             this.isEditing = !this.isEditing;
-            console.log(this.isEditing);
             if (this.isEditing) {
                 // deactivate zoom on OL map
                 this.map.getInteractions().forEach((interaction) => {
