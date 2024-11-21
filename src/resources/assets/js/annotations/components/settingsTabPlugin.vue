@@ -8,8 +8,7 @@ import {Projection} from '@biigle/ol/proj';
 import MetaApi from '../api/imageMetadata.js'
 import {getHeight, getWidth, getCenter} from '@biigle/ol/extent';
 import {getRenderPixel} from '@biigle/ol/render';
-
-
+import MouseWheelZoom from '@biigle/ol/interaction/MouseWheelZoom.js';
 
 /**
  * The plugin component to edit the context-layer appearance.
@@ -38,6 +37,8 @@ export default {
             loaded: false,
             metadata: [],
             imageLayer: null,
+            isEditing: false,
+            scale: 1,
         }
     },
     computed: {
@@ -89,6 +90,27 @@ export default {
                 this.activeId = id;
             }
         },
+        // If edit mode on, deactivate the normal scroll interaction on map
+        toggleEditing() {
+            this.isEditing = !this.isEditing;
+            console.log(this.isEditing);
+            if (this.isEditing) {
+                // deactivate zoom on OL map
+                this.map.getInteractions().forEach((interaction) => {
+                    if (interaction.get('name') === 'mousewheelzoom') {
+                        interaction.setActive(false);
+                    }
+                });
+            } else {
+                // call method to update layer scale
+                this.handleRenderEvents(this.layer, this.scale, null);
+                this.map.getInteractions().forEach((interaction) => {
+                    if (interaction.get('name') === 'mousewheelzoom') {
+                        interaction.setActive(true);
+                    }
+                });
+            }
+        },
         // calculateExtent Parameters:
         // targetExtent = extent of the tiled context layer
         // imagePosX = x position of the image (in pixel)
@@ -103,6 +125,54 @@ export default {
             });
 
             return shiftedTargetExtent;
+        },
+        throttle(fn, wait) {
+            let time = Date.now();
+
+            return function(event) {
+                // dismiss every wheel event with deltaY less than 4
+                if (Math.abs(event.deltaY) < 4) return
+
+                if ((time + wait - Date.now()) < 0) {
+                    fn(event);
+                    time = Date.now();
+                }
+            }
+        },
+        // triggered when mouse scroll is performed on "ol-viewport" 
+        handleScale(event) {
+            if (this.isEditing) {
+                // TODO: Get and save the default scale values, from these, compute the scale with each new scale value
+                this.scale += event.deltaY * -0.001;
+                // Restrict scale
+                let val = Math.min(Math.max(0.5, this.scale), 2);
+                this.scale = Number(Math.round(parseFloat(val + 'e' + 2)) + 'e-' + 2);
+            }
+        },
+        handleRenderEvents(tileLayer, scale=null, radians=null) {
+            // handle rotation
+            tileLayer.on('prerender', (evt) => {
+                // [0, 0] image-coordinate position in the shifted mosaic extent
+                // this coordinate functions as an anchor around which the mosaic is rotated
+                let mapPixel = this.map.getPixelFromCoordinate([0, 0]);
+                let ctx = evt.context;
+                ctx.save();
+                let canvasPixel = getRenderPixel(evt, mapPixel);
+                ctx.translate(canvasPixel[0], canvasPixel[1]);
+                if(radians !== null) {
+                    ctx.rotate(radians);
+                }
+                if(scale !== null) {
+                    ctx.scale(scale, scale, canvasPixel);
+                    this.$nextTick();
+                }
+                ctx.translate(-canvasPixel[0], -canvasPixel[1]);
+            });
+
+            tileLayer.on('postrender', (evt) => {
+                let ctx = evt.context;
+                ctx.restore();
+            });
         },
         // takes an overlay as input and returns ol-tileLayer in pixel-projection
         createOverlayTile(overlay) {
@@ -166,7 +236,7 @@ export default {
                     extent: shiftedExtent,
             });
 
-            // specify the point resolution in degrees through custom function 
+            // specify the point resolution in degrees through custom function
             // set pointResolution on map-View manually
             projection.setGetPointResolution(
                 (r) => r * Math.max(
@@ -187,53 +257,17 @@ export default {
             // console.log('mosaic-ratio: ', mosaicRatio);
             // console.log('image-ratio: ', imageRatio);
             // console.log('scale-ratio', scaleX);
-            
+
             // calculate angle (given in degrees) as radians
             let radians = this.currentImage.attrs.metadata.yaw * (Math.PI / 180);
-
-
-            // console.log('shiftedExtent: ', shiftedExtent);
-            // console.log('map-size: ', this.map.getSize());
-            // console.log('map-extent (after): ', this.map.getView().calculateExtent(this.map.getSize()));
-            // console.log('shiftedExtent-center: ' , getCenter(shiftedExtent));
-            // console.log('img-center: ', this.map.getView().getCenter());
-            // console.log('radians: ', radians);
-            // console.log('imageCoords: ', [imagePosX, imagePosY]);
-            // console.log('shiftedExt-size: ', this.map.getView().calculateExtent([width, height]));
-
-            // handle rotation
-            tileLayer.on('prerender', (evt) => {
-                // [0, 0] image-coordinate position in the shifted mosaic extent
-                // this coordinate functions as an anchor around which the mosaic is rotated
-                let mapPixel = this.map.getPixelFromCoordinate([0, 0]);
-                let ctx = evt.context;
-                ctx.save();
-                let canvasPixel = getRenderPixel(evt, mapPixel);
-                ctx.translate(canvasPixel[0], canvasPixel[1]);
-                ctx.rotate(radians);
-                // ctx.scale(1.0, 1.0, canvasPixel);
-                ctx.translate(-canvasPixel[0], -canvasPixel[1]);
-            });
-
-            tileLayer.on('postrender', (evt) => {
-                let ctx = evt.context;
-                ctx.restore();
-            });
-
+            this.handleRenderEvents(tileLayer, null, radians);
+            
             return tileLayer;
         },
         updateCurrentImage(id,) {
             // fetch the image metadata
             MetaApi.get({id: this.volumeId, image_id: id})
                 .then(response => this.currentImage = response.body, handleErrorResponse);
-
-            // retrieve the current image-layer
-            // this.map.getLayers().forEach((mapLayer) => {
-            //         if(mapLayer.get('name') === 'imageRegular' || mapLayer.get('name') === 'imageTile') {
-            //             this.imageLayer = mapLayer;
-            //             console.log('imageLayer-settingsTab: ', this.imageLayer.getExtent());
-            //         }
-            // });
         },
     },
     watch: {
@@ -306,6 +340,10 @@ export default {
             this.map = map;
         });
     },
+    mounted() {
+        let el = document.getElementsByClassName("ol-viewport")[1];
+        el.addEventListener("wheel", this.throttle(this.handleScale, 500));
+    }
 };
 </script>
 <style scoped>
