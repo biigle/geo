@@ -17,6 +17,6 @@
             </div>
         </collapse>
         <button class="btn btn-default" title="Edit the scale of the context layer" v-on:click="toggleEditing" :class="{active:isEditing}"><span class="fa fa-pencil-alt" aria-hidden="true"></span> Edit</button>
-        <span>Scale </span>(<span v-text="scale"></span>)
+        <span v-if="scale !== 1.0"> <span>Scale </span>(<span v-text="scale"></span>)</span>
     </div>
 </component>

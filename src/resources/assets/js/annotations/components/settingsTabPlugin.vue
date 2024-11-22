@@ -102,6 +102,8 @@ export default {
             } else {
                 // call method to update layer scale
                 this.handleRenderEvents(this.layer, this.scale, null);
+                // reset scale to 1.0 after it has been modified
+                this.scale = 1.0;
                 this.map.getInteractions().forEach((interaction) => {
                     if (interaction.get('name') === 'mousewheelzoom') {
                         interaction.setActive(true);
@@ -162,7 +164,6 @@ export default {
                 }
                 if(scale !== null) {
                     ctx.scale(scale, scale, canvasPixel);
-                    this.$nextTick();
                 }
                 ctx.translate(-canvasPixel[0], -canvasPixel[1]);
             });
@@ -298,12 +299,14 @@ export default {
                 //             //     mapLayer.changed();
                 //             //     mapLayer.getSource().refresh();
                 //             // });
-                //             layer.setOpacity(this.opacity);
-                //             layer.setVisible(true);
+                //             mapLayer.setOpacity(this.opacity);
+                //             mapLayer.setVisible(true);
                 //         }
                 //     }
                 // });
-                // // if layer does not exist yet, add it to map
+
+                // this.map.renderSync();
+                // if layer does not exist yet, add it to map
                 // if(!layerExists) {
                 this.map.getLayers().removeAt(0);
                 this.map.getLayers().insertAt(0, this.layer);
