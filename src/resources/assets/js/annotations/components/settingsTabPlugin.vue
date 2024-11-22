@@ -132,7 +132,6 @@ export default {
             return function(event) {
                 // dismiss every wheel event with deltaY less than 4
                 if (Math.abs(event.deltaY) < 4) return
-
                 if ((time + wait - Date.now()) < 0) {
                     fn(event);
                     time = Date.now();
@@ -142,7 +141,6 @@ export default {
         // triggered when mouse scroll is performed on "ol-viewport" 
         handleScale(event) {
             if (this.isEditing) {
-                // TODO: Get and save the default scale values, from these, compute the scale with each new scale value
                 this.scale += event.deltaY * -0.001;
                 // Restrict scale
                 let val = Math.min(Math.max(0.5, this.scale), 2);
@@ -342,6 +340,7 @@ export default {
         });
     },
     mounted() {
+        // create Eventlistener for mouswheel interaction (used for scaling the context-layer, see handleScale() method)
         let el = document.getElementsByClassName("ol-viewport")[1];
         el.addEventListener("wheel", this.throttle(this.handleScale, 500));
     }
