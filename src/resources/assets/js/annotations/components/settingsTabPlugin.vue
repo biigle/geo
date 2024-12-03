@@ -60,6 +60,12 @@ export default {
 
             if(this.activeOverlay != null && this.currentImage != null) {
                 if(this.activeOverlay.type === 'webmap') {
+                    /*
+                    * TODO:
+                    * The WMS tile layer needs further development, i.e. shifting the extent to align with
+                    * the single image (see calculateExtent()-method), and rotate/scale the extent 
+                    * using handleRenderEvents()-method.
+                    */
                     tileLayer = new TileLayer({
                             source: new TileWMS({
                                 url: this.activeOverlay.attrs.url,
@@ -111,11 +117,13 @@ export default {
                 });
             }
         },
-        // calculateExtent Parameters:
-        // targetExtent = extent of the tiled context layer
-        // imagePosX = x position of the image (in pixel)
-        // imagePosY = y position of the image (in pixel)
-        // imageCenter = the center coordinate of the currently active image (experimental!)
+        /* 
+        * calculateExtent Parameters
+        * @param targetExtent = extent of the tiled context layer
+        * @param imagePosX = x position of the image (in pixels)
+        * @param imagePosY = y position of the image (in pixels)
+        * @param imageCenter = the center coordinate of the currently active image (experimental!)
+        */
         calculateExtent(targetExtent, imagePosX, imagePosY, imageCenter) {
             // shift the mosaic extent to fit to image coordinate 
             // subtract the image-coordinate (lower left corner)
@@ -148,7 +156,7 @@ export default {
             }
         },
         handleRenderEvents(tileLayer, scale=null, radians=null) {
-            // handle rotation
+            // handle rotation and scale
             tileLayer.on('prerender', (evt) => {
                 // [0, 0] image-coordinate position in the shifted mosaic extent
                 // this coordinate functions as an anchor around which the mosaic is rotated
@@ -203,8 +211,11 @@ export default {
                 units: 'pixels',
             });
 
-            // Commented code below produces same result as using calculateExtent() method:
-            // add coordinate transforms between the source-projection and target projection (subtract image-coordinate and distance to image center)
+            /* 
+            * Commented code below produces same result as using calculateExtent() method:
+            * add coordinate transforms between the source-projection and target 
+            * projection (subtract image-coordinate and distance to image center)
+            */
             // addCoordinateTransforms(
             //     'EPSG:4326',
             //     projection,
@@ -246,7 +257,13 @@ export default {
                 source: sourceLayer,
             });
 
-            // Experimental calculation of scaling factor, given the pixel-to-unit-ratio of the image and the mosaic:
+            /* 
+            * Experimental calculation of scaling factor, given the pixel-to-unit-ratio of the image and the mosaic.
+            * This did not result in a senseful scaling-factor as the imageRatio-values of the Samoylov dataset were 
+            * very off. The imageRatio was calculated based on approximated altitude values (H) and the focal length 
+            * of the camera (f): Scale = f / (H-h_avg), with h_avg (the average elevation of the terrain) being set to 0.
+            * Hence, an option for manual scaling has been implemented.
+            */
             // Get pixel/unit ratio of mosaic and image
             // let mosaicRatio = (targetExtent[2] - targetExtent[0]) / width;
             // let imageRatio = this.currentImage.attrs.metadata.area / this.currentImage.attrs.width / this.currentImage.attrs.height;
@@ -255,7 +272,7 @@ export default {
             // console.log('image-ratio: ', imageRatio);
             // console.log('scale-ratio', scaleX);
 
-            // calculate angle (given in degrees) as radians
+            // calculate angle as radians (provided in degrees)
             let radians = this.currentImage.attrs.metadata.yaw * (Math.PI / 180);
             this.handleRenderEvents(tileLayer, null, radians);
             
@@ -279,11 +296,18 @@ export default {
                 this.settings.delete(`${this.volumeId}-contextLayerOpacity`);
             }
         },
-        // change layer on map instance upon changes
+        // update layer on map instance upon changes (reactive values: opacity-value, currentImage, activeOverlay)
         layer(layer) {
             if(layer !== null && this.currentImage !== null) {
                 // let layerExists = false;
 
+                /* 
+                * Commented code below aims at updating the layer upon changes (i.e. a changed opacity-value, 
+                * currentImage, activeOverlay) without having to delete the context-layer,
+                * but rather setting the visibility true/false. However, an existing context-layer
+                * did not reflect the new changes upon an update using the OL refresh()-function. 
+                * Thus, the current solution is to remove/add a context layer each time changes are applied.   
+                */
                 // this.map.getLayers().forEach((mapLayer) => {
                 //     if(mapLayer.get('name') === 'contextLayer') {
                 //         // set visibility of contextLayers false (except currently active mapLayer)
@@ -306,6 +330,8 @@ export default {
                 // this.map.renderSync();
                 // if layer does not exist yet, add it to map
                 // if(!layerExists) {
+                //     this.map.getLayers().insertAt(0, this.layer);
+                // }
                 this.map.getLayers().removeAt(0);
                 this.map.getLayers().insertAt(0, this.layer);
             }
