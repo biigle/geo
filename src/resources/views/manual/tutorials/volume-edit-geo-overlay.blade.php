@@ -13,8 +13,17 @@
     </p>
     <h3>GeoTIFF</h3>
     <p>
-        The first option to upload an overlay is to provide a geoTIFF-file (in .tif format). The upload allows only GeoTIFF's that have projected coordinate reference systems (CRS) and use the common <a href="https://epsg.org/home.html" target="_blank">EPSG Geodetic Parameter Dataset</a> codes (e.g. EPSG:4326 for WGS84 CRS). It does, however, not support user-defined projected CRS.
+        The first option to upload an overlay is to provide a geoTIFF-file (in .tif(f) format). The upload allows only GeoTIFF's that have projected coordinate reference systems (CRS) and use the common <a href="https://epsg.org/home.html" target="_blank">EPSG Geodetic Parameter Dataset</a> codes (e.g. EPSG:4326 for WGS84 CRS). It does, however, not support user-defined projected CRS. <br>
+        Note: When uploaded, the geoTIFF will be tiled into JPGEG files for web-opimization. Therefore, some information that is contained in the original .tiff will be lost. You should take one of the precautionary steps below to ensure the uploaded .tiff is displayed as expected in BIIGLE:
     </p>
+    <ol>
+        <li>
+            Make sure that the color-band of the geoTIFF is normalized to the range of 0 to 255.
+        </li>
+        <li>
+            If the color-band differs (e.g. negative range), the normalization can also be handled by BIIGLE if the NoData values of the geoTIFF are set to -99999.
+        </li>
+    </ol>
     <h3>Web Map Service (WMS)</h3>
     <p>
         The second option to embed an overlay is by providing the URL to a WMS source. If only the base URL of the WMS is provided (e.g. <code>https://maps.org/geoserver/namespace/wms</code>), the first layer of the WMS will be chosen as the overlay. By providing a URL with query parameters (e.g. <code>https://maps.org/geoserver/namespace/wms?service=WMS&version=1.1.0&request=GetMap&layers=LAYER1,LAYER5</code>), it is also possible to specify WHICH layer(s) of the WMS shall be used. The uploaded overlay will contain ALL the layers specified in the layers-parameter of the URL.

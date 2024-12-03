@@ -122,6 +122,9 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
 
         $response->assertJson($overlay2->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
+        // check if directory of tiled images has been created
+        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->id . '_tiles'));
+
 
         // 3. testing upload of geoTIFF with missing PixelScale / ModelTiePoint as well as missing ModelTransform-Tags.
         // Which means there is no way to transform the geotiff from raster- to model-space 

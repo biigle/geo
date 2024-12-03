@@ -3,9 +3,7 @@ import Api from './api/geoOverlays';
 import GeotiffOverlayForm from './components/geotiffOverlayForm';
 import WebmapOverlayForm from './components/webmapOverlayForm';
 import OverlayTable from './components/overlayTable';
-import {handleErrorResponse, LoaderMixin, EditorMixin} from './import';
-import Tabs from 'uiv/dist/Tabs';
-import Tab from 'uiv/dist/Tab';
+import {handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs} from './import';
 
 export default {
     mixins: [
