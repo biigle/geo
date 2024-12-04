@@ -105,6 +105,6 @@ class TileSingleOverlay extends TileSingleObject
     protected function imageNormalization($vipsImage, $min, $max)
     {
         // band intensity normalization x' = (x - $min) / ($max - $min) * 255
-        return $vipsImage->linear(($vipsImage - $min) / ($max - $min) * 255);
+        return $vipsImage->subtract($min)->multiply(255 / ($max - $min));
     }
 }
