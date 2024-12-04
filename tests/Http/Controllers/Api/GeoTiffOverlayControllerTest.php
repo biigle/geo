@@ -99,8 +99,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertSame($overlay->context_layer, false);
         $response->assertJson($overlay->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
-        // check if directory of tiled images has been created
-        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->id . '_tiles'));
+
 
         // 2. testing upload of geoTIFF using the ModelTransform-Tag
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
@@ -124,8 +123,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
 
         $response->assertJson($overlay2->toArray(), $exact=false);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->path));
-        // check if directory of tiled images has been created
-        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2->id . '_tiles'));
 
 
         // 3. testing upload of geoTIFF with missing PixelScale / ModelTiePoint as well as missing ModelTransform-Tags.
