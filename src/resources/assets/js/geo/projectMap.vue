@@ -6,7 +6,7 @@ import GeoMap from './mixins/geoMap.vue';
  * World map displaying positions of all project images
  */
 export default {
-    mixins: [GeoMap],
+    extends: GeoMap,
     data() {
         return {
             projectId: null,

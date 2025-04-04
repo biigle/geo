@@ -16,13 +16,19 @@
 @endpush
 
 @section('content')
-<main class="sidebar-container">
-    <section id="project-geo-map" class="sidebar-container__content">
+<main id="project-geo-map" class="sidebar-container">
+    <section class="sidebar-container__content">
         <image-map :images="images"></image-map>
     </section>
-    <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>
+    <sidebar v-on:toggle="handleSidebarToggle" v-cloak>
         <sidebar-tab name="labels" icon="tags" title="Filter images by label">
-            <label-trees :trees="labelTrees" :multiselect="true" v-on:select="handleSelect" v-on:deselect="handleDeselect" v-on:clear="handleCleared"></label-trees>
+            <label-trees
+                :trees="labelTrees"
+                :multiselect="true"
+                v-on:select="handleSelectedLabel"
+                v-on:deselect="handleDeselectedLabel"
+                v-on:clear="handleClearedLabels"
+                ></label-trees>
         </sidebar-tab>
     </sidebar>
 </main>

@@ -13,7 +13,7 @@ if (Array.isArray(VolumeFilters)) {
         label: 'geo selection',
         help: "All images that were (not) selected on the world map.",
         listComponent: {
-            mixins: [FilterList],
+            extends: FilterList,
             data() {
                 return {
                     name: 'geo selection',
@@ -21,16 +21,10 @@ if (Array.isArray(VolumeFilters)) {
             },
         },
         selectComponent: {
-            mixins: [FilterSelect],
-            components: {
-            },
-            data() {
-                return {
-                };
-            },
+            extends: FilterSelect,
         },
         getSequence(volumeId, data) {
-            return new Vue.Promise.resolve({data});
+            return Promise.resolve({data});
         }
     });
 }

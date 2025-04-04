@@ -2,6 +2,9 @@
 import ImageMap from '../components/imageMap.vue';
 import {Events} from '../import.js';
 import {handleErrorResponse} from '../import.js';
+import {LabelTrees} from '../import.js';
+import {SidebarTab} from '../import.js';
+import {Sidebar} from '../import.js';
 
 /**
  * Things that are used by both the project and volume geo map.
@@ -9,12 +12,16 @@ import {handleErrorResponse} from '../import.js';
 export default {
     components: {
         imageMap: ImageMap,
+        sidebar: Sidebar,
+        sidebarTab: SidebarTab,
+        labelTrees: LabelTrees,
     },
     data: function() {
         return {
             selectedLabels: [],
             filteredImageCache: {},
             allImages: [],
+            labelTrees: [],
         };
     },
     computed: {
@@ -48,6 +55,9 @@ export default {
 
             return this.allImages;
         },
+        imageCount() {
+            return this.images.length;
+        },
     },
     methods: {
         addSelectedLabel(label) {
@@ -57,7 +67,7 @@ export default {
         },
         handleSelectedLabel(label) {
             if (!this.filteredImageCache.hasOwnProperty(label.id)) {
-                Events.$emit('loading.start');
+                Events.emit('loading.start');
                 this.getImageFilterApi(label.id)
                     .then(
                         (response) => {
@@ -69,7 +79,7 @@ export default {
                             handleErrorResponse(response);
                         }
                     ).finally(function () {
-                        Events.$emit('loading.stop');
+                        Events.emit('loading.stop');
                     });
             } else {
                 this.addSelectedLabel(label);
@@ -84,18 +94,22 @@ export default {
         handleClearedLabels() {
             this.selectedLabels.splice(0);
         },
+        handleSidebarToggle() {
+            // Use nextTick so the event is handled *after* the sidebar expanded/
+            // collapsed.
+            this.$nextTick(function () {
+                Events.emit('sidebar.toggle');
+            });
+        },
     },
     watch: {
-        images(images) {
-            Events.$emit('imageMap.update', images);
+        imageCount(count) {
+            Events.emit('imageMap.update', count);
         },
     },
     created() {
         this.allImages = biigle.$require('geo.images');
-
-        Events.$on('label.selected', this.handleSelectedLabel);
-        Events.$on('label.deselected', this.handleDeselectedLabel);
-        Events.$on('label.cleared', this.handleClearedLabels);
+        this.labelTrees = biigle.$require('geo.labelTrees');
     },
 };
 </script>

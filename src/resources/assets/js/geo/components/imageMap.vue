@@ -29,6 +29,8 @@ import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
  * @type {Object}
  */
 export default {
+    compatConfig: {WATCH_ARRAY: false},
+    emits: ['select'],
     props: {
         images: {
             type: Array,
@@ -124,7 +126,7 @@ export default {
             controls: defaultControls({zoom: this.interactive}),
         });
 
-        map.getView().fit(extent, map.getSize());
+        map.getView().fit(extent, {padding: [10, 10, 10, 10]});
 
         if (this.zoom) {
             map.getView().setZoom(this.zoom);
@@ -170,7 +172,7 @@ export default {
             });
         }
 
-        Events.$on('sidebar.toggle', function () {
+        Events.on('sidebar.toggle', function () {
             map.updateSize();
         });
 

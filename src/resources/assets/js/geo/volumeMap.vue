@@ -7,7 +7,7 @@ import GeoMap from './mixins/geoMap.vue';
  */
 
 export default {
-    mixins: [GeoMap],
+    extends: GeoMap,
     data() {
         return {
             volumeId: null,

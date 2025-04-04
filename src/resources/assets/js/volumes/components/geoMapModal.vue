@@ -10,10 +10,12 @@
         <p class="text-muted">
             <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
         </p>
-        <div slot="footer">
-            <button class="btn btn-default" @click="callback('dismiss')" >Cancel</button>
-            <button class="btn btn-default" @click="callback('ok')" :disabled="disabled">Add rule</button>
-      </div>
+        <template #footer>
+            <div>
+                <button class="btn btn-default" @click="callback('dismiss')" >Cancel</button>
+                <button class="btn btn-default" @click="callback('ok')" :disabled="disabled || null">Add rule</button>
+            </div>
+        </template>
     </modal>
 </template>
 
@@ -24,6 +26,10 @@ import {LoaderMixin} from '../import.js';
 import {Modal} from '../import.js';
 
 export default {
+    emits: [
+        'on',
+        'close-modal',
+    ],
     mixins: [LoaderMixin],
     components: {
         modal: Modal,
