@@ -1,8 +1,8 @@
 <script>
-import {Events} from './import';
-import {LabelTrees} from './import';
-import {SidebarTab} from './import';
-import {Sidebar} from './import';
+import {Events} from './import.js';
+import {LabelTrees} from './import.js';
+import {SidebarTab} from './import.js';
+import {Sidebar} from './import.js';
 
 /**
  * The sidebar of the geo show view

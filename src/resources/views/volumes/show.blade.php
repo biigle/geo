@@ -3,12 +3,12 @@
 @section('title', $volume->name)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/geo')}}
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
-<script type="text/javascript">
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/js/geo/main.js'], 'vendor/geo')}}
+<script type="module">
     biigle.$declare('geo.images', {!! $images !!});
     biigle.$declare('geo.volume', {!! $volume !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});

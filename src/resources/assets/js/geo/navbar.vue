@@ -1,5 +1,5 @@
 <script>
-import {Events} from './import';
+import {Events} from './import.js';
 
 /**
  * Dynamic information in the navbar of the geo show view

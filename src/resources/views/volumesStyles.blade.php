@@ -1,3 +1,3 @@
 @if ($volume->isImageVolume() && $volume->hasGeoInfo())
-<link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/geo')}}
 @endif

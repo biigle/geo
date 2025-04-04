@@ -11,7 +11,7 @@ import OverviewMap from '@biigle/ol/control/OverviewMap';
 import Point from '@biigle/ol/geom/Point';
 import ScaleLine from '@biigle/ol/control/ScaleLine';
 import Select from '@biigle/ol/interaction/Select';
-import Style from '../ol/style';
+import Style from '../ol/style.js';
 import TileLayer from '@biigle/ol/layer/Tile';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
@@ -19,7 +19,7 @@ import View from '@biigle/ol/View';
 import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
 import {defaults as defaultControls} from '@biigle/ol/control';
 import {defaults as defaultInteractions} from '@biigle/ol/interaction';
-import {Events} from '../import';
+import {Events} from '../import.js';
 import {fromLonLat} from '@biigle/ol/proj';
 import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
 

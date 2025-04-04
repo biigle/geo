@@ -1,7 +1,7 @@
 <script>
-import ImageMap from '../components/imageMap';
-import {Events} from '../import';
-import {handleErrorResponse} from '../import';
+import ImageMap from '../components/imageMap.vue';
+import {Events} from '../import.js';
+import {handleErrorResponse} from '../import.js';
 
 /**
  * Things that are used by both the project and volume geo map.

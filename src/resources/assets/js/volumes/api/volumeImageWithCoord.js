@@ -1,3 +1,5 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for volume images with coordinates.
  *
@@ -6,7 +8,5 @@
  * Get image IDs:
  *
  * resource.query({id: volumeId}).then(...)
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/volumes{/id}/coordinates', {});
+export default Resource('api/v1/volumes{/id}/coordinates', {});

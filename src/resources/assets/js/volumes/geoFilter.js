@@ -1,6 +1,6 @@
-import {VolumeFilters} from './import';
-import {FilterList} from './import';
-import FilterSelect from '../volumes/components/filterByLocationComponent';
+import {VolumeFilters} from './import.js';
+import {FilterList} from './import.js';
+import FilterSelect from '../volumes/components/filterByLocationComponent.vue';
 
 /**
  * Geo filter for the volume overview filters.
