@@ -19,7 +19,7 @@
                 <a href="{{route('volume-geo', $volume->id) }}" title="Show all volume images on a world map" class="btn btn-default btn-xs">show all</a>
             </span>
         </div>
-        <image-map :images="images" :interactive="false" :zoom="2"></image-map>
+        <image-map class="image-map--index" :images="images" :interactive="false" :zoom="2"></image-map>
     </div>
 </div>
 
