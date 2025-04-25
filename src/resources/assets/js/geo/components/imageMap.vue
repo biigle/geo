@@ -29,7 +29,6 @@ import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
  * @type {Object}
  */
 export default {
-    compatConfig: {WATCH_ARRAY: false},
     emits: ['select'],
     props: {
         images: {
