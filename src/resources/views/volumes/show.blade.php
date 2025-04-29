@@ -3,12 +3,12 @@
 @section('title', $volume->name)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/geo/styles/main.css') }}" rel="stylesheet">
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/geo')}}
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/geo/scripts/main.js') }}"></script>
-<script type="text/javascript">
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/js/geo/main.js'], 'vendor/geo')}}
+<script type="module">
     biigle.$declare('geo.images', {!! $images !!});
     biigle.$declare('geo.volume', {!! $volume !!});
     biigle.$declare('geo.labelTrees', {!! $trees !!});
@@ -16,13 +16,19 @@
 @endpush
 
 @section('content')
-<main class="sidebar-container">
-    <section id="volume-geo-map" class="sidebar-container__content">
+<main id="volume-geo-map" class="sidebar-container">
+    <section class="sidebar-container__content">
         <image-map :images="images"></image-map>
     </section>
-    <sidebar id="geo-sidebar" v-on:toggle="handleSidebarToggle" v-cloak>
+    <sidebar v-on:toggle="handleSidebarToggle" v-cloak>
         <sidebar-tab name="labels" icon="tags" title="Filter images by label">
-            <label-trees :trees="labelTrees" :multiselect="true" v-on:select="handleSelect" v-on:deselect="handleDeselect" v-on:clear="handleCleared"></label-trees>
+            <label-trees
+                :trees="labelTrees"
+                :multiselect="true"
+                v-on:select="handleSelectedLabel"
+                v-on:deselect="handleDeselectedLabel"
+                v-on:clear="handleClearedLabels"
+                ></label-trees>
         </sidebar-tab>
     </sidebar>
 </main>

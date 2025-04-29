@@ -1,5 +1,5 @@
 <script>
-import ImageMap from './components/imageMap';
+import ImageMap from './components/imageMap.vue';
 
 /**
  * Panel to display an image location.

@@ -14,6 +14,7 @@ import GeoMapModal from './geoMapModal.vue';
  * @type {Object}
  */
 export default {
+    emits: ['select'],
     components: {
         geoMapModal: GeoMapModal,
     },

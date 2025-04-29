@@ -1,5 +1,5 @@
 <script>
-import {Events} from './import';
+import {Events} from './import.js';
 
 /**
  * Dynamic information in the navbar of the geo show view
@@ -7,29 +7,22 @@ import {Events} from './import';
 export default {
     data() {
         return {
-            images: [],
+            number: 0,
             loading: false,
         };
     },
-    computed: {
-        number() {
-            return this.images.length;
-        },
-    },
     created() {
-        this.images = biigle.$require('geo.images');
+        this.number = biigle.$require('geo.images').length;
 
-        Events.$on('loading.start', () => {
+        Events.on('loading.start', () => {
             this.loading = true;
         });
 
-        Events.$on('loading.stop', () => {
+        Events.on('loading.stop', () => {
             this.loading = false;
         });
 
-        Events.$on('imageMap.update', (images) => {
-            this.images = images;
-        });
+        Events.on('imageMap.update', (number) => this.number = number);
     },
 };
 </script>
