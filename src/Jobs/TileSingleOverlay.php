@@ -3,13 +3,13 @@
 namespace Biigle\Modules\Geo\Jobs;
 
 use Biigle\FileCache\GenericFile;
-use Biigle\Jobs\TileSingleObject;
+use Biigle\Jobs\TileSingleImage;
 use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
 use File;
 use Jcupitt\Vips\Image as VipsImage;
 
-class TileSingleOverlay extends TileSingleObject
+class TileSingleOverlay extends TileSingleImage
 {
 
     /**
