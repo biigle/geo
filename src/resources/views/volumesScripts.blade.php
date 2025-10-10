@@ -5,4 +5,5 @@
         biigle.$declare('geo.overlayUrlTemplate', '{!! Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/') !!}');
 </script>
 <script src="{{ cachebust_asset('vendor/geo/scripts/volumes.js') }}"></script>
+{{vite_hot(base_path('vendor/biigle/geo/hot'), ['src/resources/assets/js/volumes/main.js'], 'vendor/geo')}}
 @endif

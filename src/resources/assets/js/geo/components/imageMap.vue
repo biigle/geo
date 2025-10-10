@@ -12,7 +12,7 @@ import OverviewMap from '@biigle/ol/control/OverviewMap';
 import Point from '@biigle/ol/geom/Point';
 import ScaleLine from '@biigle/ol/control/ScaleLine';
 import Select from '@biigle/ol/interaction/Select';
-import Style from '../ol/style';
+import Style from '../ol/style.js';
 import TileLayer from '@biigle/ol/layer/Tile';
 import TileWMS from '@biigle/ol/source/TileWMS';
 import VectorLayer from '@biigle/ol/layer/Vector';
@@ -33,6 +33,7 @@ import {getHeight, getWidth} from '@biigle/ol/extent';
  * @type {Object}
  */
 export default {
+    emits: ['select'],
     props: {
         images: {
             type: Array,
@@ -294,7 +295,7 @@ export default {
             });
         }
 
-        Events.$on('sidebar.toggle', function () {
+        Events.on('sidebar.toggle', function () {
             if(this.map) {
                 this.map.updateSize();
             }

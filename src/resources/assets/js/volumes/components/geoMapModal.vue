@@ -51,13 +51,17 @@
 </template>
 
 <script>
-import Modal from 'uiv/dist/Modal';
-import ImageMap from '../../geo/components/imageMap';
-import CoordApi from '../api/volumeImageWithCoord';
-import {LoaderMixin} from '../import';
+import CoordApi from '../api/volumeImageWithCoord.js';
+import ImageMap from '../../geo/components/imageMap.vue';
+import {LoaderMixin} from '../import.js';
+import {Modal} from '../import.js';
 
 
 export default {
+    emits: [
+        'on',
+        'close-modal',
+    ],
     mixins: [LoaderMixin],
     components: {
         modal: Modal,
