@@ -1,5 +1,5 @@
 <script>
-import geoApi from '../api/geoOverlays';
+import geoApi from '../api/geoOverlays.js';
 
 export default {
   data() {

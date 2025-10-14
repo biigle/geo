@@ -32,8 +32,8 @@
 </template>
 
 <script>
-import Api from '../api/geoOverlays';
-import {handleErrorResponse} from '../../geo/import';
+import Api from '../api/geoOverlays.js';
+import {handleErrorResponse} from '../../geo/import.js';
 
 
 export default {

@@ -1,9 +1,9 @@
 <script>
-import Api from './api/geoOverlays';
-import GeotiffOverlayForm from './components/geotiffOverlayForm';
-import WebmapOverlayForm from './components/webmapOverlayForm';
-import OverlayTable from './components/overlayTable';
-import {handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs} from './import';
+import Api from './api/geoOverlays.js';
+import GeotiffOverlayForm from './components/geotiffOverlayForm.vue';
+import WebmapOverlayForm from './components/webmapOverlayForm.vue';
+import OverlayTable from './components/overlayTable.vue';
+import {handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs} from './import.js';
 
 export default {
     mixins: [

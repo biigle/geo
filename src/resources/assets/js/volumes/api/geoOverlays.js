@@ -1,3 +1,4 @@
+import { Resource } from '../import.js';
 /**
  * Resource for geo overlays.
  *
@@ -9,7 +10,7 @@
  *
  * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/geo-overlays{/id}', {}, {
+export default Resource('api/v1/geo-overlays{/id}', {}, {
     // GeoOverlay
     updateGeoOverlay: {
         method: 'PUT',

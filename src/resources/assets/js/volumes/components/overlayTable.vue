@@ -22,10 +22,10 @@
 </template>
 
 <script>
-import OverlayItem from './overlayItem';
+import OverlayItem from './overlayItem.vue';
 import draggable from 'vuedraggable';
-import GeoApi from '../api/geoOverlays';
-import {handleErrorResponse} from '../../geo/import';
+import GeoApi from '../api/geoOverlays.js';
+import {handleErrorResponse} from '../../geo/import.js';
 
 
 

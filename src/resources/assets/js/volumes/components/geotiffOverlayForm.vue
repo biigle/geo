@@ -1,5 +1,5 @@
 <script>
-import Api from '../api/geoOverlays';
+import Api from '../api/geoOverlays.js';
 
 export default {
     props: {
