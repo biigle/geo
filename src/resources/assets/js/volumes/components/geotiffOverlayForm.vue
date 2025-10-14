@@ -48,7 +48,10 @@ export default {
             }
         },
         submitGeoTiff() {
-            this.$refs.geoTiffInput.click();
+            // Cannot use $refs, ref() or useTemplateRef()
+            // since a wrapper component cannot easily access slot content
+            // without a parent component.
+            document.getElementById('geoTiffInput').click();
         },
         upload(data) {
             return Api.saveGeoTiff({id: this.volumeId}, data);
