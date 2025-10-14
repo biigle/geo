@@ -1,3 +1,7 @@
+<template>
+  <slot :submitWebMap="submitWebMap" :error="error"></slot>
+</template>
+
 <script>
 import geoApi from '../api/geoOverlays.js';
 
@@ -14,6 +18,10 @@ export default {
           required: true,
       },
   },
+  emits: [
+    'success',
+    'upload'
+  ],
   methods: {
     handleSuccess(response) {
         this.error = false;

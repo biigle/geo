@@ -1,3 +1,7 @@
+<template>
+  <slot :submitGeoTiff="submitGeoTiff" :uploadGeoTiff="uploadGeoTiff" :error="error" ></slot>
+</template>
+
 <script>
 import Api from '../api/geoOverlays.js';
 
@@ -13,6 +17,10 @@ export default {
             error: false,
         };
     },
+    emits: [
+        'success',
+        'upload'
+    ],
     methods: {
         handleSuccess(response) {
             this.error = false;
