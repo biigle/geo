@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Geo\Services\Support;
 
+use Exception;
 use Illuminate\Validation\ValidationException;
 
 class WebMapSource 
@@ -89,17 +90,23 @@ class WebMapSource
      */
     protected function getCapabilities()
     {
-        $wmsRequest = file_get_contents($this->baseUrl.'?service=wms&version=1.1.1&request=GetCapabilities');
-        libxml_use_internal_errors(true); // suppress all XML errors
-        $xml = simplexml_load_string($wmsRequest);
-        if($xml === false) {
-            throw ValidationException::withMessages(
-                [
-                    'invalidWMS' => ["The url does not lead to a WMS resource."],
-                ]
-            );
-        } else {
-            return $xml;
+        $validationException = ValidationException::withMessages(
+            [
+                'invalidWMS' => ["The url does not lead to a WMS resource."],
+            ]
+        );
+
+        try {
+            $wmsRequest = file_get_contents($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
+            libxml_use_internal_errors(true); // suppress all XML errors
+            $xml = simplexml_load_string($wmsRequest);
+            if ($xml === false) {
+                throw $validationException;
+            } else {
+                return $xml;
+            }
+        } catch (Exception $e) {
+            throw $validationException;
         }
     }
 
