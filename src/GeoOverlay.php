@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Geo;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\UploadedFile;
-use Biigle\Volume;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Storage;
+use Biigle\Volume;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Biigle\Modules\Geo\Database\factories\GeoOverlayFactory;
 
 class GeoOverlay extends Model
 {
@@ -115,5 +115,15 @@ class GeoOverlay extends Model
     {
         Storage::disk(config('geo.tiles.overlay_storage_disk'))
             ->putFileAs($this->id, $file, "{$this->id}_original.tif");
+    }
+
+    /**
+     * Returns model's factory
+     * 
+     * @return GeoOverlayFactory
+     */
+    protected static function factory()
+    {
+        return GeoOverlayFactory::new();
     }
 }

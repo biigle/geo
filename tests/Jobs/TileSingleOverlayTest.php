@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Geo\Jobs;
 
+use Biigle\Modules\Geo\Database\factories\GeoOverlayFactory;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -19,7 +20,8 @@ class TileSingleOverlayTest extends TestCase
     public function testGenerateOverlayTiles()
     {
         Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
+
 
         // save fake UploadedFile to geo-overlay storage
         // $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
@@ -49,7 +51,8 @@ class TileSingleOverlayTest extends TestCase
     public function testUploadOverlayToStorage()
     {
         config(['geo.tiles.overlay_storage_disk' => 'geo-overlays']);
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
+
         $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
         $job = new TileSingleOverlayStub($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
         File::makeDirectory($job->tempPath);
