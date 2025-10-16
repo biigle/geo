@@ -2,21 +2,48 @@
 
 namespace Biigle\Tests\Modules\Geo\Jobs;
 
-use Biigle\Modules\Geo\Database\factories\GeoOverlayFactory;
-use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
-use Biigle\Tests\Modules\Geo\GeoOverlayTest;
-use Biigle\Modules\Geo\GeoOverlay;
-use Biigle\FileCache\GenericFile;
 use File;
-use FileCache;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Jcupitt\Vips\Image;
-use Mockery;
 use TestCase;
+use FileCache;
+use Illuminate\Support\Arr;
+use Biigle\FileCache\GenericFile;
+use Illuminate\Http\UploadedFile;
+use Biigle\Modules\Geo\GeoOverlay;
+use Jcupitt\Vips\Image as VipsImage;
+use Illuminate\Support\Facades\Storage;
+use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
+
 
 class TileSingleOverlayTest extends TestCase
 {
+    public function testMinMax()
+    {
+        [$img1, $min, $max] = $this->createRandomImage();
+        $img2 = VipsImage::black(10, 10);
+
+        $this->assertEquals($min, TileSingleOverlay::min($img1));
+        $this->assertEquals($max, TileSingleOverlay::max($img1));
+        $this->assertEquals(0, TileSingleOverlay::min($img2));
+        $this->assertEquals(0, TileSingleOverlay::max($img2));
+    }
+
+    public function testImageNormalization()
+    {
+        [$img, $min, $max] = $this->createRandomImage();
+
+        $getPixel = fn($img) => $img->getpoint(2, 3)[0];
+
+        $normMin = 0;
+        $normMax = 255;
+        $pixel = $getPixel($img);
+        $normPixel = round(($pixel - $min) * 255 / ($max - $min), 3);
+
+        $normImg = TileSingleOverlay::imageNormalization($img, $min, $max);
+
+        $this->assertEquals($normMin, TileSingleOverlay::min($normImg));
+        $this->assertEquals($normMax, round(TileSingleOverlay::max($normImg), 3));
+        $this->assertEquals($normPixel, round($getPixel($normImg), 3));
+    }
     public function testGenerateOverlayTiles()
     {
         Storage::fake('geo-overlays');
@@ -66,6 +93,26 @@ class TileSingleOverlayTest extends TestCase
         } finally {
             File::deleteDirectory($job->tempPath);
         }
+    }
+
+    protected function createRandomImage()
+    {
+        $rows = $cols = 5;
+        $data = [];
+
+        for ($i = 0; $i < $rows; $i++) {
+            $row = [];
+            for($j = 0; $j < $cols; $j++) {
+                $row[] = rand(0,255);
+            }
+            $data[] = $row;
+        }
+
+        $img = VipsImage::newFromArray($data);
+        $values = Arr::flatten($data);
+
+        return [$img, min($values), max($values)];
+
     }
 }
 
