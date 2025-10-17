@@ -16,17 +16,6 @@ use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 
 class TileSingleOverlayTest extends TestCase
 {
-    public function testMinMax()
-    {
-        [$img1, $min, $max] = $this->createRandomImage();
-        $img2 = VipsImage::black(10, 10);
-
-        $this->assertEquals($min, TileSingleOverlay::min($img1));
-        $this->assertEquals($max, TileSingleOverlay::max($img1));
-        $this->assertEquals(0, TileSingleOverlay::min($img2));
-        $this->assertEquals(0, TileSingleOverlay::max($img2));
-    }
-
     public function testImageNormalization()
     {
         [$img, $min, $max] = $this->createRandomImage();
@@ -38,10 +27,12 @@ class TileSingleOverlayTest extends TestCase
         $pixel = $getPixel($img);
         $normPixel = round(($pixel - $min) * 255 / ($max - $min), 3);
 
-        $normImg = TileSingleOverlay::imageNormalization($img, $min, $max);
+        $overlay = GeoOverlay::factory()->create();
+        $job = new TileSingleOverlay($overlay, 'test', 'test');
+        $normImg = $job->imageNormalization($img, $min, $max);
 
-        $this->assertEquals($normMin, TileSingleOverlay::min($normImg));
-        $this->assertEquals($normMax, round(TileSingleOverlay::max($normImg), 3));
+        $this->assertEquals($normMin, $normImg->min());
+        $this->assertEquals($normMax, round($normImg->max(), 3));
         $this->assertEquals($normPixel, round($getPixel($normImg), 3));
     }
     public function testGenerateOverlayTiles()

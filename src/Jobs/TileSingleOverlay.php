@@ -67,11 +67,11 @@ class TileSingleOverlay extends TileSingleObject
     {
         $vipsImage = $this->getVipsImage($path);
         // exclude the NoData values (-99999) of the geoTIFF file when searching the min
-        $min = self::min($vipsImage);
-        $max = self::max($vipsImage);
+        $min = $vipsImage->equal(-99999)->ifthenelse(0, $vipsImage)->min();
+        $max = $vipsImage->max();
 
         if($min < 0 || $min > 255 || $max < 0 || $max > 255) {
-            self::imageNormalization($vipsImage, $min, $max)->dzsave($this->tempPath, [
+            $this->imageNormalization($vipsImage, $min, $max)->dzsave($this->tempPath, [
                 'layout' => 'zoomify',
                 'container' => 'fs',
                 'strip' => true,
@@ -102,33 +102,9 @@ class TileSingleOverlay extends TileSingleObject
      * 
      * @return \Jcupitt\Vips\Image
      */
-    public static function imageNormalization($vipsImage, $min, $max)
+    public function imageNormalization($vipsImage, $min, $max)
     {
         // band intensity normalization x' = (x - $min) / ($max - $min) * 255
         return $vipsImage->subtract($min)->multiply(255 / ($max - $min));
-    }
-
-    /**
-     * Return smallest pixel value
-     *
-     * @param VipsImage $img
-     *
-     * @return int
-     */
-    public static function min($img)
-    {
-        return $img->equal(-99999)->ifthenelse(0, $img)->min();
-    }
-
-    /**
-     * Return largest pixel value
-     *
-     * @param VipsImage $img
-     *
-     * @return int
-     */
-    public static function max($img)
-    {
-        return $img->max();
     }
 }
