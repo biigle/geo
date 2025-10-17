@@ -37,33 +37,40 @@ class TileSingleOverlayTest extends TestCase
     }
     public function testGenerateOverlayTiles()
     {
-        Storage::fake('geo-overlays');
         $overlay = GeoOverlay::factory()->create();
+        $file = new GenericFile("test");
 
+        $job = new TileSingleOverlayStub($overlay, "test", "test");
+        $job->generateTiles($file, "test");
 
-        // save fake UploadedFile to geo-overlay storage
-        // $overlayFile = UploadedFile::fake()->create($overlay->name, 20, 'image/tiff');
-        $overlayFile = new UploadedFile(
-            __DIR__."/../files/geotiff_standardEPSG2013.tif",
-            'standardEPSG2013.tif',
-            'image/tiff',
-            null, 
-            true
-        );
+        $files = [
+            $job->tempPath . "/ImageProperties.xml",
+            $job->tempPath . "/TileGroup0/0-0-0.jpg",
+            $job->tempPath . '/vips-properties.xml'
+        ];
 
-        $disk = config('geo.tiles.overlay_storage_disk');
-        $overlay->storeFile($overlayFile);
-        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay->path));
-        // $testCorrectFile = Storage::disk('geo-overlays')->path($overlay->path);
-        // dd("{$disk}://{$overlay->path}", $testCorrectFile);
-        
-        
-        // retreive UploadedFile from geo-overlay storage and cast to GenericFile
-        $file = new GenericFile("{$disk}://{$overlay->path}");
-        $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
-        $job = new TileSingleOverlay($overlay, $disk, $targetPath);
+        $this->assertCount(3, File::allFiles($job->tempPath));
+        $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
+    }
 
-        FileCache::getOnce($file, [$job, 'generateTiles']);
+    public function testGenerateOverlayTilesWithNormalization()
+    {
+        $overlay = GeoOverlay::factory()->create();
+        $file = new GenericFile("test");
+
+        $job = new TileSingleOverlayStub($overlay, "test", "test");
+        $job->shouldNormalize = true;
+        $job->generateTiles($file, "test");
+
+        $files = [
+            $job->tempPath . "/ImageProperties.xml",
+            $job->tempPath . "/TileGroup0/0-0-0.jpg",
+            $job->tempPath . '/vips-properties.xml'
+        ];
+
+        $this->assertCount(3, File::allFiles($job->tempPath));
+        $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
+
     }
 
     public function testUploadOverlayToStorage()
@@ -109,8 +116,24 @@ class TileSingleOverlayTest extends TestCase
 
 class TileSingleOverlayStub extends TileSingleOverlay
 {
+    public $shouldNormalize = false;
+
     protected function getVipsImage($path)
     {
-        return $this->mock;
+        $imageSize = 5;
+
+        if ($this->shouldNormalize) {
+            $rows = $imageSize;
+            $data = [];
+
+            // add negative number to apply normalization
+            for ($i = 0; $i < $rows; $i++) {
+                $data[] = [-255, 0, 0, 0, 0];
+            }
+
+            return VipsImage::newFromArray($data);
+        }
+
+        return VipsImage::black($imageSize, $imageSize);
     }
 }
