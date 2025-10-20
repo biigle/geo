@@ -36,6 +36,8 @@ class GeoServiceProvider extends ServiceProvider
             require __DIR__.'/routes.php';
         });
 
+        \Biigle\Volume::observe(new Observers\VolumeObserver);
+
         $modules->register('geo', [
             'viewMixins' => [
                 'imagesIndex',

@@ -70,21 +70,6 @@ class GeoOverlay extends Model
             return $value;
         });
     }
-
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Delete the overlay image file when the model is deleted.
-        static::deleting(function ($overlay) {
-            Storage::disk(config('geo.tiles.overlay_storage_disk'))->deleteDirectory($overlay->id);
-        });
-    }
     
     /**
      * The volume, this overlay belongs to.
@@ -115,6 +100,21 @@ class GeoOverlay extends Model
     {
         Storage::disk(config('geo.tiles.overlay_storage_disk'))
             ->putFileAs($this->id, $file, "{$this->id}_original.tif");
+    }
+
+    /**
+     * Delete the uploaded image file of the geo overlay.
+     *
+     */
+    public function deleteFile()
+    {
+        $exists = Storage::disk(config('geo.tiles.overlay_storage_disk'))
+            ->exists($this->id);
+
+        if ($exists) {
+            Storage::disk(config('geo.tiles.overlay_storage_disk'))
+                ->deleteDirectory($this->id);
+        }
     }
 
     /**
