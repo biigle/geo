@@ -45,8 +45,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertEquals($overlay->browsing_layer, false);
         $this->assertEquals($overlay->context_layer, false);
-        $this->assertEquals($overlay->attrs['layers'], ['CV_Accepted_GEBCO23_15s_WGS84']);
-        $this->assertEquals($overlay->name, 'Cabo Verde Bathymetry Compilation');
+        $this->assertEquals($overlay->attrs['layers'], ['AL632_Adlergrund_West_week1_50cm']);
+        $this->assertEquals($overlay->name, 'AL632_Adlergrund_West_week1_50cm');
         $response->assertJson($overlay->toArray(), $exact=true);
 
         // test upload of valid WMS-URL (with query-parameters and SEVERAL LAYERS declared)
