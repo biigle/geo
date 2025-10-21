@@ -18,5 +18,9 @@
         "psr-4": {
             "Biigle\\Modules\\Geo\\": "src"
         }
+    },
+    "require": {
+        "lychee-org/php-exif": "^1.0",
+        "proj4php/proj4php": "^2.0"
     }
 }

@@ -1,0 +1,36 @@
+.custom {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.custom > .close {
+    order: 2;
+    flex: 0;
+}
+
+.toggle-btn {
+    background-color: grey;
+    text-decoration: none;
+    border: 0;
+    border-radius: 50%;
+}
+
+
+.toggle-btn.active {
+    background-color: darkorange;
+}
+
+.handle:hover {
+    cursor: grab;
+}
+
+.custom > .ellipsis {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

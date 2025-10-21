@@ -4,6 +4,7 @@ namespace Biigle\Modules\Geo;
 
 use Biigle\Services\Modules;
 use Illuminate\Routing\Router;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Support\ServiceProvider;
 
 class GeoServiceProvider extends ServiceProvider
@@ -36,14 +37,21 @@ class GeoServiceProvider extends ServiceProvider
             require __DIR__.'/routes.php';
         });
 
+        \Biigle\Volume::observe(new Observers\VolumeObserver);
+        GeoOverlay::observe(new Observers\GeoOverlayObserver);
+
         $modules->register('geo', [
             'viewMixins' => [
                 'imagesIndex',
                 'manualTutorial',
+                'manualVolumes',
                 'volumesSidebar',
                 'volumesScripts',
                 'projectsShowTabs',
-                'volumesStyles'
+                'volumesStyles',
+                'volumesEditRight',
+                'volumesEditScripts',
+                'volumesEditStyles'
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
         ]);
@@ -56,10 +64,18 @@ class GeoServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/config/geo.php', 'geo');
+
         $this->app->singleton('command.geo.publish', function ($app) {
             return new \Biigle\Modules\Geo\Console\Commands\Publish();
         });
         $this->commands('command.geo.publish');
+
+
+        $this->app->singleton('command.geo.config', function ($app) {
+            return new \Biigle\Modules\Geo\Console\Commands\Config();
+        });
+        $this->commands('command.geo.config');
     }
 
     /**
@@ -71,6 +87,7 @@ class GeoServiceProvider extends ServiceProvider
     {
         return [
             'command.geo.publish',
+            'command.geo.config',
         ];
     }
 }
