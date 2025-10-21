@@ -4,6 +4,7 @@ namespace Biigle\Modules\Geo;
 
 use Biigle\Services\Modules;
 use Illuminate\Routing\Router;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Support\ServiceProvider;
 
 class GeoServiceProvider extends ServiceProvider
@@ -37,6 +38,7 @@ class GeoServiceProvider extends ServiceProvider
         });
 
         \Biigle\Volume::observe(new Observers\VolumeObserver);
+        GeoOverlay::observe(new Observers\GeoOverlayObserver);
 
         $modules->register('geo', [
             'viewMixins' => [
