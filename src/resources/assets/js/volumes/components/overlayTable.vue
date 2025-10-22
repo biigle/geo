@@ -15,8 +15,8 @@
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle" item-key="id">
                 <template #item="{ element: overlay, index }">
-                    <tr is="overlay-item" :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="index" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
-                    </tr>
+                    <overlay-item :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="index" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
+                    </overlay-item >
                 </template>
             </draggable>
         </table>
