@@ -7,7 +7,6 @@ use TestCase;
 use FileCache;
 use Illuminate\Support\Arr;
 use Biigle\FileCache\GenericFile;
-use Illuminate\Http\UploadedFile;
 use Biigle\Modules\Geo\GeoOverlay;
 use Jcupitt\Vips\Image as VipsImage;
 use Illuminate\Support\Facades\Storage;

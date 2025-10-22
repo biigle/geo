@@ -19,7 +19,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $id = $this->volume()->id;
     
         // Get current ID so we can predict the next ID later.
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlayId = $overlay->id;
         $overlay->delete();
         

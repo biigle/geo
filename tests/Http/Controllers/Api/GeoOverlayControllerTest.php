@@ -2,9 +2,10 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
-use ApiTestCase;
-use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 use Storage;
+use ApiTestCase;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 
 class GeoOverlayControllerTest extends ApiTestCase
 {
@@ -12,13 +13,13 @@ class GeoOverlayControllerTest extends ApiTestCase
     public function testIndex()
     {
         Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlay->volume_id = $this->volume()->id;
         // modify overlay context_layer value
         $overlay->context_layer = true;
         $overlay->save();
 
-        $overlay2 = GeoOverlayTest::createWebMapOverlay();
+        $overlay2 = GeoOverlay::factory(true)->create();
         $overlay2->volume_id = $this->volume()->id;
         // modify overlay2 browsing_layer value
         $overlay2->browsing_layer = true;
@@ -52,7 +53,7 @@ class GeoOverlayControllerTest extends ApiTestCase
     public function testShowFile()
     {
         Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlay->volume_id = $this->volume()->id;
         $overlay->save();
         $id = $overlay->id;
@@ -73,7 +74,7 @@ class GeoOverlayControllerTest extends ApiTestCase
     public function testShowFileNotFound()
     {
         Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlay->volume_id = $this->volume()->id;
         $overlay->save();
         $id = $overlay->id;
@@ -89,7 +90,7 @@ class GeoOverlayControllerTest extends ApiTestCase
         $id = $this->volume()->id;
     
         // Create overlay-instance
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlay->save();
        
         $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}");
@@ -124,7 +125,7 @@ class GeoOverlayControllerTest extends ApiTestCase
     public function testDestroy()
     {
         Storage::fake('geo-overlays');
-        $overlay = GeoOverlayTest::createGeotiffOverlay();
+        $overlay = GeoOverlay::factory()->create();
         $overlay->volume_id = $this->volume()->id;
         $overlay->save();
         $id = $overlay->id;
