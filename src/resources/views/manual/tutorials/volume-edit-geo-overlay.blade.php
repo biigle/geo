@@ -1,6 +1,6 @@
 @extends('manual.base')
 
-@section('manual-title') Volume edit - geo overlays @stop
+@section('manual-title') Geo overlays @stop
 
 @section('manual-content')
 <div class="row">

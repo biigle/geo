@@ -1,5 +1,5 @@
 <h4>
-    <a href="{{route('manual-tutorials', ['geo', 'volume-edit-geo-overlay'])}}">Volume edit - geo overlays</a>
+    <a href="{{route('manual-tutorials', ['geo', 'volume-edit-geo-overlay'])}}">Geo overlays</a>
 </h4>
 
 <p>
