@@ -34,6 +34,12 @@ class WebMapOverlayControllerTest extends ApiTestCase
             'volumeId' => $id
         ])->assertStatus(422);
 
+        // test invalid url
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => 'https://maps.gemar.de/geoserver/MSM96/wms',
+            'volumeId' => $id
+        ])->assertStatus(422);
+
         // test upload of valid WMS-URL (with query-parameters, but NO LAYERS declared)
         // should enter fallback method and return first valid layer anyways 
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
