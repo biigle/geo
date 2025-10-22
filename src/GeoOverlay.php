@@ -122,8 +122,12 @@ class GeoOverlay extends Model
      * 
      * @return GeoOverlayFactory
      */
-    protected static function factory()
+    protected static function factory($isWebMap = false)
     {
+        if ($isWebMap) {
+            return GeoOverlayFactory::new()->webMap();
+        }
+
         return GeoOverlayFactory::new();
     }
 }

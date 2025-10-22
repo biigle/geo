@@ -35,4 +35,16 @@ class GeoOverlayFactory extends Factory
         ];
     }
 
+    public function webMap()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'webmap',
+                'attrs' => [
+                    'layers' => [$this->faker->word(), $this->faker->word()],
+                    'url' => $this->faker->url()
+                ]
+            ];
+        });
+    }
 }
