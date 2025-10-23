@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="images.length && dataLoaded" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds"></image-map>
+            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
@@ -52,6 +52,7 @@
 
 <script>
 import CoordApi from '../api/volumeImageWithCoord.js';
+import VolumeApi from '../api/geoOverlays.js';
 import ImageMap from '../../geo/components/imageMap.vue';
 import {LoaderMixin} from '../import.js';
 import {Modal} from '../import.js';
@@ -76,7 +77,6 @@ export default {
     data() {
         return {
             show: false,
-            dataLoaded: false,
             showLayers: false,
             images: [],
             disabled: true,
@@ -85,6 +85,11 @@ export default {
             projectId: null,
             geoOverlays: [],
             overlayUrlTemplate: '',
+        }
+    },
+    computed: {
+        showOverlay() {
+            return this.images.length && !this.loading;
         }
     },
     methods: {
@@ -114,25 +119,25 @@ export default {
             }
         },
     },
-    async created() {
+    created() {
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;
         // get all image + coordinate information from volume-images
-        await CoordApi.get({id: this.volumeId})
-            .then(response => this.images = response.body, this.handleErrorResponse)
+        CoordApi.get({id: this.volumeId})
+            .then(response => this.images = response.body, this.handleErrorResponse);
+
+
+        VolumeApi.getOverlay({ 'id': this.volumeId })
+            .then(response => {
+                this.overlayUrlTemplate = response.body.urlTemplate;
+                this.projectId = response.body.projectId;
+                this.geoOverlays = response.body.geoOverlays;
+            }, this.handleErrorResponse)
             .finally(this.finishLoading);
 
-        // get the overlayUrlTemplate string
-        this.overlayUrlTemplate = biigle.$require('geo.overlayUrlTemplate');
-        this.projectId = biigle.$require('geo.projectId');
-        // provide overlays array (only those where browsing_overlay = true)
-        this.geoOverlays = biigle.$require('geo.geoOverlays');
         // initially fill activeIds with selected overlays
         this.activeIds = this.geoOverlays.map(x => x.id);
-        
-        // prevent imageMap component from rendering before data is fetched
-        this.dataLoaded = true;
     }
 }
 </script>

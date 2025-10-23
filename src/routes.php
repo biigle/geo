@@ -43,6 +43,10 @@ $router->group([
         'uses' => 'GeoOverlayController@index',
     ]);
 
+    $router->get('volumes/{id}/geo-overlay', [
+        'uses' => 'GeoOverlayController@getOverlay',
+    ]);
+
     $router->resource('geo-overlays', 'GeoOverlayController', [
         'only' => ['destroy'],
         'parameters' => ['geo-overlays' => 'id'],

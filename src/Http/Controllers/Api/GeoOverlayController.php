@@ -137,6 +137,37 @@ class GeoOverlayController extends Controller
      }
 
     /**
+     * Returns overlay data
+     * 
+     * @param int $id Volume id
+     * 
+     * @return Response
+     */
+    public function getOverlay(int $id)
+    {
+        $volume = Volume::findOrFail($id);
+        $this->authorize('access', $volume);
+
+        if ($volume->isVideoVolume()) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        $pid = $volume->projects()->pluck('id')->first();
+        $overlays = GeoOverlay::where('volume_id', $volume->id)
+            ->where('browsing_layer', '=', true)
+            ->orderBy('layer_index')
+            ->get();
+
+        $urlTemplate = Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/');
+
+        return response([
+            'projectId' => $pid,
+            'geoOverlays' => $overlays,
+            'urlTemplate' => $urlTemplate
+        ]);
+    }
+
+    /**
      * Deletes the geo overlay.
      *
      * @api {delete} geo-overlays/:id Delete a geo overlay
