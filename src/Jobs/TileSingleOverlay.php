@@ -2,12 +2,14 @@
 
 namespace Biigle\Modules\Geo\Jobs;
 
+use File;
+use FileCache;
 use Biigle\FileCache\GenericFile;
 use Biigle\Jobs\TileSingleObject;
-use FileCache;
 use Biigle\Modules\Geo\GeoOverlay;
-use File;
+use Illuminate\Support\Facades\Log;
 use Jcupitt\Vips\Image as VipsImage;
+use Illuminate\Support\Facades\Storage;
 
 class TileSingleOverlay extends TileSingleObject
 {
@@ -67,18 +69,31 @@ class TileSingleOverlay extends TileSingleObject
     {
         $vipsImage = $this->getVipsImage($path);
         // exclude the NoData values (-99999) of the geoTIFF file when searching the min
-        $min = $vipsImage->equal(-99999)->ifthenelse(0, $vipsImage)->min();
         $max = $vipsImage->max();
+        $masked = $vipsImage
+            ->moreeq(0)
+            ->ifthenelse($vipsImage, 9999, ['blend' => false]);
+        $min = $masked->min();
 
-        if($min < 0 || $min > 255 || $max < 0 || $max > 255) {
-            $this->imageNormalization($vipsImage, $min, $max)->dzsave($this->tempPath, [
-                'layout' => 'zoomify',
-                'container' => 'fs',
-                'strip' => true,
-            ]);
-        } else {
-            parent::generateTiles($file, $path);
-        }
+        // if($min < 0 || $min > 255 || $max < 0 || $max > 255) {
+        $vipsImage = $this->imageNormalization($vipsImage, $min, $max);
+
+        // Add transparency for missing pixel values
+        $validMask = $vipsImage->moreeq(0);
+        $alpha = $validMask->ifthenelse(255, 0, ['blend' => false]);
+        $test = $vipsImage->bandjoin($alpha);
+        
+        $test->dzsave($this->tempPath, [
+            'layout' => 'zoomify',
+            'container' => 'fs',
+            'strip' => true,
+            'suffix' => '.png',
+            'background' => [255, 255, 255, 0],
+        ]);
+
+        // } else {
+        //     parent::generateTiles($file, $path);
+        // }
     }
 
     /**

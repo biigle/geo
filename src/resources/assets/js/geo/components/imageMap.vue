@@ -119,7 +119,13 @@ export default {
                     size: [overlay.attrs.width, overlay.attrs.height],
                     crossOrigin: 'anonymous',
                     zDirection: -1, // Ensure we get a tile with the screen resolution or higher
-                    projection: projection
+                    projection: projection,
+            });
+
+            sourceLayer.setTileUrlFunction((coords) => {
+                let url = this.overlayUrlTemplate.replaceAll(':id', overlay.id);
+                let maxZ = sourceLayer.getTileGrid().getMaxZoom();
+                return this.pngTileUrl(coords, url, maxZ)
             });
 
             let extentEPSG4326 = [
@@ -164,6 +170,18 @@ export default {
             });
 
             return tileLayer;
+        },
+        pngTileUrl(coords, url, maxZ){
+            if (!coords) {
+                return undefined;
+            }
+
+            const [z, x, y] = coords;
+            const scale = maxZ - z;
+            const tileIndex = x + y * Math.pow(2, scale);
+            const tileGroup = Math.floor(tileIndex / 256);
+            
+            return `${url}TileGroup${tileGroup}/${z}-${x}-${y}.png`;
         }
     },
     watch: {
