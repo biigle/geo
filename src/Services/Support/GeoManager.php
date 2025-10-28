@@ -2,15 +2,15 @@
 
 namespace Biigle\Modules\Geo\Services\Support;
 
-use DivisionByZeroError;
 use Exception;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Validation\ValidationException;
-use PHPExif\Enum\ReaderType;
 use PHPExif\Reader\Reader;
-use proj4php\Point;
-use proj4php\Proj;
-use proj4php\Proj4php;
+use PHPExif\Enum\ReaderType;
+use Illuminate\Http\UploadedFile;
+use PHPCoord\Point\ProjectedPoint;
+use PHPCoord\UnitOfMeasure\Length\Metre;
+use Illuminate\Validation\ValidationException;
+use PHPCoord\CoordinateReferenceSystem\Geographic2D;
+use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
 
 class GeoManager
 {
@@ -259,31 +259,29 @@ class GeoManager
      */
     public function transformModelSpace($coords_current, $pcs_code)
     {
-        // Initialise Proj4
-        $proj4 = new Proj4php();
-        // create the WGS84 projection
-        $projWGS84 = new Proj('EPSG:4326', $proj4);
-        // create projection of current geoTIFF from ProjectedCSTypeTag
-        try {
-            $proj_current = new Proj($pcs_code, $proj4);
-        } catch (Exception $e) {
-            report($e);
-            throw ValidationException::withMessages(
-                [
-                    'transformError' => ['An error occurred during transformation of the projected coordinate system to WGS84: ' . $e->getMessage()],
-                ]
-            );
-        }
+        $crs = str_replace(':', '::', $pcs_code);
+        $fromCRS = CoordinateReferenceSystem::fromSRID('urn:ogc:def:crs:' . $crs);
+        $toCRS = Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84);
         $transformed_coords = [];
 
         for ($i = 0; $i < count($coords_current); $i += 2) {
-            // create a point
-            $pointSrc = new Point($coords_current[$i], $coords_current[$i + 1], $proj_current);
-            // transform the point between datums
-            $projected_point = $proj4->transform($projWGS84, $pointSrc)->toArray();
-            $transformed_coords[] = $projected_point[0];
-            $transformed_coords[] = $projected_point[1];
-        };
+            $p = ProjectedPoint::create(
+                $fromCRS,
+                new Metre($coords_current[$i]),
+                new Metre($coords_current[$i + 1]),
+                null,
+                null
+            );
+
+            $to = $p->convert($toCRS);
+            $transformed_coords = array_merge(
+                $transformed_coords,
+                [
+                    $to->getLongitude()->getValue(),
+                    $to->getLatitude()->getValue()
+                ]
+            );
+        }
 
         return $transformed_coords;
     }
