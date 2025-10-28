@@ -46,84 +46,41 @@ class GeoTiffOverlayController extends Controller
     public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
 
-        // return DB::transaction(function () use ($request) {
         $file = $request->file('geotiff');
         $fileName = $request->input('name', $file->getClientOriginalName());
         // create GeoManager-class from uploadedFile
-        $geotiff = new GeoManager($file);
-        $volumeId = $request->volumeId;
+        $geotiff = $request->geotiff;
+        $volumeId = $request->volume->id;
 
         // check whether file exists alread in DB 
         $overlayExists = GeoOverlay::where('volume_id', $volumeId)->where('name', $fileName)->exists();
         if ($overlayExists) {
             // strip the name if too long
             $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
-            throw ValidationException::withMessages(
-                [
-                    'fileExists' => ["The geoTIFF \"{$fileNameShort}\" has already been uploaded."],
-                ]
-            );
+            throw ValidationException::withMessages(['fileExists' => "The geoTIFF \"{$fileNameShort}\" has already been uploaded."]);
         }
 
-        // find out which coordinate-system we're dealing with
-        $modelType = $geotiff->getCoordSystemType();
-        // find the width and height of geotiff file in pixels
         $pixelDimensions = $geotiff->getPixelSize();
-        // Retreive the four corner coordinates of the geoTIFF in raster space
         $corners = $geotiff->getCorners();
+        $pcsCode = intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
         // Convert corners from RASTER-SPACE to MODEL-SPACE
         $minMaxCoords = $geotiff->convertToModelSpace($corners);
 
-        // Change MODEL SPACE to WGS 84
-        // determine the projected coordinate system in use
-        if ($modelType === 'projected') {
-            // get the ProjectedCSTypeTag from the geoTIFF (if exists)
-            $pcsCode = is_null($geotiff->getKey('GeoTiff:ProjectedCSType')) ? null : intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
-            if (!is_null($pcsCode)) {
-                // project to correct CRS (WGS84)
-                if ($pcsCode === 0) {
-                    throw ValidationException::withMessages(
-                        [
-                            'unDefined' => ['The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.'],
-                        ]
-                    );
-                } elseif ($pcsCode === 32767) {
-                    // if ProjectedCS-GeoKey is user-defined --> throw error
-                    throw ValidationException::withMessages(
-                        [
-                            'userDefined' => ['User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.'],
-                        ]
-                    );
-                } elseif ($pcsCode === 4326) {
-                    // save data in GeoOverlay DB when already in WGS84
-                    $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
-                } else {
-                    // use phpcoord-functions to transform to WGS 84
-                    // save data in GeoOverlay DB
-                    try {
-                        $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
-                    } catch (Exception $e) {
-                        throw ValidationException::withMessages(
-                            [
-                                'failedTransformation' => ["Could not transform CRS. Please convert $pcsCode to EPSG:4326 (WGS84) before uploading."]
-                            ]
-                        );
-                    }
-                    $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
-                }
-            } else {
+        if ($pcsCode === 4326) {
+            // save data in GeoOverlay DB when already in WGS84
+            $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
+        } else {
+            // transform to WGS 84
+            try {
+                $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
+            } catch (Exception $e) {
                 throw ValidationException::withMessages(
                     [
-                        'noPCSKEY' => ["Did not detect the 'ProjectedCSType' geokey in geoTIFF metadata. Make sure this key exists for geoTIFF's containing a projected coordinate system."],
+                        'failedTransformation' => ["Could not transform CRS. Please convert $pcsCode to EPSG:4326 (WGS84) before uploading."]
                     ]
                 );
             }
-        } else {
-            throw ValidationException::withMessages(
-                [
-                    'wrongModelType' => ["The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!"],
-                ]
-            );
+            $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
         }
 
         return $overlay;

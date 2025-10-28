@@ -4,6 +4,7 @@ namespace Biigle\Modules\Geo\Http\Requests;
 
 use Biigle\Volume;
 use Illuminate\Foundation\Http\FormRequest;
+use Biigle\Modules\Geo\Services\Support\GeoManager;
 
 class StoreGeotiffOverlay extends FormRequest
 {
@@ -13,6 +14,13 @@ class StoreGeotiffOverlay extends FormRequest
      * @var Volume
      */
     public $volume;
+
+    /**
+     * The geoManager used to process geo data
+     * 
+     * @var GeoManager
+     */
+    public $geotiff;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -50,6 +58,24 @@ class StoreGeotiffOverlay extends FormRequest
         $validator->after(function ($validator) {
             if ($this->volume->isVideoVolume()) {
                 $validator->errors()->add('id', 'Geo overlays are not available for video volumes.');
+            }
+
+            $file = $this->file('geotiff');
+            $this->geotiff = new GeoManager($file);
+            // get the ProjectedCSTypeTag from the geoTIFF (if exists)
+            $pcsCode = is_null($this->geotiff->getKey('GeoTiff:ProjectedCSType')) ?: intval($this->geotiff->getKey('GeoTiff:ProjectedCSType'));
+            $modelType = $this->geotiff->getCoordSystemType();
+
+            if ($modelType != 'projected') {
+                $validator->errors()->add('wrongModelType', "The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!");
+            }
+
+            if (is_null($pcsCode)) {
+                $validator->errors()->add('noPCSKEY', "Did not detect the 'ProjectedCSType' geokey in geoTIFF metadata. Make sure this key exists for geoTIFF's containing a projected coordinate system.");
+            } elseif ($pcsCode === 0) {
+                $validator->errors()->add('unDefined', 'The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.');
+            } elseif ($pcsCode === 32767) {
+                $validator->errors()->add('userDefined', 'User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.');
             }
         });
     }
