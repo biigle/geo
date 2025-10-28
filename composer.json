@@ -21,6 +21,6 @@
     },
     "require": {
         "lychee-org/php-exif": "^1.0",
-        "proj4php/proj4php": "^2.0"
+        "php-coord/php-coord": "^5.11"
     }
 }
