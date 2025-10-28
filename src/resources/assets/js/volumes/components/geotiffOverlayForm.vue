@@ -31,6 +31,7 @@ export default {
                 response.body.errors.geotiff || 
                 response.body.errors.fileExists ||
                 response.body.errors.noPCSKEY ||
+                response.body.errors.failedTransformation ||
                 response.body.errors.missingModelTiePoints ||
                 response.body.errors.missingModelType || 
                 response.body.errors.wrongModelType || 

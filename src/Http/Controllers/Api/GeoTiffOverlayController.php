@@ -2,14 +2,13 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
+use Exception;
+use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
-use Biigle\Modules\Geo\GeoOverlay;
-use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
-use Biigle\Modules\Geo\Services\Support\GeoManager;
-use Biigle\Volume;
 use Illuminate\Validation\ValidationException;
-use Storage;
+use Biigle\Modules\Geo\Services\Support\GeoManager;
+use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 
 class GeoTiffOverlayController extends Controller
 {
@@ -82,34 +81,35 @@ class GeoTiffOverlayController extends Controller
             $pcsCode = is_null($geotiff->getKey('GeoTiff:ProjectedCSType')) ? null : intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
             if (!is_null($pcsCode)) {
                 // project to correct CRS (WGS84)
-                switch ($pcsCode) {
-                        // undefined code
-                    case 0:
-                        throw ValidationException::withMessages(
-                            [
-                                'unDefined' => ['The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.'],
-                            ]
-                        );
-                        break;
-                        // user-defined code
-                    case 32767:
-                        // if ProjectedCS-GeoKey is user-defined --> throw error
-                        throw ValidationException::withMessages(
-                            [
-                                'userDefined' => ['User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.'],
-                            ]
-                        );
-                        break;
-                        // WGS 84 code
-                    case 4326:
-                        // save data in GeoOverlay DB when already in WGS84
-                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
-                        break;
-                    default:
-                        // use proj4-functions to transform to WGS 84
+                if ($pcsCode === 0) {
+                    throw ValidationException::withMessages(
+                        [
+                            'unDefined' => ['The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.'],
+                        ]
+                    );
+                } elseif ($pcsCode === 32767) {
+                    // if ProjectedCS-GeoKey is user-defined --> throw error
+                    throw ValidationException::withMessages(
+                        [
+                            'userDefined' => ['User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.'],
+                        ]
+                    );
+                } elseif ($pcsCode === 4326) {
+                    // save data in GeoOverlay DB when already in WGS84
+                    $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
+                } else {
+                    // use phpcoord-functions to transform to WGS 84
+                    // save data in GeoOverlay DB
+                    try {
                         $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
-                        // save data in GeoOverlay DB
-                        $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
+                    } catch (Exception $e) {
+                        throw ValidationException::withMessages(
+                            [
+                                'failedTransformation' => ["Could not transform CRS. Please convert $pcsCode to EPSG:4326 (WGS84) before uploading."]
+                            ]
+                        );
+                    }
+                    $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
                 }
             } else {
                 throw ValidationException::withMessages(
@@ -127,7 +127,6 @@ class GeoTiffOverlayController extends Controller
         }
 
         return $overlay;
-        // });
     }
 
     /**
