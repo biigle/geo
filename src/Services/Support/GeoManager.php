@@ -218,7 +218,7 @@ class GeoManager
             }
         } elseif (array_key_exists('IFD0:ModelTransform', $this->exif)) {
             // another way of transforming raster- to model-space with ModelTransformationTag (only 2D case implemented)
-            $model_transform = array_map('intval', explode(" ", $this->exif['IFD0:ModelTransform']));
+            $model_transform = array_map('doubleval', explode(" ", $this->exif['IFD0:ModelTransform']));
             $keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             $var_array = array_combine($keys, array_slice($model_transform, 0, count($keys)));
             // make variables availabe

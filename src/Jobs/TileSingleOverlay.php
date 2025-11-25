@@ -4,6 +4,8 @@ namespace Biigle\Modules\Geo\Jobs;
 
 use File;
 use FileCache;
+use PHPExif\Reader\Reader;
+use PHPExif\Enum\ReaderType;
 use Biigle\FileCache\GenericFile;
 use Biigle\Jobs\TileSingleObject;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -68,22 +70,38 @@ class TileSingleOverlay extends TileSingleObject
     public function generateTiles($file, $path)
     {
         $vipsImage = $this->getVipsImage($path);
+        $reader = Reader::factory(ReaderType::EXIFTOOL);
+        $missingValue = $reader->read($path)->getRawData()['IFD0:GDALNoData'];
+
         // exclude the NoData values (-99999) of the geoTIFF file when searching the min
+        $min = $vipsImage->min();
+        // Check if metadata returns shortened missing value
+        $minIsMissingValue = $min != 0 && $missingValue/$min >= 0.999;
+        $missingValue = $minIsMissingValue ? $min : $missingValue;
+
+        if ($minIsMissingValue) {
+            $min = $vipsImage
+                ->more($missingValue)
+                ->ifthenelse($vipsImage, 9999, ['blend' => false])
+                ->min();
+        }
         $max = $vipsImage->max();
-        $masked = $vipsImage
-            ->moreeq(0)
-            ->ifthenelse($vipsImage, 9999, ['blend' => false]);
-        $min = $masked->min();
 
-        // if($min < 0 || $min > 255 || $max < 0 || $max > 255) {
-        $vipsImage = $this->imageNormalization($vipsImage, $min, $max);
+        $newImage = $vipsImage;
+        if ($min != 0 && $max != 255) {
+            $newImage = $this->imageNormalization($vipsImage, $min, $max);
+        }
 
-        // Add transparency for missing pixel values
-        $validMask = $vipsImage->moreeq(0);
-        $alpha = $validMask->ifthenelse(255, 0, ['blend' => false]);
-        $test = $vipsImage->bandjoin($alpha);
-        
-        $test->dzsave($this->tempPath, [
+        $hasMissingValues = $vipsImage->hist_find()->writeToArray()[$missingValue] > 0;
+        if ($hasMissingValues) {
+            $a1 = $vipsImage->less($missingValue)->ifthenelse(255, 0);
+            $a2 = $vipsImage->more($missingValue)->ifthenelse(255, 0);
+
+            $alpha = $a1->orimage($a2);
+            $newImage = $newImage->bandjoin($alpha);
+        }
+
+        $newImage->dzsave($this->tempPath, [
             'layout' => 'zoomify',
             'container' => 'fs',
             'strip' => true,
@@ -91,7 +109,7 @@ class TileSingleOverlay extends TileSingleObject
             'background' => [255, 255, 255, 0],
         ]);
 
-        // } else {
+        // else {
         //     parent::generateTiles($file, $path);
         // }
     }
@@ -120,6 +138,9 @@ class TileSingleOverlay extends TileSingleObject
     public function imageNormalization($vipsImage, $min, $max)
     {
         // band intensity normalization x' = (x - $min) / ($max - $min) * 255
-        return $vipsImage->subtract($min)->multiply(255 / ($max - $min));
+        return $vipsImage
+            ->subtract($min)
+            ->multiply(255 / ($max - $min))
+            ->cast('uchar');
     }
 }
