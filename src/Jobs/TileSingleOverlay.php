@@ -9,7 +9,6 @@ use PHPExif\Enum\ReaderType;
 use Biigle\FileCache\GenericFile;
 use Biigle\Jobs\TileSingleObject;
 use Biigle\Modules\Geo\GeoOverlay;
-use Illuminate\Support\Facades\Log;
 use Jcupitt\Vips\Image as VipsImage;
 use Illuminate\Support\Facades\Storage;
 
@@ -76,10 +75,10 @@ class TileSingleOverlay extends TileSingleObject
         // exclude the NoData values (-99999) of the geoTIFF file when searching the min
         $min = $vipsImage->min();
         // Check if metadata returns shortened missing value
-        $minIsMissingValue = $min != 0 && $missingValue/$min >= 0.999;
+        $minIsMissingValue = $min != 0 && $missingValue / $min >= 0.999;
         $missingValue = $minIsMissingValue ? $min : $missingValue;
 
-        if ($minIsMissingValue) {
+        if ($minIsMissingValue || $missingValue <= $min) {
             $min = $vipsImage
                 ->more($missingValue)
                 ->ifthenelse($vipsImage, 9999, ['blend' => false])
@@ -97,8 +96,19 @@ class TileSingleOverlay extends TileSingleObject
             $a1 = $vipsImage->less($missingValue)->ifthenelse(255, 0);
             $a2 = $vipsImage->more($missingValue)->ifthenelse(255, 0);
 
+            if ($newImage->bands >= 3) {
+                $a1 = $a1->bandand();
+                $a2 = $a2->bandand();
+            }
+
             $alpha = $a1->orimage($a2);
-            $newImage = $newImage->bandjoin($alpha);
+
+            if ($newImage->bands === 4) {
+                $newImage = $newImage->extract_band(0, ['n' => 3]);
+                $newImage = $newImage->bandjoin($alpha);
+            } else {
+                $newImage = $newImage->bandjoin($alpha);
+            }
         }
 
         $newImage->dzsave($this->tempPath, [
@@ -108,10 +118,6 @@ class TileSingleOverlay extends TileSingleObject
             'suffix' => '.png',
             'background' => [255, 255, 255, 0],
         ]);
-
-        // else {
-        //     parent::generateTiles($file, $path);
-        // }
     }
 
     /**
