@@ -5,7 +5,6 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
-use League\Flysystem\UnableToRetrieveMetadata;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Biigle\Volume;
@@ -13,7 +12,7 @@ use Storage;
 
 class GeoOverlayController extends Controller
 {
-    
+
     /**
      * Shows the geo overlays of the specified volume.
      *
@@ -43,7 +42,7 @@ class GeoOverlayController extends Controller
     public function index(Request $request, $id, $layer_type = null)
     {
         // set layer_type if it appears in the query-url, otherwise null 
-        $layer_type  = $layer_type ?: $request->layer_type;
+        $layer_type = $layer_type ?: $request->layer_type;
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);
 
@@ -52,9 +51,9 @@ class GeoOverlayController extends Controller
         }
 
         // retrieve subset of the geo-overlays if layer_type is specified
-        if($layer_type == 'browsing_layer') {
+        if ($layer_type == 'browsing_layer') {
             return GeoOverlay::where('volume_id', $id)->where('browsing_layer', true)->get();
-        } else if($layer_type == 'context_layer') {
+        } else if ($layer_type == 'context_layer') {
             return GeoOverlay::where('volume_id', $id)->where('context_layer', true)->get();
         } else { // return all geoOverlays
             return GeoOverlay::where('volume_id', $id)->get();
@@ -79,36 +78,35 @@ class GeoOverlayController extends Controller
      * @param UpdateOverlay $request
      * @param $geo_overlay_id
      */
-
-     public function updateGeoOverlay(UpdateOverlay $request)
-     {
+    public function updateGeoOverlay(UpdateOverlay $request)
+    {
         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
-        
-        if($request->filled('layerIndex')) {
+
+        if ($request->filled('layerIndex')) {
             $overlay->update([
                 'layer_index' => $request->input('layerIndex')
             ]);
-            return response($status=200);
+            return response($status = 200);
 
-        } else if($request->filled('layer_type')) {
-            if($request->input('layer_type') == 'contextLayer') {
+        } else if ($request->filled('layer_type')) {
+            if ($request->input('layer_type') == 'contextLayer') {
                 $overlay->update([
                     'context_layer' => $request->input('value')
                 ]);
             }
-            if($request->input('layer_type') == 'browsingLayer') {
+            if ($request->input('layer_type') == 'browsingLayer') {
                 $overlay->update([
                     'browsing_layer' => $request->input('value')
                 ]);
             }
             return response()->json([
                 'browsing_layer' => $overlay->browsing_layer,
-                'context_layer' =>  $overlay->context_layer
+                'context_layer' => $overlay->context_layer
             ]);
         } else {
-            return response('no data update performed', $status=422);
+            return response('no data update performed', $status = 422);
         }
-     }
+    }
 
     /**
      * Returns overlay data
