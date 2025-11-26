@@ -50,40 +50,6 @@ class GeoOverlayControllerTest extends ApiTestCase
         ->assertStatus(200);
     }
 
-    public function testShowFile()
-    {
-        Storage::fake('geo-overlays');
-        $overlay = GeoOverlay::factory()->create();
-        $overlay->volume_id = $this->volume()->id;
-        $overlay->save();
-        $id = $overlay->id;
-        Storage::disk('geo-overlays')->put($overlay->path, 'content');
-
-        $this->doTestApiRoute('GET', "/api/v1/geo-overlays/{$id}/file");
-
-        $this->beUser();
-        $this->get("/api/v1/geo-overlays/{$id}/file")
-            ->assertStatus(403);
-
-        $this->beGuest();
-        $response = $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
-            ->assertStatus(200);
-        $this->assertEquals(7, $response->headers->get('content-length'));
-    }
-    
-    public function testShowFileNotFound()
-    {
-        Storage::fake('geo-overlays');
-        $overlay = GeoOverlay::factory()->create();
-        $overlay->volume_id = $this->volume()->id;
-        $overlay->save();
-        $id = $overlay->id;
-
-        $this->beGuest();
-        $this->json('GET', "/api/v1/geo-overlays/{$id}/file")
-            ->assertStatus(404);
-    }
-
     public function testUpdateGeoOverlay()
     {
         Storage::fake('geo-overlays');

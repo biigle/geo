@@ -62,32 +62,6 @@ class GeoOverlayController extends Controller
     }
 
     /**
-     * Shows the specified geo overlay file.
-     *
-     * @api {get} geo-overlays/:id/file Get a geo overlay file
-     * @apiGroup Geo
-     * @apiName ShowGeoOverlayFile
-     * @apiPermission projectMember
-     *
-     * @apiParam {Number} id The geo overlay ID.
-     *
-     * @param int $id geo overlay id
-     * @return mixed
-     */
-    public function showFile($id)
-    {
-        $overlay = GeoOverlay::findOrFail($id);
-        $this->authorize('access', $overlay->volume);
-
-        try {
-            return Storage::disk(config('geo.tiles.overlay_storage_disk'))
-                ->download($overlay->path);
-        } catch (UnableToRetrieveMetadata $e) {
-            abort(404);
-        }
-    }
-
-    /**
      * Update the context_layer and/or browsing_layer values
      * 
      * @api {put} volumes/:id/geo-overlays/:geo_overlay_id Update a geo overlay
