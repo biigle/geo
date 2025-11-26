@@ -86,7 +86,7 @@ class GeoOverlayController extends Controller
             $overlay->update([
                 'layer_index' => $request->input('layerIndex')
             ]);
-            return response($status = 200);
+            return;
 
         } else if ($request->filled('layer_type')) {
             if ($request->input('layer_type') == 'contextLayer') {
