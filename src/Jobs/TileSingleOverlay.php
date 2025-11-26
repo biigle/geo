@@ -69,8 +69,7 @@ class TileSingleOverlay extends TileSingleObject
     public function generateTiles($file, $path)
     {
         $vipsImage = $this->getVipsImage($path);
-        $reader = Reader::factory(ReaderType::EXIFTOOL);
-        $missingValue = $reader->read($path)->getRawData()['IFD0:GDALNoData'];
+        $missingValue = $this->getExifData($path)['IFD0:GDALNoData'];
 
         // exclude the NoData values (-99999) of the geoTIFF file when searching the min
         $min = $vipsImage->min();
@@ -118,6 +117,12 @@ class TileSingleOverlay extends TileSingleObject
             'suffix' => '.png',
             'background' => [255, 255, 255, 0],
         ]);
+    }
+
+    protected function getExifData($path)
+    {
+        $reader = Reader::factory(ReaderType::EXIFTOOL);
+        return $reader->read($path)->getRawData();
     }
 
     /**
