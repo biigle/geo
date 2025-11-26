@@ -4,13 +4,13 @@ namespace Biigle\Tests\Modules\Geo\Jobs;
 
 use File;
 use TestCase;
-use FileCache;
 use Illuminate\Support\Arr;
 use Biigle\FileCache\GenericFile;
 use Biigle\Modules\Geo\GeoOverlay;
 use Jcupitt\Vips\Image as VipsImage;
 use Illuminate\Support\Facades\Storage;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
+
 
 
 class TileSingleOverlayTest extends TestCase
@@ -24,14 +24,14 @@ class TileSingleOverlayTest extends TestCase
         $normMin = 0;
         $normMax = 255;
         $pixel = $getPixel($img);
-        $normPixel = round(($pixel - $min) * 255 / ($max - $min), 3);
+        $normPixel = (int) (($pixel - $min) * 255 / ($max - $min));
 
         $overlay = GeoOverlay::factory()->create();
         $job = new TileSingleOverlay($overlay, 'test', 'test');
         $normImg = $job->imageNormalization($img, $min, $max);
 
         $this->assertEquals($normMin, $normImg->min());
-        $this->assertEquals($normMax, round($normImg->max(), 3));
+        $this->assertEquals($normMax, (int) $normImg->max());
         $this->assertEquals($normPixel, round($getPixel($normImg), 3));
     }
     public function testGenerateOverlayTiles()
@@ -44,7 +44,7 @@ class TileSingleOverlayTest extends TestCase
 
         $files = [
             $job->tempPath . "/ImageProperties.xml",
-            $job->tempPath . "/TileGroup0/0-0-0.jpg",
+            $job->tempPath . "/TileGroup0/0-0-0.png",
             $job->tempPath . '/vips-properties.xml'
         ];
 
@@ -63,7 +63,7 @@ class TileSingleOverlayTest extends TestCase
 
         $files = [
             $job->tempPath . "/ImageProperties.xml",
-            $job->tempPath . "/TileGroup0/0-0-0.jpg",
+            $job->tempPath . "/TileGroup0/0-0-0.png",
             $job->tempPath . '/vips-properties.xml'
         ];
 
@@ -129,10 +129,14 @@ class TileSingleOverlayStub extends TileSingleOverlay
             for ($i = 0; $i < $rows; $i++) {
                 $data[] = [-255, 0, 0, 0, 0];
             }
-
             return VipsImage::newFromArray($data);
         }
 
         return VipsImage::black($imageSize, $imageSize);
+    }
+
+    protected function getExifData($path)
+    {
+        return ['IFD0:GDALNoData' => 0];
     }
 }
