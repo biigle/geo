@@ -52,14 +52,6 @@ class GeoTiffOverlayController extends Controller
         $geotiff = $request->geotiff;
         $volumeId = $request->volume->id;
 
-        // check whether file exists alread in DB 
-        $overlayExists = GeoOverlay::where('volume_id', $volumeId)->where('name', $fileName)->exists();
-        if ($overlayExists) {
-            // strip the name if too long
-            $fileNameShort = strlen($fileName) > 25 ? substr($fileName, 0, 25) . "..." : $fileName;
-            throw ValidationException::withMessages(['fileExists' => "The geoTIFF \"{$fileNameShort}\" has already been uploaded."]);
-        }
-
         $pixelDimensions = $geotiff->getPixelSize();
         $corners = $geotiff->getCorners();
         $pcsCode = intval($geotiff->getKey('GeoTiff:ProjectedCSType'));

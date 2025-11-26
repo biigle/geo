@@ -3,6 +3,8 @@
 namespace Biigle\Modules\Geo\Http\Requests;
 
 use Biigle\Volume;
+use Illuminate\Support\Str;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
 
@@ -76,6 +78,13 @@ class StoreGeotiffOverlay extends FormRequest
                 $validator->errors()->add('unDefined', 'The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.');
             } elseif ($pcsCode === 32767) {
                 $validator->errors()->add('userDefined', 'User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.');
+            }
+
+            $fileName = $this->input('name', $file->getClientOriginalName());
+            $overlayExists = GeoOverlay::where('volume_id', $this->volume->id)->where('name', $fileName)->exists();
+            if ($overlayExists) {
+                $fileNameShort = Str::limit($fileName, 25);
+                $validator->errors()->add('fileExists', "The geoTIFF \"{$fileNameShort}\" has already been uploaded.");
             }
         });
     }
