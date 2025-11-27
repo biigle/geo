@@ -10,6 +10,8 @@ use PHPCoord\Point\ProjectedPoint;
 use PHPCoord\UnitOfMeasure\Length\Metre;
 use Illuminate\Validation\ValidationException;
 use PHPCoord\CoordinateReferenceSystem\Geographic2D;
+use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
+use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
 use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
 
 class GeoManager
@@ -177,8 +179,12 @@ class GeoManager
 
     /**
      * Convert corners from RASTER-SPACE to MODEL-SPACE
-     * 
-     * @return
+     *
+     * @param $corners Top left and bottom right corner
+     *
+     * @throws ConvertModelSpaceException if PixelScale is ill-defined and ModelTransformation is not given
+     *
+     * @return array containing the transformed coordinates
      */
     public function convertToModelSpace($corners) 
     {
@@ -237,12 +243,7 @@ class GeoManager
             // get the minimum and maximum coordinates of the geoTIFF
             $min_max_coords = $this->getMinMaxCoordinate($projected);
         } else {
-            // if PixelScale is ill-defined and ModelTransformation is not given -> throw error
-            throw ValidationException::withMessages(
-                [
-                    'affineTransformation' => ['The geoTIFF file does not have an affine transformation.'],
-                ]
-            );
+            throw new ConvertModelSpaceException();
         }
 
         return $min_max_coords;
@@ -255,35 +256,40 @@ class GeoManager
      * @param $coords_current min and max coordinates of the geoTIFF
      * @param $pcs_code from the ProjectedCSTypeTag of the geoTIFF
      *
+     * @throws TransformCoordsException if any exception occurs
+     *
      * @return array in form [min_x, min_y, max_x, max_y]
      */
     public function transformModelSpace($coords_current, $pcs_code)
     {
-        $crs = str_replace(':', '::', $pcs_code);
-        $fromCRS = CoordinateReferenceSystem::fromSRID('urn:ogc:def:crs:' . $crs);
-        $toCRS = Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84);
-        $transformed_coords = [];
+        try {
+            $crs = str_replace(':', '::', $pcs_code);
+            $fromCRS = CoordinateReferenceSystem::fromSRID('urn:ogc:def:crs:' . $crs);
+            $toCRS = Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84);
+            $transformed_coords = [];
 
-        for ($i = 0; $i < count($coords_current); $i += 2) {
-            $p = ProjectedPoint::create(
-                $fromCRS,
-                new Metre($coords_current[$i]),
-                new Metre($coords_current[$i + 1]),
-                null,
-                null
-            );
+            for ($i = 0; $i < count($coords_current); $i += 2) {
+                $p = ProjectedPoint::create(
+                    $fromCRS,
+                    new Metre($coords_current[$i]),
+                    new Metre($coords_current[$i + 1]),
+                    null,
+                    null
+                );
 
-            $to = $p->convert($toCRS);
-            $transformed_coords = array_merge(
-                $transformed_coords,
-                [
-                    $to->getLongitude()->getValue(),
-                    $to->getLatitude()->getValue()
-                ]
-            );
+                $to = $p->convert($toCRS);
+                $transformed_coords = array_merge(
+                    $transformed_coords,
+                    [
+                        $to->getLongitude()->getValue(),
+                        $to->getLatitude()->getValue()
+                    ]
+                );
+            }
+            return $transformed_coords;
+        } catch (Exception $e) {
+            throw new TransformCoordsException();
         }
-
-        return $transformed_coords;
     }
 
     /**
