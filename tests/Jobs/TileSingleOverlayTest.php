@@ -27,7 +27,7 @@ class TileSingleOverlayTest extends TestCase
         $normPixel = (int) (($pixel - $min) * 255 / ($max - $min));
 
         $overlay = GeoOverlay::factory()->create();
-        $job = new TileSingleOverlay($overlay, 'test', 'test');
+        $job = new TileSingleOverlay($overlay);
         $normImg = $job->imageNormalization($img, $min, $max);
 
         $this->assertEquals($normMin, $normImg->min());
@@ -39,7 +39,7 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlay::factory()->create();
         $file = new GenericFile("test");
 
-        $job = new TileSingleOverlayStub($overlay, "test", "test");
+        $job = new TileSingleOverlayStub($overlay);
         $job->generateTiles($file, "test");
 
         $files = [
@@ -57,7 +57,7 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlay::factory()->create();
         $file = new GenericFile("test");
 
-        $job = new TileSingleOverlayStub($overlay, "test", "test");
+        $job = new TileSingleOverlayStub($overlay);
         $job->shouldNormalize = true;
         $job->generateTiles($file, "test");
 
@@ -78,7 +78,7 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlay::factory()->create();
 
         $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
-        $job = new TileSingleOverlayStub($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
+        $job = new TileSingleOverlayStub($overlay);
         File::makeDirectory($job->tempPath);
         File::put("{$job->tempPath}/test.txt", 'test');
 
