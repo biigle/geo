@@ -2,13 +2,15 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
+use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
 use Exception;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Illuminate\Validation\ValidationException;
-use Biigle\Modules\Geo\Services\Support\GeoManager;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
+use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
+use function Sabre\Event\Loop\instance;
 
 class GeoTiffOverlayController extends Controller
 {
@@ -55,70 +57,35 @@ class GeoTiffOverlayController extends Controller
         $pixelDimensions = $geotiff->getPixelSize();
         $corners = $geotiff->getCorners();
         $pcsCode = intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
-        // Convert corners from RASTER-SPACE to MODEL-SPACE
-        $minMaxCoords = $geotiff->convertToModelSpace($corners);
 
-        if ($pcsCode === 4326) {
-            // save data in GeoOverlay DB when already in WGS84
-            $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoords, $file, $pixelDimensions);
-        } else {
-            // transform to WGS 84
-            try {
-                $minMaxCoordsWGS = $geotiff->transformModelSpace($minMaxCoords, "EPSG:{$pcsCode}");
-            } catch (Exception $e) {
-                throw ValidationException::withMessages(
-                    [
-                        'failedTransformation' => ["Could not transform CRS. Please convert $pcsCode to EPSG:4326 (WGS84) before uploading."]
-                    ]
-                );
+        try {
+            // Convert corners from RASTER-SPACE to MODEL-SPACE
+            $coords = $geotiff->convertToModelSpace($corners);
+
+            if ($pcsCode != 4326) {
+                $coords = $geotiff->transformModelSpace($coords, "EPSG:{$pcsCode}");
             }
-            $overlay = $this->saveGeoOverlay($volumeId, $fileName, $minMaxCoordsWGS, $file, $pixelDimensions);
+
+            $overlay = GeoOverlay::build($volumeId, $fileName, $coords, $pixelDimensions);
+            $overlay->storeFile($file);
+            TileSingleOverlay::dispatch($overlay, config('geo.tiles.overlay_storage_disk'), "{$overlay->id}/{$overlay->id}_tiles");
+            return $overlay;
+
+        } catch (ConvertModelSpaceException | TransformCoordsException | Exception $e) {
+            $msg = [];
+            if ($e instanceof ConvertModelSpaceException) {
+                $msg = ['affineTransformation' => 'The geoTIFF file does not have an affine transformation.'];
+            } else if ($e instanceof TransformCoordsException) {
+                $msg = [
+                    'failedTransformation' =>
+                        "Could not transform CRS. Please convert EPSG:$pcsCode to EPSG:4326 (WGS84) before uploading."
+                ];
+            } else {
+                $overlay->deleteFile();
+                $overlay->delete();
+                $msg = ['failedUpload' => "The file \"$fileName\" could not be uploaded. Please try again."];
+            }
+            throw ValidationException::withMessages($msg);
         }
-
-        return $overlay;
-    }
-
-    /**
-     * Save GeoTIFF data in GeoOverlay DB
-     *
-     * @param $volumeId ID of the current volume
-     * @param $fileName of the original input-file
-     * @param $coords min and max coordinates in WGS84 format
-     * @param $file the geotiff file from request
-     *
-     * @return GeoOverlay
-     */
-    protected function saveGeoOverlay($volumeId, $fileName, $coords, $file, $pixelDimensions)
-    {
-        $overlay = new GeoOverlay;
-        $overlay->volume_id = $volumeId;
-        $overlay->name = $fileName;
-        $overlay->browsing_layer = false;
-        $overlay->context_layer = false;
-        $overlay->type = 'geotiff';
-        $overlay->layer_index = null;
-        $overlay->attrs = [
-            "top_left_lng" => round($coords[0], 13),
-            "top_left_lat" => round($coords[1], 13),
-            "bottom_right_lng" => round($coords[2], 13),
-            "bottom_right_lat" => round($coords[3], 13),
-            "width" => $pixelDimensions[0],  
-            "height" => $pixelDimensions[1]
-        ];
-        $overlay->save();
-        $overlay->storeFile($file);
-        $this->submitTileJob($overlay);
-        return $overlay;
-    }
-
-    /**
-     * Submit a new tile job for any new overlay.
-     *
-     * @param GeoOverlay $overlay
-     */
-    protected function submitTileJob(GeoOverlay $overlay)
-    {
-        $targetPath =  "{$overlay->id}/{$overlay->id}_tiles";
-        TileSingleOverlay::dispatch($overlay, config('geo.tiles.overlay_storage_disk'), $targetPath);
     }
 }
