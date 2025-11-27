@@ -69,9 +69,8 @@ class StoreGeotiffOverlay extends FormRequest
 
             $file = $this->file('geotiff');
             $this->geotiff = new GeoManager($file);
-            // get the ProjectedCSTypeTag from the geoTIFF (if exists)
             $pcsCode = is_null($this->geotiff->getKey('GeoTiff:ProjectedCSType')) ?: intval($this->geotiff->getKey('GeoTiff:ProjectedCSType'));
-            $modelType = $this->geotiff->getCoordSystemType();
+            $modelType = $this->getCoordSystemType($this->geotiff->exif);
 
             if ($modelType != 'projected') {
                 $validator->errors()->add('wrongModelType', "The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!");
@@ -92,5 +91,41 @@ class StoreGeotiffOverlay extends FormRequest
                 $validator->errors()->add('fileExists', "The geoTIFF \"{$fileNameShort}\" has already been uploaded.");
             }
         });
+    }
+
+    /**
+     * Retreive the type of coordinate reference system used in the geoTIFF.
+     *
+     * @return string the coordinate system type
+     */
+    public function getCoordSystemType($exif)
+    {
+        if (isset($exif['GeoTiff:GTModelType'])) {
+            $modelTypeKey = $exif['GeoTiff:GTModelType'];
+            switch ($modelTypeKey) {
+                case 1:
+                    $modelType = 'projected';
+                    break;
+                case 2:
+                    $modelType = 'geographic';
+                    break;
+                case 3:
+                    $modelType = 'geocentric';
+                    break;
+                case 32767:
+                    $modelType = 'user-defined';
+                    break;
+                default:
+                    $modelType = null;
+            }
+        } else {
+            throw ValidationException::withMessages(
+                [
+                    'missingModelType' => ['The geoTIFF file does not have the required GTModelTypeTag.'],
+                ]
+            );
+        }
+
+        return $modelType;
     }
 }

@@ -8,7 +8,6 @@ use PHPExif\Enum\ReaderType;
 use Illuminate\Http\UploadedFile;
 use PHPCoord\Point\ProjectedPoint;
 use PHPCoord\UnitOfMeasure\Length\Metre;
-use Illuminate\Validation\ValidationException;
 use PHPCoord\CoordinateReferenceSystem\Geographic2D;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
@@ -83,42 +82,6 @@ class GeoManager
             return $this->exif[$geoKey];
         }
         return null;
-    }
-
-    /**
-     * Retreive the type of coordinate reference system used in the geoTIFF.  
-     * 
-     * @return string the coordinate system type
-     */
-    public function getCoordSystemType()
-    {
-        if (array_key_exists('GeoTiff:GTModelType', $this->exif)) {
-            $modelTypeKey = $this->exif['GeoTiff:GTModelType'];
-            switch ($modelTypeKey) {
-                case 1:
-                    $modelType = 'projected';
-                    break;
-                case 2:
-                    $modelType = 'geographic';
-                    break;
-                case 3:
-                    $modelType = 'geocentric';
-                    break;
-                case 32767:
-                    $modelType = 'user-defined';
-                    break;
-                default:
-                    $modelType = null;
-            }
-        } else {
-            throw ValidationException::withMessages(
-                [
-                    'missingModelType' => ['The geoTIFF file does not have the required GTModelTypeTag.'],
-                ]
-            );
-        }
-
-        return $modelType;
     }
 
     /**
