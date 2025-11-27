@@ -38,7 +38,8 @@ export default {
                 response.body.errors.affineTransformation ||
                 response.body.errors.userDefined ||
                 response.body.errors.unDefined ||
-                response.body.errors.transformError
+                response.body.errors.transformError ||
+                response.body.errors.failedUpload
             );
             if (knownError) {
                 if (Array.isArray(knownError)) {
