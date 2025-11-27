@@ -130,4 +130,35 @@ class GeoOverlay extends Model
 
         return GeoOverlayFactory::new();
     }
+
+    /**
+     * Builds object by using the given data and saves it.
+     *
+     * @param mixed $volumeId Id of the used volume
+     * @param mixed $fileName File name
+     * @param mixed $coords Top left and bottom right coordinates of the geotiff (model space)
+     * @param mixed $pixelDimensions Size of geotiff in pixels
+     * @return GeoOverlay
+     */
+    public static function build($volumeId, $fileName, $coords, $pixelDimensions)
+    {
+        $overlay = new static;
+        $precision = 13;
+        $overlay->volume_id = $volumeId;
+        $overlay->name = $fileName;
+        $overlay->browsing_layer = false;
+        $overlay->context_layer = false;
+        $overlay->type = 'geotiff';
+        $overlay->layer_index = null;
+        $overlay->attrs = [
+            "top_left_lng" => round($coords[0], $precision),
+            "top_left_lat" => round($coords[1], $precision),
+            "bottom_right_lng" => round($coords[2], $precision),
+            "bottom_right_lat" => round($coords[3], $precision),
+            "width" => $pixelDimensions[0],
+            "height" => $pixelDimensions[1]
+        ];
+        $overlay->save();
+        return $overlay;
+    }
 }
