@@ -35,10 +35,10 @@ class TileSingleOverlay extends TileSingleObject
      * @param GeoOverlay $file The Overlay to generate tiles for.
      *
      * @return void
-     */
-    public function __construct(GeoOverlay $file, $storage, $targetPath)
+     */    
+    public function __construct(GeoOverlay $file)
     {
-        parent::__construct($storage, $targetPath);
+        parent::__construct(config('geo.tiles.overlay_storage_disk'), "{$file->id}/{$file->id}_tiles");
         $this->file = $file;
         $this->tempPath = config('geo.tiles.tmp_dir')."/{$file->id}";
     }
