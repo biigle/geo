@@ -6,6 +6,7 @@ use Biigle\Volume;
 use Illuminate\Support\Str;
 use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
 
 class StoreGeotiffOverlay extends FormRequest
@@ -58,6 +59,10 @@ class StoreGeotiffOverlay extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            if (!$this->hasFile('geotiff')) {
+                throw ValidationException::withMessages(['invalid' => 'Invalid request. Geotiff is missing.']);
+            }
+
             if ($this->volume->isVideoVolume()) {
                 $validator->errors()->add('id', 'Geo overlays are not available for video volumes.');
             }
