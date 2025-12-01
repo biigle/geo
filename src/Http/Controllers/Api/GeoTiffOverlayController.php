@@ -66,7 +66,7 @@ class GeoTiffOverlayController extends Controller
                 $coords = $geotiff->transformModelSpace($coords, "EPSG:{$pcsCode}");
             }
 
-            $overlay = GeoOverlay::build($volumeId, $fileName, $coords, $pixelDimensions);
+            $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
             TileSingleOverlay::dispatch($overlay);
             return $overlay;
