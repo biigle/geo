@@ -25,6 +25,10 @@ class StoreWebMapOverlay extends FormRequest
      */
     protected $stopOnFirstFailure = true;
 
+    public function __construct(WebMapSource $webmapSource){
+        $this->webmapSource = $webmapSource;
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -53,7 +57,7 @@ class StoreWebMapOverlay extends FormRequest
             if (!$this->has('url')) {
                 throw ValidationException::withMessages(['invalid' => 'Invalid request. Web map URL is missing']);
             }
-            $this->webmapSource = new WebMapSource($this->input('url'));
+            $this->webmapSource->useUrl($this->input('url'));
 
             $overlay = GeoOverlay::where('volume_id', $this->volume->id)
                 ->where('type', 'webmap')

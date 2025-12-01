@@ -38,13 +38,13 @@ class WebMapSource
 
 
     /**
-     * Create a new WebMapSource instance.
+     * Use url to retrieve XML from source.
      *
      * @param String $url The uploaded raw url.
      *
      * @return void
      */
-    public function __construct(String $url)
+    public function useUrl(string $url)
     {
         $this->rawUrl = $url;
         $this->parsedUrl = parse_url($url);
@@ -97,7 +97,7 @@ class WebMapSource
         );
 
         try {
-            $wmsRequest = file_get_contents($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
+            $wmsRequest = $this->request($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
             libxml_use_internal_errors(true); // suppress all XML errors
             $xml = simplexml_load_string($wmsRequest);
             if ($xml === false) {
@@ -108,6 +108,16 @@ class WebMapSource
         } catch (Exception $e) {
             throw $validationException;
         }
+    }
+
+    /**
+     * Request file from source
+     *
+     * @param string $url of source
+     * @return bool|string request response
+     */
+    protected function request($url) {
+        return file_get_contents($url);
     }
 
     /**
