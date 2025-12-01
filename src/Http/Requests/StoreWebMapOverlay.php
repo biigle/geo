@@ -2,10 +2,12 @@
 
 namespace Biigle\Modules\Geo\Http\Requests;
 
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
+use Illuminate\Support\Str;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
+use Illuminate\Validation\ValidationException;
+use Biigle\Modules\Geo\Services\Support\WebMapSource;
 
 class StoreWebMapOverlay extends FormRequest
 {
@@ -45,37 +47,26 @@ class StoreWebMapOverlay extends FormRequest
         ];
     }
 
-        
-    /**
-     * Get the "after" validation callables for the request.
-     */
-    public function after(): array
+    public function withValidator($validator)
     {
-        return [
-            function (Validator $validator) {
-                $uploaded_attrs = GeoOverlay::where('volume_id', $this->volume['id'])->where('type', 'webmap')->pluck('attrs')->all();
-                $uploaded_urls = array_column($uploaded_attrs, 'url');
-                // dd($uploaded_urls);
-                
-                if(in_array($this->input('url'), $uploaded_urls)) {
-                    $validator->errors()->add(
-                        'url.unique',
-                        'The url has already been uploaded.'
-                    );
-                }
+        $validator->after(function ($validator) {
+            if (!$this->has('url')) {
+                throw ValidationException::withMessages(['invalid' => 'Invalid request. Web map URL is missing']);
             }
-        ];
-    }
+            $this->webmapSource = new WebMapSource($this->input('url'));
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'url.unique' => 'The url has already been uploaded.',
-        ];
+            $overlay = GeoOverlay::where('volume_id', $this->volume->id)
+                ->where('type', 'webmap')
+                ->whereJSONContains('attrs', ['url' => $this->webmapSource->baseUrl]);
+
+            if ($overlay->exists()) {
+                $urlShort = Str::limit($this->webmapSource->baseUrl, 80);
+                $name = $overlay->first()->name;
+                $validator->errors()->add(
+                    'uniqueUrl',
+                    "The url \"{$urlShort}\" has already been uploaded (Filename: \"{$name}\").",
+                );
+            }
+        });
     }
 }
