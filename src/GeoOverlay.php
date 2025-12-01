@@ -134,30 +134,39 @@ class GeoOverlay extends Model
     /**
      * Builds object by using the given data and saves it.
      *
-     * @param mixed $volumeId Id of the used volume
-     * @param mixed $fileName File name
-     * @param mixed $coords Top left and bottom right coordinates of the geotiff (model space)
-     * @param mixed $pixelDimensions Size of geotiff in pixels
+     * @param mixed $id Id of the used volume
+     * @param mixed $name File name
+     * @param string $type GeoOverlay type (geotiff or webmap)
+     * @param mixed $attrs Array containing the corresponding attributes
      * @return GeoOverlay
      */
-    public static function build($volumeId, $fileName, $coords, $pixelDimensions)
+    public static function build($id, $name, $type, $attrs)
     {
         $overlay = new static;
-        $precision = 13;
-        $overlay->volume_id = $volumeId;
-        $overlay->name = $fileName;
+        $overlay->volume_id = $id;
+        $overlay->type = $type;
+        $overlay->name = $name;
         $overlay->browsing_layer = false;
         $overlay->context_layer = false;
-        $overlay->type = 'geotiff';
         $overlay->layer_index = null;
-        $overlay->attrs = [
-            "top_left_lng" => round($coords[0], $precision),
-            "top_left_lat" => round($coords[1], $precision),
-            "bottom_right_lng" => round($coords[2], $precision),
-            "bottom_right_lat" => round($coords[3], $precision),
-            "width" => $pixelDimensions[0],
-            "height" => $pixelDimensions[1]
-        ];
+        if ($type === 'geotiff') {
+            $precision = 13;
+            [$coords, $pixelDimensions] = $attrs;
+            $overlay->attrs = [
+                "top_left_lng" => round($coords[0], $precision),
+                "top_left_lat" => round($coords[1], $precision),
+                "bottom_right_lng" => round($coords[2], $precision),
+                "bottom_right_lat" => round($coords[3], $precision),
+                "width" => $pixelDimensions[0],
+                "height" => $pixelDimensions[1]
+            ];
+        } else {
+            [$url, $layers] = $attrs;
+            $overlay->attrs = [
+                'url' => $url,
+                'layers' => $layers,
+            ];
+        }
         $overlay->save();
         return $overlay;
     }
