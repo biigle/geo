@@ -71,13 +71,14 @@ class TileSingleOverlay extends TileSingleObject
         $vipsImage = $this->getVipsImage($path);
         $missingValue = $this->getExifData($path)['IFD0:GDALNoData'];
 
-        // exclude the NoData values (-99999) of the geoTIFF file when searching the min
         $min = $vipsImage->min();
-        // Check if metadata returns shortened missing value
+        // Check if metadata returns truncated no data value
         $minIsMissingValue = $min != 0 && $missingValue / $min >= 0.999;
+        // Use no data value from file instead of truncated value from exif data
         $missingValue = $minIsMissingValue ? $min : $missingValue;
 
         if ($minIsMissingValue || $missingValue <= $min) {
+            // Exclude no data values since they do not represent the minimum
             $min = $vipsImage
                 ->more($missingValue)
                 ->ifthenelse($vipsImage, 9999, ['blend' => false])
@@ -86,16 +87,20 @@ class TileSingleOverlay extends TileSingleObject
         $max = $vipsImage->max();
 
         $newImage = $vipsImage;
+        // If smaller or larger range is used, normalize pixel range to enhance contrast
         if ($min != 0 && $max != 255) {
             $newImage = $this->imageNormalization($vipsImage, $min, $max);
         }
 
+        // Check whether image contains no data values
         $hasMissingValues = $vipsImage->hist_find()->writeToArray()[$missingValue] > 0;
         if ($hasMissingValues) {
             // Create alpha mask
             $alpha = $vipsImage->equal($missingValue)->ifthenelse(0, 255, ['blend' => false]);
 
+            // Set transparecy to 0 if pixel is a no data value
             if ($newImage->bands === 4) {
+                // discard old alpha channel
                 $newImage = $newImage->extract_band(0, ['n' => 3]);
                 $newImage = $newImage->bandjoin($alpha);
             } else {
@@ -131,8 +136,9 @@ class TileSingleOverlay extends TileSingleObject
     }
 
     /**
-     * Normalize the image band to 0 to 255
-     * 
+     * Normalize the image band to 0 to 255 to enhance contrast
+     * since some images use only a very small pixel range.
+     *
      * @param \Jcupitt\Vips\Image $vipsImage
      * @param float $min minimum value of color-level of the input image
      * @param float $max maximum value of color-level of the input image
