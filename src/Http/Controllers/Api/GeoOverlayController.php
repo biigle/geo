@@ -2,13 +2,14 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Geo\GeoOverlay;
-use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
+use Storage;
+use Biigle\Volume;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Biigle\Volume;
-use Storage;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
 
 class GeoOverlayController extends Controller
 {
@@ -89,23 +90,16 @@ class GeoOverlayController extends Controller
             return;
         }
 
-        } else if ($request->filled('layer_type')) {
-            if ($request->input('layer_type') == 'contextLayer') {
-                $overlay->update([
-                    'context_layer' => $request->input('use_layer')
+        if ($request->has('layer_type')) {
+            $type = Str::snake($request->input('layer_type'));
+            $overlay->update([
+                    $type => $request->input('use_layer')
                 ]);
-            }
-            if ($request->input('layer_type') == 'browsingLayer') {
-                $overlay->update([
-                    'browsing_layer' => $request->input('use_layer')
-                ]);
-            }
+
             return response()->json([
                 'browsing_layer' => $overlay->browsing_layer,
                 'context_layer' => $overlay->context_layer
             ]);
-        } else {
-            return response('no data update performed', $status = 422);
         }
     }
 
