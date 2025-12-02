@@ -50,7 +50,7 @@ class UpdateOverlay extends FormRequest
 
             if ($this->has('layer_index')) {
                 $idx = $this->input('layer_index');
-                $overlayCount = GeoOverlay::count();
+                $overlayCount = GeoOverlay::count() - 1;
                 if ($idx > $overlayCount) {
                     $validator->errors()->add('invalidLayerIndex', 'The layer index is invalid.');
                 }
