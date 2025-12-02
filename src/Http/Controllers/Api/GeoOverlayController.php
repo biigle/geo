@@ -82,11 +82,12 @@ class GeoOverlayController extends Controller
     {
         $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
 
-        if ($request->filled('layerIndex')) {
+        if ($request->has('layer_index')) {
             $overlay->update([
-                'layer_index' => $request->input('layerIndex')
+                'layer_index' => $request->input('layer_index')
             ]);
             return;
+        }
 
         } else if ($request->filled('layer_type')) {
             if ($request->input('layer_type') == 'contextLayer') {
