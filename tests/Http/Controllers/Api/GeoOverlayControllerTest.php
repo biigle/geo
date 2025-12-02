@@ -107,11 +107,15 @@ class GeoOverlayControllerTest extends ApiTestCase
         ])->assertStatus(422);
 
         $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => GeoOverlay::count() + 1
+            'layer_index' => 1.1
         ])->assertStatus(422);
 
         $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => 1
+            'layer_index' => GeoOverlay::count()
+        ])->assertStatus(422);
+
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_index' => 0
         ])->assertStatus(200);
     }
 
