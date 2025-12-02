@@ -51,7 +51,7 @@ class StoreGeotiffOverlay extends FormRequest
     public function rules()
     {
         return [
-            'geotiff' => 'required|file|max:52430000|mimetypes:image/tiff',
+            'geotiff' => 'required|file|mimetypes:image/tiff',
         ];
     }
 
