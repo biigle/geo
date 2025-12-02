@@ -65,7 +65,7 @@ class GeoOverlayControllerTest extends ApiTestCase
         // 403: The client does not have access rights to the content
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_type' => 'browsingLayer',
-            'value' => true
+            'use_layer' => true
         ])
         ->assertStatus(403);
 
@@ -75,18 +75,47 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}")
         ->assertStatus(422);
 
+        // Reject request if only layer_type or use_layer is given
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_type' => 'browsingLayer',
+        ])->assertStatus(422);
+
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'use_layer' => false,
+        ])->assertStatus(422);
+
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_type' => 'testLayer',
+            'use_layer' => true
+        ])->assertStatus(422);
+
         // now test if updating with data will succeed with the correct values being returned
         $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_type' => 'browsingLayer',
-            'value' => true
+            'use_layer' => true
         ]);
+
         $response
             ->assertStatus(200)            
             ->assertJson([
                 'browsing_layer' => true,
                 'context_layer' => false
             ]);
+
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_index' => -1
+        ])->assertStatus(422);
+
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_index' => GeoOverlay::count() + 1
+        ])->assertStatus(422);
+
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+            'layer_index' => 1
+        ])->assertStatus(200);
     }
+
+    // public function testUpdateGeoOverlayInvalidLayerIndex
 
     public function testDestroy()
     {
