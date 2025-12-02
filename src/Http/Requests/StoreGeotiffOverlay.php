@@ -25,6 +25,11 @@ class StoreGeotiffOverlay extends FormRequest
      */
     public $geotiff;
 
+    public function __construct(GeoManager $geotiff)
+    {
+        $this->geotiff = $geotiff;
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -68,7 +73,7 @@ class StoreGeotiffOverlay extends FormRequest
             }
 
             $file = $this->file('geotiff');
-            $this->geotiff = new GeoManager($file);
+            $this->geotiff->useFile($file);
             $pcsCode = is_null($this->geotiff->getKey('GeoTiff:ProjectedCSType')) ?: intval($this->geotiff->getKey('GeoTiff:ProjectedCSType'));
             $modelType = $this->getCoordSystemType($this->geotiff->exif);
 

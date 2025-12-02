@@ -2,11 +2,13 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
+use Biigle\Modules\Geo\Services\Support\GeoManager;
+use Mockery;
+use Storage;
 use ApiTestCase;
 use Biigle\MediaType;
-use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Http\UploadedFile;
-use Storage;
+use Biigle\Modules\Geo\GeoOverlay;
 
 class GeoTiffOverlayControllerTest extends ApiTestCase
 {
@@ -20,15 +22,18 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     public function testStoreGeotiff()
     {
         $id = $this->volume()->id;
-
-        // define the test-files
-        $standard_gtiff = new UploadedFile(
-            __DIR__ . "/../../../files/geotiff_standardEPSG2013.tif",
-            'standardEPSG2013.tif',
-            'image/tiff',
-            null,
-            true
-        );
+        $exif = [
+            "System:FileName" => "geotiff_standardEPSG2013.tif",
+            "IFD0:ImageWidth" => 3,
+            "IFD0:ImageHeight" => 2,
+            "IFD0:PixelScale" => "57 53.125 0",
+            "IFD0:ModelTiePoint" => "0 0 0 344275.42 801113.187 0",
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:ProjectedCSType" => 27700,
+        ];
+        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(GeoManager::class, fn() => $mock);
+        $file = UploadedFile::fake()->create('standardEPSG2013.tif', 1, 'image/tiff');
 
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
 
@@ -37,7 +42,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'geotiff' => $standard_gtiff,
+                'geotiff' => $file,
                 'volumeId' => $id
             ]
         )->assertStatus(403);
@@ -47,17 +52,19 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff")
             ->assertStatus(422);
 
-        $file = UploadedFile::fake()->create('overlay.tif');
+        $emptyFile = UploadedFile::fake()->create('overlay.tif');
         // check if "empty" geotiff fails properly
-        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $file])
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $emptyFile])
             ->assertStatus(422);
 
         $this->assertFalse(GeoOverlay::exists());
 
+        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+
         $response = $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'geotiff' => $standard_gtiff,
+                'geotiff' => $file,
                 'volumeId' => $id
             ]
         )->assertSuccessful();
@@ -82,19 +89,25 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $this->beAdmin();
+        $exif = [
+            "System:FileName" => "geotiff_modelTransform.tiff",
+            "IFD0:ImageWidth" => 396,
+            "IFD0:ImageHeight" => 183,
+            "IFD0:ModelTransform" => "10 0 0 677920 0 10 0 5150930 0 0 0 0 0 0 0 1",
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:GTRasterType" => 1,
+            "GeoTiff:ProjectedCSType" => 32632,
+        ];
 
-        $model_transform_gtiff = new UploadedFile(
-            __DIR__ . "/../../../files/geotiff_modelTransform.tiff",
-            'modelTransform.tiff',
-            'image/tiff',
-            null,
-            true
-        );
+        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(GeoManager::class, fn() => $mock);
+        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $response = $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'geotiff' => $model_transform_gtiff,
+                'geotiff' => $file,
                 'volumeId' => $id
             ]
         )->assertSuccessful();
@@ -108,7 +121,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertSame(396, $overlay2['attrs']['width']);
         $this->assertSame(183, $overlay2['attrs']['height']);
         $this->assertSame('geotiff', $overlay2['type']);
-        $this->assertSame('modelTransform.tiff', $overlay2['name']);
+        $this->assertSame('geotiff_modelTransform.tiff', $overlay2['name']);
         $this->assertFalse($overlay2['browsing_layer']);
         $this->assertFalse($overlay2['context_layer']);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2['id']));
@@ -118,19 +131,22 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $this->beAdmin();
+        $exif = [
+            "IFD0:ImageWidth" => 396,
+            "IFD0:ImageHeight" => 183,
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:ProjectedCSType" => 32632,
+        ];
 
-        $missing_transform_gtiff = new UploadedFile(
-            __DIR__ . "/../../../files/geotiff_missing_ModelTiePoint_and_ModelTransform.tiff",
-            'missingTransform.tiff',
-            'image/tiff',
-            null,
-            true
-        );
+        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(GeoManager::class, fn() => $mock);
+        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'geotiff' => $missing_transform_gtiff,
+                'geotiff' => $file,
                 'volumeId' => $id
             ]
         )->assertInvalid(['affineTransformation']);
@@ -140,19 +156,21 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $this->beAdmin();
+        $exif = [
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:ProjectedCSType" => 32767,
+        ];
 
-        $user_defined_gtiff = new UploadedFile(
-            __DIR__ . "/../../../files/geotiff_user_defined2011.tif",
-            'user_defined2011.tif',
-            'image/tiff',
-            null,
-            true
-        );
+        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(GeoManager::class, fn() => $mock);
+        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
 
         $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'geotiff' => $user_defined_gtiff,
+                'geotiff' => $file,
                 'volumeId' => $id
             ]
         )->assertInvalid(['userDefined']);

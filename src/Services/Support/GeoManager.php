@@ -58,17 +58,27 @@ class GeoManager
     protected $Y;
 
     /**
-     * Create a new GeoOverlay instance.
+     * Set exif data of the given file
      *
-     * @param UploadedFile $file The uploaded geotiff.
-     *
+     * @param UploadedFile $file
      * @return void
      */
-    public function __construct(UploadedFile $file)
+    public function useFile(UploadedFile $file)
+    {
+        $this->exif = $this->getExifData($file);
+    }
+
+    /**
+     * Returns exif data of a file
+     *
+     * @param mixed $file to be read
+     * @return array containing the exif data
+     */
+    protected function getExifData($file)
     {
         // reader with Exiftool adapter
         $reader = Reader::factory(ReaderType::EXIFTOOL);
-        $this->exif = $reader->read($file)->getRawData();
+        return $reader->read($file)->getRawData();
     }
 
     /**
