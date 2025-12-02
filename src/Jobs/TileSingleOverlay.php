@@ -92,15 +92,8 @@ class TileSingleOverlay extends TileSingleObject
 
         $hasMissingValues = $vipsImage->hist_find()->writeToArray()[$missingValue] > 0;
         if ($hasMissingValues) {
-            $a1 = $vipsImage->less($missingValue)->ifthenelse(255, 0);
-            $a2 = $vipsImage->more($missingValue)->ifthenelse(255, 0);
-
-            if ($newImage->bands >= 3) {
-                $a1 = $a1->bandand();
-                $a2 = $a2->bandand();
-            }
-
-            $alpha = $a1->orimage($a2);
+            // Create alpha mask
+            $alpha = $vipsImage->equal($missingValue)->ifthenelse(0, 255, ['blend' => false]);
 
             if ($newImage->bands === 4) {
                 $newImage = $newImage->extract_band(0, ['n' => 3]);
