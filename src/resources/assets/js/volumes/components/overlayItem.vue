@@ -72,7 +72,7 @@ export default {
         update(dataKey) {
             return Api.updateGeoOverlay({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
                 layer_type: dataKey,
-                value: !this[dataKey],
+                use_layer: !this[dataKey],
                 });
         },
         // checks if string is too long and returns truncated version

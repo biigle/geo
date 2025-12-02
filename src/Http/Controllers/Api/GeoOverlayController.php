@@ -91,12 +91,12 @@ class GeoOverlayController extends Controller
         } else if ($request->filled('layer_type')) {
             if ($request->input('layer_type') == 'contextLayer') {
                 $overlay->update([
-                    'context_layer' => $request->input('value')
+                    'context_layer' => $request->input('use_layer')
                 ]);
             }
             if ($request->input('layer_type') == 'browsingLayer') {
                 $overlay->update([
-                    'browsing_layer' => $request->input('value')
+                    'browsing_layer' => $request->input('use_layer')
                 ]);
             }
             return response()->json([

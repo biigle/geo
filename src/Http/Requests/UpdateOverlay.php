@@ -35,7 +35,7 @@ class UpdateOverlay extends FormRequest
     {
         return [
             'layer_type' => 'filled|string',
-            'value' => 'filled|boolean'
+            'use_layer' => 'filled|boolean'
         ];
     }
 }
