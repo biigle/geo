@@ -4,7 +4,7 @@ namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
 
-class WebMapSource 
+class WebMapSource
 {
     /**
      * The raw url input string
@@ -19,7 +19,7 @@ class WebMapSource
      * @var Object
      */
     protected $xml;
-    
+
     /**
      * The parsed web-map-service url compartments
      *
@@ -68,15 +68,15 @@ class WebMapSource
      */
     protected function unparseUrlBase()
     {
-        $scheme   = isset($this->parsedUrl['scheme']) ? $this->parsedUrl['scheme'] . '://' : '';
-        $host     = isset($this->parsedUrl['host']) ? $this->parsedUrl['host'] : '';
-        $port     = isset($this->parsedUrl['port']) ? ':' . $this->parsedUrl['port'] : '';
-        $user     = isset($this->parsedUrl['user']) ? $this->parsedUrl['user'] : '';
-        $pass     = isset($this->parsedUrl['pass']) ? ':' . $this->parsedUrl['pass']  : '';
-        $pass     = ($user || $pass) ? "$pass@" : '';
-        $path     = isset($this->parsedUrl['path']) ? $this->parsedUrl['path'] : '';
+        $scheme = isset($this->parsedUrl['scheme']) ? $this->parsedUrl['scheme'] . '://' : '';
+        $host = isset($this->parsedUrl['host']) ? $this->parsedUrl['host'] : '';
+        $port = isset($this->parsedUrl['port']) ? ':' . $this->parsedUrl['port'] : '';
+        $user = isset($this->parsedUrl['user']) ? $this->parsedUrl['user'] : '';
+        $pass = isset($this->parsedUrl['pass']) ? ':' . $this->parsedUrl['pass'] : '';
+        $pass = ($user || $pass) ? "$pass@" : '';
+        $path = isset($this->parsedUrl['path']) ? $this->parsedUrl['path'] : '';
         // return only the base url without query or fragment parameters
-        $query    = isset($this->parsedUrl['query']) ? '?' . $this->parsedUrl['query'] : '';
+        $query = isset($this->parsedUrl['query']) ? '?' . $this->parsedUrl['query'] : '';
         $fragment = isset($this->parsedUrl['fragment']) ? '#' . $this->parsedUrl['fragment'] : '';
 
         return "$scheme$user$pass$host$port$path";
@@ -89,16 +89,16 @@ class WebMapSource
      */
     protected function getCapabilities()
     {
-            $wmsRequest = $this->request($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
-            libxml_use_internal_errors(true); // suppress all XML errors
-            $xml = simplexml_load_string($wmsRequest);
+        $wmsRequest = $this->request($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
+        libxml_use_internal_errors(true); // suppress all XML errors
+        $xml = simplexml_load_string($wmsRequest);
 
-            // xml can be a non-boolean value which is interpreted as boolean false
-            if ($xml === false) {
-                throw new Exception();
-            }
+        // xml can be a non-boolean value which is interpreted as boolean false
+        if ($xml === false) {
+            throw new Exception();
+        }
 
-            return $xml;
+        return $xml;
     }
 
     /**
@@ -107,7 +107,8 @@ class WebMapSource
      * @param string $url of source
      * @return bool|string request response
      */
-    protected function request($url) {
+    protected function request($url)
+    {
         return file_get_contents($url);
     }
 
@@ -123,16 +124,16 @@ class WebMapSource
         // select only those layers that have no Child layers within them
         $layers = $this->xml->xpath('//*[local-name()="Layer"][not(.//*[local-name()="Layer"])]');
         // loop over layers and return first valid layer title and name
-        foreach($layers as $layer) {
-                $webmapTitle = (string) $layer->Title;
-                // Excerpt from OpenGIS 'Web Map Server Implementation Specification':
-                // If, and only if, a layer has a <Name>, then it is a map layer that can be requested
-                // If the layer has a Title but no Name, then that layer is only a category title for
-                // all the layers nested within (the latter case should not occur due to xpath query above)
-                if(!empty($layer->Name)) {
-                    $webmapLayers = [(string) $layer->Name];
-                    return [$webmapTitle, $webmapLayers];
-                }
+        foreach ($layers as $layer) {
+            $webmapTitle = (string) $layer->Title;
+            // Excerpt from OpenGIS 'Web Map Server Implementation Specification':
+            // If, and only if, a layer has a <Name>, then it is a map layer that can be requested
+            // If the layer has a Title but no Name, then that layer is only a category title for
+            // all the layers nested within (the latter case should not occur due to xpath query above)
+            if (!empty($layer->Name)) {
+                $webmapLayers = [(string) $layer->Name];
+                return [$webmapTitle, $webmapLayers];
+            }
         }
         throw new Exception();
     }
@@ -146,8 +147,8 @@ class WebMapSource
     public function getLayerTitle($layerString)
     {
         // xpath query to find the corresponding layer-title in the getCapabilities xml
-        $titleArray = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString .'"])[1]/Title');
-        if(count($titleArray) !== 0) {
+        $titleArray = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString . '"])[1]/Title');
+        if (count($titleArray) !== 0) {
             $webmapTitle = (string) $titleArray[0];
         } else { // default case
             $webmapTitle = $layerString;
@@ -170,13 +171,13 @@ class WebMapSource
         parse_str(urldecode($queryString), $output);
 
         // if queryString is empty or does not contain the layers parameter
-        if(empty($queryString) || empty($output['layers'])) {
+        if (empty($queryString) || empty($output['layers'])) {
             return null;
         } else {
             // Extract layers from url query-string
             $layerString = $output['layers'];
             // if multiple layers are defined in url layers-parameter:
-            if(str_contains($layerString, ',')) {
+            if (str_contains($layerString, ',')) {
                 $webmapLayers = explode(',', $layerString);
             } else {
                 // if $layerString contains only one layer

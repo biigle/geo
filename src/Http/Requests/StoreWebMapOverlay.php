@@ -26,7 +26,8 @@ class StoreWebMapOverlay extends FormRequest
      */
     protected $stopOnFirstFailure = true;
 
-    public function __construct(WebMapSource $webmapSource){
+    public function __construct(WebMapSource $webmapSource)
+    {
         $this->webmapSource = $webmapSource;
     }
 
