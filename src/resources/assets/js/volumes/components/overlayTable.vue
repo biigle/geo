@@ -14,7 +14,7 @@
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle" item-key="id">
                 <template #item="{ element: overlay, index }">
-                    <overlay-item :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="index" :overlay="overlay" :volume-id="volumeId" v-on:remove="$emit('remove', overlay);">
+                    <overlay-item :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="index" :overlay="overlay" :volume-id="volumeId" v-on:remove="remove(overlay)">
                     </overlay-item >
                 </template>
             </draggable>
@@ -54,6 +54,13 @@ export default {
             type: String,
             required: false,
             default: null
+        }
+    },
+    emits: ['remove'],
+    methods: {
+        remove(overlay) {
+            this.$emit('remove', overlay);
+            this.sortedOverlays = this.sortedOverlays.filter((o) => o != overlay);
         }
     },
     watch: {
