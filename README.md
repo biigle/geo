@@ -12,6 +12,19 @@ This module is already included in [`biigle/biigle`](https://github.com/biigle/b
 2. Add `Biigle\Modules\Geo\GeoServiceProvider::class` to the `providers` array in `config/app.php`.
 3. Run `php artisan vendor:publish --tag=public` to publish the public assets of this module.
 
+## Set up
+
+Add geo-overlay disk to `config/filesystems.php`.
+
+```php
+'geo-overlays' => [
+    'driver' => 'local',
+    'root' => storage_path('app/public/geo-overlays'),
+    'url' => env('APP_URL').'/storage/geo-overlays',
+    'visibility' => 'public',
+ ],
+```
+
 ## Developing
 
 Take a look at the [development guide](https://github.com/biigle/core/blob/master/DEVELOPING.md) of the core repository to get started with the development setup.
