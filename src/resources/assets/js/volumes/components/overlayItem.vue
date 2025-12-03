@@ -18,14 +18,6 @@
             </span>
         </td>
         <td>
-            <!-- context layer -->
-            <span class="power-toggle">
-                <button class="btn btn-default btn-sm" :class="{'active btn-info': contextLayer}" v-on:click="toggleButton('contextLayer')" title="Add overlay to geo-selection filter">
-                    <i class="fa fa-fw fa-power-off"></i>
-                </button>
-            </span>
-        </td>
-        <td>
             <button type="button" class="close" :title="title" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>
         </td>
     </tr>
@@ -39,8 +31,7 @@ import {handleErrorResponse} from '../../geo/import.js';
 export default {
     data() {
         return {
-            browsingLayer: false,
-            contextLayer: false,
+            browsingLayer: true,
         }
     },
     props: {
@@ -93,7 +84,6 @@ export default {
     mounted() {
         // initially set the two values 
         this.browsingLayer = this.overlay.browsing_layer;
-        this.contextLayer = this.overlay.context_layer;
     }
 };
 </script>

@@ -28,7 +28,6 @@
             <th>#</th>
             <th>Filename</th>
             <th>Browsing</th>
-            <th>Context</th>
             <th>Delete</th>
         </template>
         </overlay-table>
