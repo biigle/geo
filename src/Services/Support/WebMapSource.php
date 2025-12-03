@@ -3,7 +3,6 @@
 namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
-use Illuminate\Validation\ValidationException;
 
 class WebMapSource 
 {
@@ -85,29 +84,21 @@ class WebMapSource
 
     /**
      * Checks whether the base-url is an actual WMS resource and sets global XML variable
-     * 
-     * @return Boolean 
+     *
+     * @return \SimpleXMLElement xml from source
      */
     protected function getCapabilities()
     {
-        $validationException = ValidationException::withMessages(
-            [
-                'invalidWMS' => ["The url does not lead to a WMS resource."],
-            ]
-        );
-
-        try {
             $wmsRequest = $this->request($this->baseUrl . '?service=wms&version=1.1.1&request=GetCapabilities');
             libxml_use_internal_errors(true); // suppress all XML errors
             $xml = simplexml_load_string($wmsRequest);
+
+            // xml can be a non-boolean value which is interpreted as boolean false
             if ($xml === false) {
-                throw $validationException;
-            } else {
-                return $xml;
+                throw new Exception();
             }
-        } catch (Exception $e) {
-            throw $validationException;
-        }
+
+            return $xml;
     }
 
     /**
@@ -122,8 +113,10 @@ class WebMapSource
 
     /**
      * Search the getCapabilities xml and find the first valid layer of the wms-resource
-     * 
-     * @return Array
+     *
+     * @return array containing the title and name of the layer.
+     *
+     * @throws Exception if xml contains no valid layer.
      */
     public function firstValidLayer()
     {
@@ -141,11 +134,7 @@ class WebMapSource
                     return [$webmapTitle, $webmapLayers];
                 }
         }
-        throw ValidationException::withMessages(
-            [
-                'noValidLayer' => ["Could not find any valid layers within the WMS resource."],
-            ]
-        );
+        throw new Exception();
     }
 
     /**

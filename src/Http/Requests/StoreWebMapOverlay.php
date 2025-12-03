@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Geo\Http\Requests;
 
 use Biigle\Volume;
+use Exception;
 use Illuminate\Support\Str;
 use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
@@ -55,9 +56,14 @@ class StoreWebMapOverlay extends FormRequest
     {
         $validator->after(function ($validator) {
             if (!$this->has('url')) {
-                throw ValidationException::withMessages(['invalid' => 'Invalid request. Web map URL is missing']);
+                throw ValidationException::withMessages(['invalidRequest' => 'The Web map URL is missing']);
             }
-            $this->webmapSource->useUrl($this->input('url'));
+
+            try {
+                $this->webmapSource->useUrl($this->input('url'));
+            } catch (Exception $e) {
+                throw ValidationException::withMessages(['invalidWMS' => "The url does not lead to a WMS resource."]);
+            }
 
             $overlay = GeoOverlay::where('volume_id', $this->volume->id)
                 ->where('type', 'webmap')
