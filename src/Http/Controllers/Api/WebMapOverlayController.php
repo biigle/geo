@@ -39,6 +39,6 @@ class WebMapOverlayController extends Controller
         }
 
         $overlay = GeoOverlay::build($volumeId, $webmapTitle, 'webmap', [$webmapSource->baseUrl, $webmapLayers]);
-        return $overlay;
+        return $overlay->fresh();
     }
 }
