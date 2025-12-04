@@ -32,7 +32,8 @@ export default {
     methods: {
         addOverlay(overlay) {
             overlay.isNew = true;
-            this.geoOverlays.unshift(overlay);
+            // use toSpliced to trigger change
+            this.geoOverlays = this.geoOverlays.toSpliced(0, 0, overlay);
             this.finishLoading();
         },
         handleRemove(overlay) {
