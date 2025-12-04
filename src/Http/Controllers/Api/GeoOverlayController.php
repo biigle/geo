@@ -4,7 +4,6 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Storage;
 use Biigle\Volume;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
@@ -12,48 +11,6 @@ use Biigle\Modules\Geo\Http\Requests\UpdateOverlay;
 
 class GeoOverlayController extends Controller
 {
-
-    /**
-     * Shows the geo overlays of the specified volume.
-     *
-     * @api {get} volumes/:id/geo-overlays Get geo overlays
-     * @apiGroup Geo
-     * @apiName VolumesIndexGeoOverlays
-     * @apiPermission projectMember
-     *
-     * @apiParam {Number} id The volume ID.
-     * @apiSuccessExample {json} Success response:
-     * [
-     *     {
-     *         "id": 1,
-     *         "name": "My geo overlay",
-     *         "top_left_lat": 6.7890,
-     *         "top_left_lng": 1.2345,
-     *         "bottom_right_lat": 7.7890,
-     *         "bottom_right_lng": 2.2345,
-     *         "browsing_layer": true,
-     *     }
-     * ]
-     *
-     * @param int $id volume id
-     */
-    public function index(Request $request, $id)
-    {
-        // set layer_type if it appears in the query-url, otherwise null
-        $volume = Volume::findOrFail($id);
-        $this->authorize('access', $volume);
-
-        if ($volume->isVideoVolume()) {
-            abort(Response::HTTP_NOT_FOUND);
-        }
-
-        return GeoOverlay::where('volume_id', $id)
-            ->when(
-                $request->has('browsing_layer'),
-                fn($q) => $q->where('browsing_layer', true)
-            )
-            ->get();
-    }
 
     /**
      * Update the context_layer and/or browsing_layer values
