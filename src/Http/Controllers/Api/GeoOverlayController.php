@@ -4,7 +4,6 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
 use Storage;
 use Biigle\Volume;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -33,17 +32,14 @@ class GeoOverlayController extends Controller
      *         "bottom_right_lat": 7.7890,
      *         "bottom_right_lng": 2.2345,
      *         "browsing_layer": true,
-     *         "context_layer": false,
      *     }
      * ]
      *
      * @param int $id volume id
-     * @param String $layer_type If specified, retrieves only a subset of the geo-overlays, e.g. 'browsing_layer', 'context_layer' or null
      */
-    public function index(Request $request, $id, $layer_type = null)
+    public function index(Request $request, $id)
     {
-        // set layer_type if it appears in the query-url, otherwise null 
-        $layer_type = $layer_type ?: $request->layer_type;
+        // set layer_type if it appears in the query-url, otherwise null
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);
 
@@ -51,14 +47,12 @@ class GeoOverlayController extends Controller
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        // retrieve subset of the geo-overlays if layer_type is specified
-        if ($layer_type == 'browsing_layer') {
-            return GeoOverlay::where('volume_id', $id)->where('browsing_layer', true)->get();
-        } else if ($layer_type == 'context_layer') {
-            return GeoOverlay::where('volume_id', $id)->where('context_layer', true)->get();
-        } else { // return all geoOverlays
-            return GeoOverlay::where('volume_id', $id)->get();
-        }
+        return GeoOverlay::where('volume_id', $id)
+            ->when(
+                $request->has('browsing_layer'),
+                fn($q) => $q->where('browsing_layer', true)
+            )
+            ->get();
     }
 
     /**
@@ -78,6 +72,8 @@ class GeoOverlayController extends Controller
      * 
      * @param UpdateOverlay $request
      * @param $geo_overlay_id
+     *
+     * @return GeoOverlay updated overlay
      */
     public function updateGeoOverlay(UpdateOverlay $request)
     {
@@ -87,20 +83,15 @@ class GeoOverlayController extends Controller
             $overlay->update([
                 'layer_index' => $request->input('layer_index')
             ]);
-            return;
         }
 
-        if ($request->has('layer_type')) {
-            $type = Str::snake($request->input('layer_type'));
+        if ($request->has('browsing_layer') && $overlay->browsing_layer != $request->browsing_layer) {
             $overlay->update([
-                    $type => $request->input('use_layer')
-                ]);
-
-            return response()->json([
-                'browsing_layer' => $overlay->browsing_layer,
-                'context_layer' => $overlay->context_layer
+                'browsing_layer' => $request->input('browsing_layer')
             ]);
         }
+
+        return $overlay;
     }
 
     /**

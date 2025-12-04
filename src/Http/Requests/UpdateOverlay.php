@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Geo\Http\Requests;
 
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Volume;
+use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateOverlay extends FormRequest
@@ -35,8 +35,7 @@ class UpdateOverlay extends FormRequest
     public function rules(): array
     {
         return [
-            'layer_type' => 'required_with:use_layer|string|max:13',
-            'use_layer' => 'required_with:layer_type|boolean',
+            'browsing_layer' => 'filled|boolean',
             'layer_index' => 'filled|integer|gte:0',
         ];
     }
@@ -54,14 +53,6 @@ class UpdateOverlay extends FormRequest
                 if ($idx > $overlayCount) {
                     $validator->errors()->add('invalidLayerIndex', 'The layer index is invalid.');
                 }
-            }
-
-            if (
-                $this->has('layer_type') &&
-                !in_array($this->input('layer_type'), ['contextLayer', 'browsingLayer'])
-            ) {
-                $type = $this->input('layer_type');
-                $validator->errors()->add('invalidLayerType', "The layer type '$type' does not exist.");
             }
         });
     }

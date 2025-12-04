@@ -10,9 +10,8 @@
             <span class="ellipsis" :title="overlay.name" v-text="truncateString(overlay.name)"></span>
         </td>
         <td>
-            <!-- browsing-layer -->
             <span class="power-toggle">
-                <button class="btn btn-default btn-sm" :class="{'active btn-info': browsingLayer}" v-on:click="toggleButton('browsingLayer')" title="Add overlay to geo-selection filter">
+                <button class="btn btn-default btn-sm" :class="{'active btn-info': browsingLayer}" v-on:click="updateShowLayer" title="Add overlay to geo-selection filter">
                     <i class="fa fa-fw fa-power-off"></i>
                 </button>
             </span>
@@ -51,20 +50,12 @@ export default {
             }
         },
         // handle update of contextLayer & browsingLayer values in overlay
-        toggleButton(dataKey) {
-            this.update(dataKey)
-                .then((response) => {
-                    if(response.status == 200) {
-                        this[dataKey] = !this[dataKey];
-                    }
-                })
-                .catch(handleErrorResponse);
-        },
-        update(dataKey) {
-            return Api.updateGeoOverlay({id: this.volumeId, geo_overlay_id: this.overlay.id}, {
-                layer_type: dataKey,
-                use_layer: !this[dataKey],
-                });
+        updateShowLayer() {
+            Api.updateGeoOverlay({ id: this.volumeId, geo_overlay_id: this.overlay.id }, { browsing_layer: !this.browsingLayer })
+                .then((res) => {
+                    let overlay = res.data;
+                    this.browsingLayer = overlay.browsing_layer;
+                }).catch(handleErrorResponse);
         },
         // checks if string is too long and returns truncated version
         truncateString(str) {
