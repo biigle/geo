@@ -13,7 +13,7 @@ class GeoOverlayController extends Controller
 {
 
     /**
-     * Update the context_layer and/or browsing_layer values
+     * Update the browsing_layer values
      * 
      * @api {put} volumes/:id/geo-overlays/:geo_overlay_id Update a geo overlay
      * @apiGroup Geo
@@ -21,11 +21,9 @@ class GeoOverlayController extends Controller
      * @apiPermission projectAdmin
      * 
      * @apiParam (Attributes that can be updated) {Boolean} browsing_layer Defines whether to show the geoOverlay as a browsing-visualisation layer.
-     * @apiParam (Attributes that can be updated) {Boolean} context_layer Defines whether to show the geoOverlay as a context-fusion layer.
      * 
      * @apiParamExample {String} Request example:
      * browsing_layer: true
-     * context_layer: false
      * 
      * @param UpdateOverlay $request
      * @param $geo_overlay_id
