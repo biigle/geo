@@ -5,50 +5,9 @@ namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 use Storage;
 use ApiTestCase;
 use Biigle\Modules\Geo\GeoOverlay;
-use Biigle\Tests\Modules\Geo\GeoOverlayTest;
 
 class GeoOverlayControllerTest extends ApiTestCase
 {
-
-    public function testIndex()
-    {
-        Storage::fake('geo-overlays');
-        $overlay = GeoOverlay::factory()->create();
-        $overlay->volume_id = $this->volume()->id;
-        // modify overlay context_layer value
-        $overlay->context_layer = true;
-        $overlay->save();
-
-        $overlay2 = GeoOverlay::factory(true)->create();
-        $overlay2->volume_id = $this->volume()->id;
-        // modify overlay2 browsing_layer value
-        $overlay2->browsing_layer = true;
-        $overlay2->save();
-
-        $id = $overlay->volume_id;
-
-        $this->beUser();
-        $response = $this->get("/api/v1/volumes/{$id}/geo-overlays");
-        $response->assertStatus(403);
-
-        $this->beGuest();
-        // check if base-case (without layer_type variable) works
-        $response = $this->json('GET', "/api/v1/volumes/{$id}/geo-overlays")
-            ->assertJsonFragment([$overlay->toArray()], [$overlay2->toArray()]);
-        $response->assertStatus(200);
-
-        // check if layer_type=browsing_layer works as expected (return only second overlay)
-        $this->get("/api/v1/volumes/{$id}/geo-overlays/?layer_type=browsing_layer")
-            ->assertJsonFragment([$overlay2->toArray()])
-            ->assertJsonMissing([$overlay->toArray()])
-            ->assertStatus(200);
-        
-        // check if layer_type=context_layer works as expected (return only first overlay)
-        $this->get("/api/v1/volumes/{$id}/geo-overlays/?layer_type=context_layer")
-        ->assertJsonFragment([$overlay->toArray()])
-        ->assertJsonMissing([$overlay2->toArray()])
-        ->assertStatus(200);
-    }
 
     public function testUpdateGeoOverlay()
     {
@@ -64,7 +23,7 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->beEditor();
         // 403: The client does not have access rights to the content
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_type' => 'browsingLayer',
+            'browsing_layer' => true,
             'use_layer' => true
         ])
         ->assertStatus(403);
@@ -75,51 +34,34 @@ class GeoOverlayControllerTest extends ApiTestCase
         $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}")
         ->assertStatus(422);
 
-        // Reject request if only layer_type or use_layer is given
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_type' => 'browsingLayer',
+            'browsing_layer' => 'test',
         ])->assertStatus(422);
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'use_layer' => false,
-        ])->assertStatus(422);
-
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_type' => 'testLayer',
-            'use_layer' => true
-        ])->assertStatus(422);
-
+        $this->assertFalse($overlay->browsing_layer);
         // now test if updating with data will succeed with the correct values being returned
         $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_type' => 'browsingLayer',
-            'use_layer' => true
-        ]);
+            'browsing_layer' => true,
+        ])->assertStatus(200);
 
-        $response
-            ->assertStatus(200)            
-            ->assertJson([
-                'browsing_layer' => true,
-                'context_layer' => false
-            ]);
+        $this->assertTrue(json_decode($response->getContent())->browsing_layer);
 
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_index' => -1
         ])->assertStatus(422);
 
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_index' => 1.1
         ])->assertStatus(422);
 
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_index' => GeoOverlay::count()
         ])->assertStatus(422);
 
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'layer_index' => 0
         ])->assertStatus(200);
     }
-
-    // public function testUpdateGeoOverlayInvalidLayerIndex
 
     public function testDestroy()
     {
