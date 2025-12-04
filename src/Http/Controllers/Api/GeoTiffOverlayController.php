@@ -10,7 +10,6 @@ use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Illuminate\Validation\ValidationException;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
-use function Sabre\Event\Loop\instance;
 
 class GeoTiffOverlayController extends Controller
 {
@@ -39,7 +38,6 @@ class GeoTiffOverlayController extends Controller
      *   "bottom_right_lat" => "57.0984589659731"
      *   "id" => 3
      *   "browsing_layer" => false
-     *   "context_layer" => false
      *   "attrs" => {"width": 648, "height": 480}
      * }
      *
