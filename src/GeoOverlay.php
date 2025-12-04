@@ -29,7 +29,6 @@ class GeoOverlay extends Model
 
     protected $fillable = [
         'browsing_layer',
-        'context_layer',
         'layer_index',
         'type',
         'attrs->url',
@@ -147,7 +146,6 @@ class GeoOverlay extends Model
         $overlay->type = $type;
         $overlay->name = $name;
         $overlay->browsing_layer = false;
-        $overlay->context_layer = false;
         $overlay->layer_index = null;
         if ($type === 'geotiff') {
             $precision = 13;

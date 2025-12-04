@@ -22,7 +22,6 @@ class GeoOverlayFactory extends Factory
             'volume_id' => Volume::factory(),
             'type' => 'geotiff',
             'browsing_layer' => false,
-            'context_layer' => false,
             'layer_index' => null,
             'attrs' => [
                 'top_left_lng' => $this->faker->randomFloat(),
