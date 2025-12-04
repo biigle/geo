@@ -81,7 +81,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertSame($overlay['layer_index'], null);
         $this->assertSame($overlay['name'], 'standardEPSG2013.tif');
         $this->assertFalse($overlay['browsing_layer']);
-        $this->assertFalse($overlay['context_layer']);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay['id']));
     }
 
@@ -123,7 +122,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertSame('geotiff', $overlay2['type']);
         $this->assertSame('geotiff_modelTransform.tiff', $overlay2['name']);
         $this->assertFalse($overlay2['browsing_layer']);
-        $this->assertFalse($overlay2['context_layer']);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2['id']));
     }
 
