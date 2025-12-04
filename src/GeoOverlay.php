@@ -145,7 +145,6 @@ class GeoOverlay extends Model
         $overlay->volume_id = $id;
         $overlay->type = $type;
         $overlay->name = $name;
-        $overlay->browsing_layer = false;
         $overlay->layer_index = null;
         if ($type === 'geotiff') {
             $precision = 13;
