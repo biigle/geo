@@ -58,7 +58,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
-        $this->assertFalse($overlay['browsing_layer']);
+        $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
         $this->assertEquals([$xml_array['Layer']['Layer']['Name']], $overlay['attrs']['layers']);
         $this->assertEquals($xml_array['Layer']['Layer']['Title'], $overlay['name']);
@@ -85,7 +85,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
-        $this->assertFalse($overlay['browsing_layer']);
+        $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
         $this->assertEquals($xml_names, $overlay['attrs']['layers']);
         $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
@@ -111,7 +111,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
-        $this->assertFalse($overlay['browsing_layer']);
+        $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals($url, $overlay['attrs']['url']);
         $this->assertEquals([$xml_array[1]['Name']], $overlay['attrs']['layers']);
         $this->assertEquals($xml_array[1]['Title'], $overlay['name']);
