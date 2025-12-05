@@ -29,19 +29,22 @@ export default {
         this.$emit('success', response.data);
     },
     handleError(response) {
-        let knownError = response.body.errors && (
-          response.body.errors.url ||
-          response.body.errors.invalidWMS ||
-          response.body.errors.noValidLayer ||
-          response.body.errors.uniqueUrl
-        );
-        if (knownError) {
-          if (Array.isArray(knownError)) {
-              this.error = knownError[0];
-          } else {
-              this.error = knownError;
-          }
+      let knownError = response.body.errors && (
+        response.body.errors.url ||
+        response.body.errors.invalidWMS ||
+        response.body.errors.noValidLayer ||
+        response.body.errors.uniqueUrl
+      );
+
+      if (knownError) {
+        this.error = Array.isArray(knownError) ? knownError[0] : knownError;
+      } else {
+        if (response.status === 422) {
+          this.error = "The url or WMS resource is invalid."
+        } else {
+          this.error = "An unknown error occured. Please retry later."
         }
+      }
     },
     submitWebMap(event) {
         this.$emit('upload', true);

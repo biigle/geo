@@ -41,11 +41,14 @@ export default {
                 response.body.errors.transformError ||
                 response.body.errors.failedUpload
             );
+
             if (knownError) {
-                if (Array.isArray(knownError)) {
-                    this.error = knownError[0];
+                this.error = Array.isArray(knownError) ? knownError[0] : knownError;
+            } else {
+                if (response.status === 422) {
+                    this.error = "The file is invalid. It must be a valid geotiff and use a 'projected' coordinate system."
                 } else {
-                    this.error = knownError;
+                    this.error = "An unknown error occured. Please retry later."
                 }
             }
         },
