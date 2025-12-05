@@ -222,18 +222,5 @@ export default {
         display: block;
     }
 
-    /* change cell-map to occupy only one col */
-    /* .layers.active + .cell-map {
-        grid-column: 1;
-        grid-row-start: 1;
-        grid-row-end: 2;
-    }
-
-    .layers.active + .cell-edit {
-        display: block;
-        grid-column: 2;
-        grid-row: 1;
-    } */
-
 </style>
 
