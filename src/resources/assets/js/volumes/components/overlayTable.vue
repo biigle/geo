@@ -95,7 +95,7 @@ export default {
         }
     },
     mounted() {
-        this.sortedOverlays = JSON.parse(JSON.stringify(this.overlays));
+        this.sortedOverlays = this.overlays.slice(0, this.overlays.length);
         this.sortedOverlays.sort((a, b) => a.layer_index - b.layer_index);
 
         this.$nextTick(() => { //with this skip the first change of sortedOverlays
