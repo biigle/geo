@@ -21,7 +21,7 @@
             </tab>
         </tabs>
     </div>
-    <div v-if="hasOverlays('geoOverlays')">
+    <div v-if="hasOverlays">
         <overlay-table :overlays="geoOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
         <template v-slot:header>
             <th></th>

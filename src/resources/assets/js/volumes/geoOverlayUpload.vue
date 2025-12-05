@@ -28,6 +28,9 @@ export default {
                 'panel-warning panel--editing': this.editing,
             };
         },
+        hasOverlays() {
+            return this.geoOverlays.length > 0;
+        },
     },
     methods: {
         addOverlay(overlay) {
@@ -50,10 +53,6 @@ export default {
                     return;
                 }
             }
-        },
-        // dataKey either 'geotiffOverlays' or 'webmapOverlays'
-        hasOverlays(dataKey) {
-            return this[dataKey].length > 0;
         },
         handleUpload(uploadInProgress) {
             if(uploadInProgress) {
