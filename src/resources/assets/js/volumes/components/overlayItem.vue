@@ -7,7 +7,7 @@
             <span class="text-muted">#<span>{{ index + 1 }}</span></span>
         </td>
         <td class="start">
-            <span class="ellipsis" :title="overlay.name" v-text="truncateString(overlay.name)"></span>
+            <span class="truncate" :title="overlay.name" v-text="overlay.name"></span>
         </td>
         <td>
             <span class="power-toggle">
@@ -57,20 +57,6 @@ export default {
                     this.browsingLayer = overlay.browsing_layer;
                 }).catch(handleErrorResponse);
         },
-        // checks if string is too long and returns truncated version
-        truncateString(str) {
-            const n = 22;
-            const ext = str.substring(str.lastIndexOf("."));
-
-            if(str.length > n) {
-                // check if the file extension exists (ext != the full string)
-                if(ext.length < str.length) {
-                    return str.slice(0, n-1) + '...' + ext;
-                }
-                return str.slice(0, n-1) + '...';
-            }
-            return str;
-        }
     },
     mounted() {
         // initially set the two values 
@@ -92,8 +78,7 @@ td:nth-child(2) {
     width: 35px;
 }
 td:nth-child(3) {
-    white-space: nowrap;
-    min-width: 200px;
+    width: 200px;
 }
 td:nth-child(4) {
     min-width: 90px;
@@ -108,6 +93,14 @@ td:nth-child(6) {
 /* align all row entries in center except the ones marked with "start" */
 td:not(.start) {
     text-align: center;
+}
+
+.truncate {
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 200px;
 }
 
 /* center the delete button */
