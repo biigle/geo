@@ -65,7 +65,6 @@ class GeoOverlayController extends Controller
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        $pid = $volume->projects()->pluck('id')->first();
         $overlays = GeoOverlay::where('volume_id', $volume->id)
             ->where('browsing_layer', '=', true)
             ->orderBy('layer_index')
@@ -74,7 +73,6 @@ class GeoOverlayController extends Controller
         $urlTemplate = Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/');
 
         return response([
-            'projectId' => $pid,
             'geoOverlays' => $overlays,
             'urlTemplate' => $urlTemplate
         ]);

@@ -82,7 +82,6 @@ export default {
             disabled: true,
             imageIds: [],
             activeIds: [],
-            projectId: null,
             geoOverlays: [],
             overlayUrlTemplate: '',
         }
@@ -131,7 +130,6 @@ export default {
         VolumeApi.getOverlay({ 'id': this.volumeId })
             .then(response => {
                 this.overlayUrlTemplate = response.body.urlTemplate;
-                this.projectId = response.body.projectId;
                 this.geoOverlays = response.body.geoOverlays;
             }, this.handleErrorResponse)
             .finally(this.finishLoading);
