@@ -25,10 +25,10 @@
         <overlay-table :overlays="geoOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
         <template v-slot:header>
             <th></th>
-            <th>#</th>
+            <th class="text-center">#</th>
             <th>Filename</th>
-            <th>Browsing</th>
-            <th>Delete</th>
+            <th class="text-center">Show</th>
+            <th class="text-center">Delete</th>
         </template>
         </overlay-table>
     </div>
