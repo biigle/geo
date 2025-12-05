@@ -222,5 +222,21 @@ export default {
         display: block;
     }
 
+    .custom {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .custom > .ellipsis {
+        order: 1;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+}
+
 </style>
 
