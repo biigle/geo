@@ -57,7 +57,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $emptyFile])
             ->assertStatus(422);
 
-        $this->assertTrue(GeoOverlay::exists());
+        $this->assertFalse(GeoOverlay::exists());
 
         $mock->shouldReceive('getExifData')->once()->andReturn($exif);
 
