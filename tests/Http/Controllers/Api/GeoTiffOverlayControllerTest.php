@@ -12,11 +12,14 @@ use Biigle\Modules\Geo\GeoOverlay;
 
 class GeoTiffOverlayControllerTest extends ApiTestCase
 {
+    public $mock = null;
 
     public function setUp(): void
     {
         parent::setUp();
         Storage::fake('geo-overlays');
+        $this->mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(GeoManager::class, fn() => $this->mock);
     }
 
     public function testStoreGeotiff()
@@ -31,8 +34,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "GeoTiff:GTModelType" => 1,
             "GeoTiff:ProjectedCSType" => 27700,
         ];
-        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->app->bind(GeoManager::class, fn() => $mock);
         $file = UploadedFile::fake()->create('standardEPSG2013.tif', 1, 'image/tiff');
 
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/geo-overlays/geotiff");
@@ -59,7 +60,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
 
         $this->assertFalse(GeoOverlay::exists());
 
-        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
 
         $response = $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
@@ -98,9 +99,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "GeoTiff:ProjectedCSType" => 32632,
         ];
 
-        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->app->bind(GeoManager::class, fn() => $mock);
-        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
         $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $response = $this->postJson(
@@ -136,9 +135,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "GeoTiff:ProjectedCSType" => 32632,
         ];
 
-        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->app->bind(GeoManager::class, fn() => $mock);
-        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
         $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $this->postJson(
@@ -159,9 +156,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "GeoTiff:ProjectedCSType" => 32767,
         ];
 
-        $mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $this->app->bind(GeoManager::class, fn() => $mock);
-        $mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
         $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
 

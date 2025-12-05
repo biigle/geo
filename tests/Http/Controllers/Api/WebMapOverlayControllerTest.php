@@ -9,6 +9,14 @@ use Biigle\Modules\Geo\Services\Support\WebMapSource;
 
 class WebMapOverlayControllerTest extends ApiTestCase
 {
+    public $mock = null;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->mock = Mockery::mock(WebMapSource::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $this->app->bind(WebMapSource::class, fn() => $this->mock);
+    }
     public function testStoreWebMap()
     {
         $id = $this->volume()->id;
@@ -31,9 +39,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
             ->assertStatus(422);
 
         $xml = 'test 123';
-        $webmap = Mockery::mock(WebMapSource::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $webmap->shouldReceive('request')->once()->andReturn($xml);
-        $this->app->bind(WebMapSource::class, fn() => $webmap);
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
 
         // test upload of invalid WMS-URL (should cause invalidWMS error)
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
@@ -44,9 +50,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $xml = $this->getXMLResponse(1);
         $xml_array = $this->XmlToJson($xml);
 
-        $webmap = Mockery::mock(WebMapSource::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $webmap->shouldReceive('request')->once()->andReturn($xml);
-        $this->app->bind(WebMapSource::class, fn() => $webmap);
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
 
         // test upload of valid WMS-URL (with query-parameters, but NO LAYERS declared)
         // should enter fallback method and return first valid layer anyways 
@@ -72,9 +76,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $xml = $this->getXMLResponse(3);
         $xml_array = $this->XmlToJson($xml);
         $xml_names = array_map(fn($l) => $l['Name'], $xml_array['Layer']['Layer']);
-        $webmap = Mockery::mock(WebMapSource::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $webmap->shouldReceive('request')->once()->andReturn($xml);
-        $this->app->bind(WebMapSource::class, fn() => $webmap);
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
 
         // test upload of valid WMS-URL (with query-parameters and SEVERAL LAYERS declared)
         $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0,Name_1,Name_2';
@@ -98,9 +100,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
 
         $xml = $this->getXMLResponse(3, true);
         $xml_array = $this->XmlToJson($xml)['Layer']['Layer'];
-        $webmap = Mockery::mock(WebMapSource::class)->makePartial()->shouldAllowMockingProtectedMethods();
-        $webmap->shouldReceive('request')->once()->andReturn($xml);
-        $this->app->bind(WebMapSource::class, fn() => $webmap);
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
 
         // test upload of valid WMS-URL (baseUrl without query-parameters)
         $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
