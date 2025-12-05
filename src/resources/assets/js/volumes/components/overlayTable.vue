@@ -86,7 +86,7 @@ export default {
             if(this.dataLoaded) {
                 // save the new overlay-order in geo_overlays table
                 for(let [idx, overlay] of sortedArray.entries()) {
-                    GeoApi.updateGeoOverlay({id: this.volumeId, geo_overlay_id: overlay.id}, {
+                    GeoApi.updateGeoOverlay({id: this.volumeId, id2: overlay.id}, {
                         layer_index: idx,
                     })
                     .catch(handleErrorResponse);

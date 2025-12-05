@@ -26,13 +26,12 @@ class GeoOverlayController extends Controller
      * browsing_layer: true
      * 
      * @param UpdateOverlay $request
-     * @param $geo_overlay_id
      *
      * @return GeoOverlay updated overlay
      */
     public function updateGeoOverlay(UpdateOverlay $request)
     {
-        $overlay = GeoOverlay::findOrFail($request->geo_overlay_id);
+        $overlay = GeoOverlay::findOrFail($request->id2);
 
         if ($request->has('layer_index')) {
             $overlay->update([

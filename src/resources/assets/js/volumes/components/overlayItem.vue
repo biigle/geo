@@ -51,7 +51,7 @@ export default {
         },
         // handle update of contextLayer & browsingLayer values in overlay
         updateShowLayer() {
-            Api.updateGeoOverlay({ id: this.volumeId, geo_overlay_id: this.overlay.id }, { browsing_layer: !this.browsingLayer })
+            Api.updateGeoOverlay({ id: this.volumeId, id2: this.overlay.id }, { browsing_layer: !this.browsingLayer })
                 .then((res) => {
                     let overlay = res.data;
                     this.browsingLayer = overlay.browsing_layer;

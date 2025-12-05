@@ -48,7 +48,7 @@ $router->group([
         'parameters' => ['geo-overlays' => 'id'],
     ]);
     
-    $router->put('volumes/{id}/geo-overlays/{geo_overlay_id}', [
+    $router->put('volumes/{id}/geo-overlays/{id2}', [
         'uses' => 'GeoOverlayController@updateGeoOverlay',
     ]);
 
