@@ -51,8 +51,4 @@ $router->group([
     $router->put('volumes/{id}/geo-overlays/{id2}', [
         'uses' => 'GeoOverlayController@updateGeoOverlay',
     ]);
-
-    $router->get('geo-overlays/{id}/file', [
-        'uses' => 'GeoOverlayController@showFile',
-    ]);
 });
