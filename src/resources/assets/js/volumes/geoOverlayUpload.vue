@@ -36,6 +36,7 @@ export default {
         addOverlay(overlay) {
             overlay.isNew = true;
             // use toSpliced to trigger change
+            this.geoOverlays.map((o) => o.isNew = false);
             this.geoOverlays = this.geoOverlays.toSpliced(0, 0, overlay);
             this.finishLoading();
         },
