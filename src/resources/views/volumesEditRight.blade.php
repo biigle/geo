@@ -33,7 +33,7 @@
         </overlay-table>
     </div>
     <div v-else>
-        <ul class="list-group" v-cloak>
+        <ul v-if="!loading" class="list-group" v-cloak>
             <li class="list-group-item text-muted">This volume has no geo overlays. <a v-if="!editing" href="#" v-on:click.prevent="toggleEditing">Add some.</a></li>
         </ul>
     </div>

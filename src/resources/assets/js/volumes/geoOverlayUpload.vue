@@ -65,10 +65,12 @@ export default {
     },
     created() {
         let volumeId = biigle.$require('volumes.volumeId');
+        this.startLoading();
         Api.getOverlays({ id: volumeId })
             .then((res) => {
                 this.geoOverlays = res.body.geoOverlays;
-            }, handleErrorResponse);
+            }, handleErrorResponse)
+            .finally(this.finishLoading);
     },
 };
 </script>
