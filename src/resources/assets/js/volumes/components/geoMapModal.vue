@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds"></image-map>
+            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds" :last-selected-overlay="selectedOverlayId"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
@@ -84,6 +84,7 @@ export default {
             activeIds: [],
             geoOverlays: [],
             overlayUrlTemplate: '',
+            selectedOverlayId: [],
         }
     },
     computed: {
@@ -110,12 +111,13 @@ export default {
             }
         },
         toggleActive(id) {
-            if(this.activeIds.includes(id)) {
+            if (this.activeIds.includes(id)) {
                 let index = this.activeIds.indexOf(id);
                 this.activeIds.splice(index, 1);
             } else {
                 this.activeIds.push(id);
             }
+            this.selectedOverlayId = id;
         },
     },
     created() {

@@ -35,6 +35,9 @@ import {getHeight, getWidth} from '@biigle/ol/extent';
 export default {
     emits: ['select'],
     props: {
+        lastSelectedOverlay: {
+            type: Number,
+        },
         images: {
             type: Array,
             required: true
@@ -77,7 +80,7 @@ export default {
     },
     data() {
         return {
-            extent: [],
+            extents: {}
         };
     },
     computed: {
@@ -138,6 +141,8 @@ export default {
             let extent = sourceLayer.getTileGrid().getExtent();
             let targetExtent = transformExtent(extentEPSG4326, 'EPSG:4326', 'EPSG:3857');
 
+            this.extents[overlay.id] = targetExtent;
+
             // specify the point resolution in meters through custom function 
             // (default transforms the point from pixel to EPSG:4326, units = degrees)
             projection.setGetPointResolution(
@@ -185,6 +190,10 @@ export default {
         }
     },
     watch: {
+        lastSelectedOverlay(id) {
+            let currentExtent = this.extents[id];
+            this.map.getView().fit(currentExtent, this.map.getSize());
+        },
         features(features) {
             this.source.clear();
             this.source.addFeatures(features);
