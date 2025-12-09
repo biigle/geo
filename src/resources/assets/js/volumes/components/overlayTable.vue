@@ -3,13 +3,11 @@
         <table v-if="overlays.length !== 0" class="table table-sm" v-cloak>
             <thead>
                 <tr>
-                    <slot name="header">
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                    </slot>
+                    <th></th>
+                    <th class="text-center">#</th>
+                    <th>Filename</th>
+                    <th class="text-center">Show</th>
+                    <th class="text-center">Delete</th>
                 </tr>
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle" item-key="id">

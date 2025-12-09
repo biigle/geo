@@ -22,15 +22,7 @@
         </tabs>
     </div>
     <div v-if="hasOverlays">
-        <overlay-table :overlays="geoOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}" >
-        <template v-slot:header>
-            <th></th>
-            <th class="text-center">#</th>
-            <th>Filename</th>
-            <th class="text-center">Show</th>
-            <th class="text-center">Delete</th>
-        </template>
-        </overlay-table>
+        <overlay-table :overlays="geoOverlays" v-on:remove="handleRemove" :volume-id="{{ $volume->id }}" :project-id="{{ $volume->projects->pluck('id')->first() }}"></overlay-table>
     </div>
     <div v-else>
         <ul v-if="!loading" class="list-group" v-cloak>
