@@ -125,7 +125,7 @@ export default {
             .then(response => this.images = response.body, this.handleErrorResponse);
 
 
-        VolumeApi.getOverlay({ 'id': this.volumeId })
+        VolumeApi.getOverlays({ 'id': this.volumeId })
             .then(response => {
                 this.overlayUrlTemplate = response.body.urlTemplate;
                 this.geoOverlays = response.body.geoOverlays;

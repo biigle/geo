@@ -55,7 +55,7 @@ class GeoOverlayController extends Controller
      * 
      * @return Response
      */
-    public function getOverlay(int $id)
+    public function getOverlays(int $id)
     {
         $volume = Volume::findOrFail($id);
         $this->authorize('access', $volume);

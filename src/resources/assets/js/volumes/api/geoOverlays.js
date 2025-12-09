@@ -30,8 +30,8 @@ export default Resource('api/v1/geo-overlays{/id}', {}, {
         method: 'POST',
         url: 'api/v1/volumes{/id}/geo-overlays/webmap',
     },
-    getOverlay: {
+    getOverlays: {
         method: 'GET',
-        url: 'api/v1/volumes{/id}/geo-overlay'
+        url: 'api/v1/volumes{/id}/geo-overlays'
     }
 });
