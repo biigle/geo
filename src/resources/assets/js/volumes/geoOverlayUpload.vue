@@ -64,7 +64,11 @@ export default {
         }
     },
     created() {
-        this.geoOverlays = biigle.$require('volumes.geoOverlays');
+        let volumeId = biigle.$require('volumes.volumeId');
+        Api.getOverlay({ id: volumeId })
+            .then((res) => {
+                this.geoOverlays = res.body.geoOverlays;
+            }, handleErrorResponse);
     },
 };
 </script>
