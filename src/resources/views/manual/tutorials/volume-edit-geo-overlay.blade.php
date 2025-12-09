@@ -9,8 +9,8 @@
     </p>
     <p>
         In the Geo Overlays panel, overlays can be created by uploading geoTIFF-files or linking web-map-services (WMS) via URLs.
-        The panel is located in the Volume Edit View (click the <button class="btn btn-default btn-xs" title="Edit"><i class="fa fa-pencil-alt"></i></button> button in the Volume Overview). It is displayed only if at least one image of the volume contains geo information.
-        Show available upload mechanisms in the Geo Overlays panel by using the <button class="btn btn-default btn-xs"><i class="fa fa-plus"></i></button> in the top-right corner of the panel.
+        The panel is located in the Volume Edit View (click the <button class="btn btn-default btn-xs" title="Edit"><i class="fa fa-pencil-alt"></i></button> button in the volume overview). It is displayed only if at least one image in the volume contains geo information.
+        Show available upload options by using the <button class="btn btn-default btn-xs"><i class="fa fa-plus"></i></button> button in the top-right corner of the Geo Overlays panel.
     </p>
     <h3>GeoTIFF</h3>
     <p>
@@ -50,17 +50,17 @@
     <div class="panel panel-info">
         <div class="panel-body">
             <p>
-                It is also possible to sort the overlays according to the order they should appear on the map (top to bottom = highest to lowest layer). In order to do so, drag an overlay from the list with the <button class="btn btn-default btn-xs"><i class="fas fa-grip-lines"></i></button> button to the desired position. 
+                Overlapping overlays can be displayed in a certain order on the map. In the Geo Overlays panel, drag the overlay via the  <button class="btn btn-default btn-xs"><i class="fas fa-grip-lines"></i></button> button to the desired position (highest = top).
             </p>
         </div>
     </div>
 
     <p>
-        Images can be filtered by using geo overlays in the Volume Overview via the <button class="btn btn-default btn-xs"><i class="fa fa-filter"></i></button> filter. Add a new filter by following the steps:
+        Images can be filtered by using geo overlays in the volume overview via the <button class="btn btn-default btn-xs"><i class="fa fa-filter"></i></button> filter. Add a new filter by following the steps:
         <ol>
             <li>Select <button class="btn btn-default btn-xs">geo selection <i class="fa fa-angle-down"></i></button> in dropdown menu</li>
             <li>Click on the <button class="btn btn-default btn-xs">Add rule</button> button</li>
-            <li>Show overlay list by clicking on <button class="btn btn-default btn-xs"><i class="fas fa-layer-group"></i></button> and select overlay(s)</li>
+            <li>Show the overlay list by clicking on <button class="btn btn-default btn-xs"><i class="fas fa-layer-group"></i></button> and select overlay(s)</li>
         </ol>
     </p>
 

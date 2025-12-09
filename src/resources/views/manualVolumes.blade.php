@@ -3,5 +3,5 @@
 </h4>
 
 <p>
-    Geo overlays are geo-referenced layers that can be used on maps.  
+    Geo overlays are geo-referenced layers that can be used on maps to filter images.
 </p>
