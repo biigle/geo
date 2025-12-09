@@ -43,10 +43,6 @@
             </p>
         </div>
     </div>
-        <div slot="footer">
-            <button class="btn btn-default" @click="callback('dismiss')" >Cancel</button>
-            <button class="btn btn-default" @click="callback('ok')" :disabled="disabled">Add rule</button>
-        </div>
     </modal>
 </template>
 
