@@ -74,19 +74,23 @@ class StoreGeotiffOverlay extends FormRequest
 
             $file = $this->file('geotiff');
             $this->geotiff->useFile($file);
-            $pcsCode = is_null($this->geotiff->getKey('GeoTiff:ProjectedCSType')) ?: intval($this->geotiff->getKey('GeoTiff:ProjectedCSType'));
-            $modelType = $this->getCoordSystemType($this->geotiff->exif);
+            $modelType = $this->geotiff->getCoordSystemType();
+            $epsg = $this->geotiff->getEpsgCode();
 
-            if ($modelType != 'projected') {
-                $validator->errors()->add('wrongModelType', "The GeoTIFF coordinate-system of type '{$modelType}' is not supported. Use a 'projected' coordinate-system instead!");
+            if (is_null($modelType)) {
+                throw ValidationException::withMessages(["MissingModelType" => "The geoTIFF file does not have the required GTModelTypeTag."]);
             }
 
-            if (is_null($pcsCode)) {
-                $validator->errors()->add('noPCSKEY', "Did not detect the 'ProjectedCSType' geokey in geoTIFF metadata. Make sure this key exists for geoTIFF's containing a projected coordinate system.");
-            } elseif ($pcsCode === 0) {
-                $validator->errors()->add('unDefined', 'The projected coordinate system (PCS) is undefined. Provide a PCS using EPSG-system instead.');
-            } elseif ($pcsCode === 32767) {
-                $validator->errors()->add('userDefined', 'User-defined projected coordinate systems (PCS) are not supported. Provide a PCS using EPSG-system instead.');
+            if ($modelType != 'projected' && $epsg != 4326) {
+                $validator->errors()->add('wrongModelType', "The coordinate reference system (CRS) of type '{$modelType}' is not supported. Please use a 'projected' CRS or EPSG:4326 instead.");
+            }
+
+            if (is_null($epsg)) {
+                $validator->errors()->add('noPCSKEY', "Did not detect the 'ProjectedCSType' or 'GeographicType' geokey in the geoTIFF metadata.");
+            } elseif ($epsg === 0) {
+                $validator->errors()->add('unDefined', "The coordinate reference system (CRS) is undefined. Please use a 'projected' CRS or EPSG:4326 instead.");
+            } elseif ($epsg === 32767) {
+                $validator->errors()->add('userDefined', "User-defined coordinate reference systems (CRS) are not supported. Please use a 'projected' CRS or EPSG:4326 instead.");
             }
 
             $fileName = $this->input('name', $file->getClientOriginalName());

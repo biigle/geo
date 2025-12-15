@@ -54,14 +54,14 @@ class GeoTiffOverlayController extends Controller
 
         $pixelDimensions = $geotiff->getPixelSize();
         $corners = $geotiff->getCorners();
-        $pcsCode = intval($geotiff->getKey('GeoTiff:ProjectedCSType'));
+        $epsg = $geotiff->getEpsgCode();
 
         try {
             // Convert corners from RASTER-SPACE to MODEL-SPACE
             $coords = $geotiff->convertToModelSpace($corners);
 
-            if ($pcsCode != 4326) {
-                $coords = $geotiff->transformModelSpace($coords, "EPSG:{$pcsCode}");
+            if ($epsg != 4326) {
+                $coords = $geotiff->transformModelSpace($coords, "EPSG:{$epsg}");
             }
 
             $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
@@ -76,7 +76,7 @@ class GeoTiffOverlayController extends Controller
             } else if ($e instanceof TransformCoordsException) {
                 $msg = [
                     'failedTransformation' =>
-                        "Could not transform CRS. Please convert EPSG:$pcsCode to EPSG:4326 (WGS84) before uploading."
+                        "Could not transform CRS. Please convert EPSG:$epsg to EPSG:4326 (WGS84) before uploading."
                 ];
             } else {
                 $overlay->deleteFile();
