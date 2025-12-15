@@ -285,4 +285,53 @@ class GeoManager
         ];
     }
 
+    /**
+     * Return epsg code from geoTIFF
+     *
+     * @return int|null
+     */
+    public function getEpsgCode()
+    {
+        $type = $this->getCoordSystemType();
+
+        if (is_null($type) || !in_array($type, ['projected', 'geographic'])) {
+            return null;
+        }
+
+        return intval(
+            $this->getKey(
+                $type === 'projected' ? 'GeoTiff:ProjectedCSType' : 'GeoTiff:GeographicType'
+            )
+        );
+    }
+
+    /**
+     * Retreive the type of coordinate reference system used in the geoTIFF.
+     *
+     * @return string the coordinate system type
+     */
+    public function getCoordSystemType()
+    {
+        $modelTypeKey = $this->getKey('GeoTiff:GTModelType');
+
+        switch ($modelTypeKey) {
+            case 1:
+                $modelType = 'projected';
+                break;
+            case 2:
+                $modelType = 'geographic';
+                break;
+            case 3:
+                $modelType = 'geocentric';
+                break;
+            case 32767:
+                $modelType = 'user-defined';
+                break;
+            default:
+                $modelType = null;
+        }
+
+        return $modelType;
+    }
+
 }
