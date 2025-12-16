@@ -152,7 +152,7 @@ class TileSingleOverlay extends TileSingleObject
         }
 
         $min = $this->vipsImage->min();
-        return $min != 0 && $this->noDataValue / $min >= 0.999 || $min === $this->noDataValue;
+        return $min != 0 && $this->noDataValue / $min >= 0.999 || intval($min) === intval($this->noDataValue);
     }
 
     /**
