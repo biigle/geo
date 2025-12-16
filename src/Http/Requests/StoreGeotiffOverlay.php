@@ -74,6 +74,12 @@ class StoreGeotiffOverlay extends FormRequest
 
             $file = $this->file('geotiff');
             $this->geotiff->useFile($file);
+
+            $colorCount = $this->geotiff->getKey('IFD0:SamplesPerPixel');
+            if (!is_null($colorCount) && $colorCount > 4) {
+                $validator->errors()->add('invalidColorSpace', "Invalid color space. The image can have at most 4 color channels, but $colorCount channels given. Please use RGB or RGBA images.");
+            }
+
             $modelType = $this->geotiff->getCoordSystemType();
             $epsg = $this->geotiff->getEpsgCode();
 
