@@ -2,8 +2,11 @@
 
 namespace Biigle\Modules\Geo\Jobs;
 
+use Biigle\Modules\Geo\Events\GeoTiffUploadFailed;
+use Biigle\Modules\Geo\Events\GeoTiffUploadSucceeded;
 use File;
 use FileCache;
+use Biigle\User;
 use Biigle\FileCache\GenericFile;
 use Biigle\Jobs\TileSingleObject;
 use Biigle\Modules\Geo\GeoOverlay;
@@ -32,6 +35,8 @@ class TileSingleOverlay extends TileSingleObject
 
     protected $noDataValue;
 
+    protected $user;
+
     /**
      * Create a new job instance.
      *
@@ -39,12 +44,13 @@ class TileSingleOverlay extends TileSingleObject
      *
      * @return void
      */    
-    public function __construct(GeoOverlay $file, array $exif)
+    public function __construct(GeoOverlay $file, User $user, array $exif)
     {
         parent::__construct(config('geo.tiles.overlay_storage_disk'), "{$file->id}/{$file->id}_tiles");
         $this->file = $file;
         $this->tempPath = config('geo.tiles.tmp_dir')."/{$file->id}";
         $this->exif = $exif;
+        $this->user = $user;
     }
 
     /**
@@ -73,6 +79,19 @@ class TileSingleOverlay extends TileSingleObject
     public function generateTiles($file, $path)
     {
         $this->vipsImage = $this->getVipsImage($path);
+
+        // Fail job if image doesn't use BW or RGB(A) color space
+        if ($this->vipsImage->bands > 4) {
+            if (GeoOverlay::find($this->file->id)->exists()) {
+                $this->file->delete();
+            }
+            $file = $this->file->name;
+            $ccount = $this->vipsImage->bands;
+            $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels given.";
+            GeoTiffUploadFailed::dispatch($this->user, $msg);
+            $this->fail();
+        }
+
         $this->setNoDataValue();
 
         $min = $this->getMin();
@@ -95,6 +114,8 @@ class TileSingleOverlay extends TileSingleObject
             'suffix' => '.png',
             'background' => [255, 255, 255, 0],
         ]);
+
+        GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
     }
 
     /**

@@ -22,14 +22,11 @@ export default {
         'upload'
     ],
     methods: {
-        handleSuccess(response) {
-            this.error = false;
-            this.$emit('success', response.data);
-        },
         handleError(response) {
             let knownError = response.body.errors && (
                 response.body.errors.geotiff || 
                 response.body.errors.fileExists ||
+                response.body.errors.invalidColorSpace ||
                 response.body.errors.noPCSKEY ||
                 response.body.errors.failedTransformation ||
                 response.body.errors.missingModelTiePoints ||
@@ -66,9 +63,7 @@ export default {
             let data = new FormData();
             data.append('geotiff', event.target.files[0]);
             data.append('volumeId', this.volumeId);
-            this.upload(data)
-                .then(this.handleSuccess, this.handleError)
-                .finally(() => this.$emit('upload', false));
+            this.upload(data).catch(this.handleError)
         },
     }
 }

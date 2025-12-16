@@ -66,7 +66,7 @@ class GeoTiffOverlayController extends Controller
 
             $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
-            TileSingleOverlay::dispatch($overlay, $geotiff->exif);
+            TileSingleOverlay::dispatch($overlay, $request->user(),  $geotiff->exif);
             return $overlay->fresh();
 
         } catch (ConvertModelSpaceException | TransformCoordsException | Exception $e) {

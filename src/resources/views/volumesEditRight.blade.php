@@ -1,3 +1,9 @@
+@push('scripts')
+    <script type="module">
+    biigle.$declare('volumes.userId', {{ $user->id }});
+    </script>
+@endpush
+
 @if ($volume->isImageVolume() && $volume->hasGeoInfo())
 <div id="volume-geo-overlay-upload" class="panel panel-default" :class="classObject">
     <div class="panel-heading">
@@ -10,7 +16,7 @@
     <div class="panel-body" v-if="editing" v-cloak>
         <tabs>
             <tab title="geoTIFF" :disabled="loading">
-                <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:success="addOverlay" v-on:upload="handleUpload" v-slot="{ submitGeoTiff, uploadGeoTiff, error }">
+                <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:upload="handleUpload" v-slot="{ submitGeoTiff, uploadGeoTiff, error }">
                     @include('geo::volumes.edit.geotiffOverlayForm')
                 </geotiff-overlay-form>
             </tab>

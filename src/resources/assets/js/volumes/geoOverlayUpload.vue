@@ -3,7 +3,7 @@ import Api from './api/geoOverlays.js';
 import GeotiffOverlayForm from './components/geotiffOverlayForm.vue';
 import WebmapOverlayForm from './components/webmapOverlayForm.vue';
 import OverlayTable from './components/overlayTable.vue';
-import {handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs} from './import.js';
+import {Messages, handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs, Echo} from './import.js';
 
 export default {
     mixins: [
@@ -20,6 +20,7 @@ export default {
     data() {
         return {
             geoOverlays: [],
+            userId: -1,
         }
     },
     computed: {
@@ -61,10 +62,24 @@ export default {
             } else {
                 this.finishLoading();
             }
+        },
+        handleSuccess(res) {
+            this.addOverlay(res.overlay)
+        },
+        handleFail(res) {
+            Messages.danger(res.error);
+            this.finishLoading();
         }
     },
     created() {
         let volumeId = biigle.$require('volumes.volumeId');
+        this.userId = biigle.$require('volumes.userId');
+
+        // Use the websocket connection to get events on geotiff upload.
+        Echo.getInstance().private(`user-${this.userId}`)
+            .listen('.Biigle\\Modules\\Geo\\Events\\GeoTiffUploadSucceeded', this.handleSuccess)
+            .listen('.Biigle\\Modules\\Geo\\Events\\GeoTiffUploadFailed', this.handleFail);
+
         this.startLoading();
         Api.getOverlays({ id: volumeId })
             .then((res) => {
