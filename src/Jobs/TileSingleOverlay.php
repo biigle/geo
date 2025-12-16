@@ -191,8 +191,8 @@ class TileSingleOverlay extends TileSingleObject
         // Set transparency to 0 if pixel is a no data value
         if ($this->vipsImage->bands === 4) {
             // replace old alpha channel in RGBA image
-            $this->vipsImage->extract_band(0, ['n' => 3]);
-            $image = $this->vipsImage->bandjoin($alpha);
+            $image = $this->vipsImage->extract_band(0, ['n' => 3]);
+            $image = $image->bandjoin($alpha);
         } else {
             $image = $this->vipsImage->bandjoin($alpha);
         }
