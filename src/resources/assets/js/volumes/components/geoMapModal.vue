@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds" :last-selected-overlay="selectedOverlayId"></image-map>
+            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds" :last-action="lastAction"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
@@ -50,8 +50,7 @@
 import CoordApi from '../api/volumeImageWithCoord.js';
 import VolumeApi from '../api/geoOverlays.js';
 import ImageMap from '../../geo/components/imageMap.vue';
-import {LoaderMixin} from '../import.js';
-import {Modal} from '../import.js';
+import {LoaderMixin, Events, Modal} from '../import.js';
 
 
 export default {
@@ -80,7 +79,7 @@ export default {
             activeIds: [],
             geoOverlays: [],
             overlayUrlTemplate: '',
-            selectedOverlayId: [],
+            lastAction: []
         }
     },
     computed: {
@@ -113,10 +112,19 @@ export default {
             } else {
                 this.activeIds.push(id);
             }
-            this.selectedOverlayId = id;
+            this.lastAction = ['selectedOverlay', id];
         },
+        changeLastAction() {
+            if (this.lastAction[0] === 'filter-map-changed') {
+                return;
+            }
+
+            let lastOverlayId = this.lastAction[1];
+            this.lastAction = ['filter-map-changed', lastOverlayId];
+        }
     },
     created() {
+        Events.on('filter-map-action', () => this.changeLastAction());
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;

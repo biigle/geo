@@ -9,3 +9,4 @@ export let VolumeFilters = biigle.$require('volumes.stores.filters');
 export let Resource = biigle.$require('resource');
 export let Modal = biigle.$require('uiv.modal');
 export let Echo = biigle.$require('echo');
+export let Events = biigle.$require('events');

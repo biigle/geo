@@ -22,7 +22,7 @@ import ZoomifySource from '@biigle/ol/source/Zoomify';
 import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
 import {defaults as defaultControls} from '@biigle/ol/control';
 import {defaults as defaultInteractions} from '@biigle/ol/interaction';
-import {Events} from '../import';
+import {Events, throttle} from '../import';
 import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
 import {Projection, addCoordinateTransforms, fromLonLat, transformExtent} from '@biigle/ol/proj';
 import {getHeight, getWidth} from '@biigle/ol/extent';
@@ -35,8 +35,8 @@ import {getHeight, getWidth} from '@biigle/ol/extent';
 export default {
     emits: ['select'],
     props: {
-        lastSelectedOverlay: {
-            type: Number,
+        lastAction: {
+            type: Array,
         },
         images: {
             type: Array,
@@ -190,7 +190,12 @@ export default {
         }
     },
     watch: {
-        lastSelectedOverlay(id) {
+        lastAction(action) {
+            if (action[0] === 'filter-map-changed') {
+                return;
+            }
+
+            let id = action[1];
             let currentExtent = this.extents[id];
             this.map.getView().fit(currentExtent, this.map.getSize());
         },
@@ -297,6 +302,8 @@ export default {
                 view: new View({zoom: 1, maxZoom: 1})
             }));
         }
+
+        this.map.on('moveend', () => throttle(() => Events.emit('filter-map-action'), 1000));
 
         if (this.selectable) {
             let selectInteraction = new Select({
