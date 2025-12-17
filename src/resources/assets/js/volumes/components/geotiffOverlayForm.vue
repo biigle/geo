@@ -43,7 +43,7 @@ export default {
                 this.error = Array.isArray(knownError) ? knownError[0] : knownError;
             } else {
                 if (response.status === 422) {
-                    this.error = "The file is invalid. It must be a valid geotiff and use a 'projected' coordinate system."
+                    this.error = "The file is invalid. It must be a valid geotiff, use a 'projected' coordinate reference system or the EPSG code 4326."
                 } else {
                     this.error = "An unknown error occured. Please retry later."
                 }
