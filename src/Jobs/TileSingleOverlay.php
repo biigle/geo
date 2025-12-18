@@ -107,6 +107,14 @@ class TileSingleOverlay extends TileSingleObject
 
         $this->vipsImage = $this->maybeAddAlpha($alpha);
 
+        // Casted images can cause segmentation faults when using dzsave.
+        // Reread images to fully apply cast instead of libvips doing it dynamically.
+        if ($this->vipsImage->format != 'uchar') {
+            $this->vipsImage = $this->vipsImage->cast('uchar');
+            $this->vipsImage = $this->vipsImage->tiffsave_buffer();
+            $this->vipsImage = VipsImage::newFromBuffer($this->vipsImage);
+        }
+
         $this->vipsImage->dzsave($this->tempPath, [
             'layout' => 'zoomify',
             'container' => 'fs',
@@ -209,6 +217,8 @@ class TileSingleOverlay extends TileSingleObject
         }
 
         $image = null;
+        // alpha mask is a 'uchar' matrix which must have the same format as the image
+        $alpha = $alpha->cast($this->vipsImage->format);
         // Set transparency to 0 if pixel is a no data value
         if ($this->vipsImage->bands === 4) {
             // replace old alpha channel in RGBA image
@@ -247,7 +257,6 @@ class TileSingleOverlay extends TileSingleObject
         // band intensity normalization x' = (x - $min) / ($max - $min) * 255
         return $this->vipsImage
             ->subtract($min)
-            ->multiply(255 / ($max - $min))
-            ->cast('uchar');
+            ->multiply(255 / ($max - $min));
     }
 }
