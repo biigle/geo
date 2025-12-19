@@ -64,6 +64,14 @@ class GeoTiffOverlayController extends Controller
                 $coords = $geotiff->transformModelSpace($coords, "EPSG:{$epsg}");
             }
 
+            // Handle coordinates at wrap point
+            // Transform edges:
+            //   _               _
+            //    | + |_ to |_ +  |
+            if ($coords[0] > 0 && $coords[2] < 0) {
+                $coords[2] += 360;
+            }
+
             $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
             TileSingleOverlay::dispatch($overlay, $request->user(),  $geotiff->exif);
