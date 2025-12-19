@@ -296,6 +296,85 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         Queue::assertNothingPushed();
     }
 
+    public function testStoreGeotiffMissingModelType()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+        $exif = [
+            'IFD0:ImageWidth' => 768,
+            'IFD0:ImageHeight' => 608,
+            'IFD0:GDALNoData' => 0.0,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:ProjectedCSType' => 32701,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_color.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'volumeId' => $id
+            ]
+        )->assertInvalid(['MissingModelType']);
+        Queue::assertNothingPushed();
+    }
+
+    public function testStoreGeotiffWrongModelType()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+        $exif = [
+            'IFD0:ImageWidth' => 768,
+            'IFD0:ImageHeight' => 608,
+            'GeoTiff:GTModelType' => 3,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:GeocentricType' => 32701,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'volumeId' => $id
+            ]
+        )->assertInvalid(['wrongModelType', 'noPCSKEY']);
+        Queue::assertNothingPushed();
+    }
+
+    public function testStoreGeotiffInvalidColorSpace()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+        $exif = [
+            'IFD0:ImageWidth' => 768,
+            'IFD0:ImageHeight' => 608,
+            'IFD0:ModelTransform' => '0.0132309081041667 0 0 5.554322947 0 -0.0132389576726974 0 55.118670158 0 0 0 0 0 0 0 1',
+            'IFD0:GDALNoData' => 0.0,
+            'GeoTiff:GTModelType' => 1,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:ProjectedCSType' => 32701,
+            'IFD0:SamplesPerPixel' => 5
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $this->mock->shouldReceive('convertToModelSpace')->andThrow(new Exception());
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'volumeId' => $id
+            ]
+        )->assertInvalid(['invalidColorSpace']);
+        Queue::assertNothingPushed();
+    }
+
     public function testStoreGeotiffCustomCode()
     {
         $id = $this->volume()->id;
