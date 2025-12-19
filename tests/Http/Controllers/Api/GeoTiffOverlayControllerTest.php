@@ -2,7 +2,9 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
+use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
+use Illuminate\Support\Facades\Queue;
 use Mockery;
 use Storage;
 use ApiTestCase;
@@ -18,6 +20,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     {
         parent::setUp();
         Storage::fake('geo-overlays');
+        Queue::fake();
         $this->mock = Mockery::mock(GeoManager::class)->makePartial()->shouldAllowMockingProtectedMethods();
         $this->app->bind(GeoManager::class, fn() => $this->mock);
     }
@@ -70,6 +73,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             ]
         )->assertSuccessful();
 
+        Queue::assertPushed(TileSingleOverlay::class);
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertSame(57.0966514849888, $overlay['attrs']['top_left_lat']);
@@ -110,6 +114,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             ]
         )->assertSuccessful();
 
+        Queue::assertPushed(TileSingleOverlay::class);
         $overlay2 = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay2);
         $this->assertSame(46.4884400488204, $overlay2['attrs']['top_left_lat']);
@@ -145,6 +150,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
                 'volumeId' => $id
             ]
         )->assertInvalid(['affineTransformation']);
+        Queue::assertNothingPushed();
     }
 
     public function testStoreGeotiffCustomCode()
@@ -167,6 +173,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
                 'volumeId' => $id
             ]
         )->assertInvalid(['userDefined']);
+        Queue::assertNothingPushed();
     }
 
     public function testStoreVideoVolume()
@@ -180,5 +187,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
                 'file' => $file,
             ]
         )->assertStatus(422);
+        Queue::assertNothingPushed();
     }
 }
