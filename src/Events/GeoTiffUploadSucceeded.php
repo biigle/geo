@@ -61,6 +61,9 @@ class GeoTiffUploadSucceeded implements ShouldBroadcastNow
      */
     public function broadcastWith()
     {
+        $this->overlay->processed = true;
+        $this->overlay->save();
+
         return [
             'overlay' => $this->overlay,
         ];

@@ -25,6 +25,7 @@ class GeoOverlay extends Model
      */
     protected $hidden = [
         'volume_id',
+        'processed',
     ];
 
     protected $fillable = [
@@ -163,6 +164,7 @@ class GeoOverlay extends Model
                 'url' => $url,
                 'layers' => $layers,
             ];
+            $overlay->processed = true;
         }
         $overlay->save();
         return $overlay;

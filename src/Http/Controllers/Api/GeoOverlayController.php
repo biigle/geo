@@ -65,6 +65,7 @@ class GeoOverlayController extends Controller
         }
 
         $overlays = GeoOverlay::where('volume_id', $volume->id)
+            ->where('processed', true)
             ->orderBy('layer_index')
             ->get();
 
