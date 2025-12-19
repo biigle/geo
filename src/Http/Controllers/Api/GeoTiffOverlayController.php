@@ -87,8 +87,6 @@ class GeoTiffOverlayController extends Controller
                         "Could not transform CRS. Please convert EPSG:$epsg to EPSG:4326 (WGS84) before uploading."
                 ];
             } else {
-                $overlay->deleteFile();
-                $overlay->delete();
                 $msg = ['failedUpload' => "The file \"$fileName\" could not be uploaded. Please try again."];
             }
             throw ValidationException::withMessages($msg);
