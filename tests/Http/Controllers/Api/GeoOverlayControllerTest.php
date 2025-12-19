@@ -63,6 +63,27 @@ class GeoOverlayControllerTest extends ApiTestCase
         ])->assertStatus(200);
     }
 
+    public function testGetOverlays()
+    {
+        // This overlay is still processing and should not be returned
+        GeoOverlay::factory()->create(['volume_id' => $this->volume()->id]);
+        // This overlay is already processed
+        $overlay = GeoOverlay::factory()->create([
+            'volume_id' => $this->volume()->id,
+            'processed' => true
+        ]);
+        $overlayCount = GeoOverlay::where('volume_id', $this->volume()->id)->count();
+        $id = $this->volume()->id;
+
+        $this->beAdmin();
+        $res = $this->getJson("/api/v1/volumes/{$id}/geo-overlays");
+        $res->assertSuccessful();
+        $overlay = json_decode($res->getContent(), true);
+
+        $this->assertEquals(2, $overlayCount);
+        $this->assertCount(1, $overlay['geoOverlays']);
+    }
+
     public function testDestroy()
     {
         Storage::fake('geo-overlays');
