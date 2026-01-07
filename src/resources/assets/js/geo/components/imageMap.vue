@@ -33,7 +33,7 @@ import {getHeight, getWidth} from '@biigle/ol/extent';
  * @type {Object}
  */
 export default {
-    emits: ['select'],
+    emits: ['select', 'disable-overlay-btn'],
     props: {
         lastAction: {
             type: Array,
@@ -249,6 +249,21 @@ export default {
                 });
                 wmsTileLayer.set('id', this.overlays[i].id);
                 this.overlayGroup.getLayers().push(wmsTileLayer);
+
+                if (Object.values(this.overlays[i].attrs).length > 2) {
+                    // save extents of webmap sources to show overlay on demand
+                    let extentEPSG4326 = [
+                        this.overlays[i].attrs.top_left_lng,
+                        this.overlays[i].attrs.top_left_lat,
+                        this.overlays[i].attrs.bottom_right_lng,
+                        this.overlays[i].attrs.bottom_right_lat
+                    ];
+                    let targetExtent = transformExtent(extentEPSG4326, 'EPSG:4326', 'EPSG:3857');
+                    this.extents[this.overlays[i].id] = targetExtent;
+                } else {
+                    Events.$emit('disable-overlay-btn', this.overlays[i].id);
+                }
+
             } else { // if overlay.type == 'geotiff'
                 // include the geotiff Layers as ol-tileLayer
                 let tileLayer = this.createOverlayTile(this.overlays[i]);

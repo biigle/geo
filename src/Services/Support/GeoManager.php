@@ -2,16 +2,10 @@
 
 namespace Biigle\Modules\Geo\Services\Support;
 
-use Exception;
 use PHPExif\Reader\Reader;
 use PHPExif\Enum\ReaderType;
 use Illuminate\Http\UploadedFile;
-use PHPCoord\Point\ProjectedPoint;
-use PHPCoord\UnitOfMeasure\Length\Metre;
-use PHPCoord\CoordinateReferenceSystem\Geographic2D;
-use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
-use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
 
 class GeoManager
 {
@@ -220,49 +214,6 @@ class GeoManager
         }
 
         return $min_max_coords;
-    }
-
-
-    /**
-     * Transform coordinates from one model-space into another 
-     *
-     * @param $coords_current min and max coordinates of the geoTIFF
-     * @param $pcs_code from the ProjectedCSTypeTag of the geoTIFF
-     *
-     * @throws TransformCoordsException if any exception occurs
-     *
-     * @return array in form [min_x, min_y, max_x, max_y]
-     */
-    public function transformModelSpace($coords_current, $pcs_code)
-    {
-        try {
-            $crs = str_replace(':', '::', $pcs_code);
-            $fromCRS = CoordinateReferenceSystem::fromSRID('urn:ogc:def:crs:' . $crs);
-            $toCRS = Geographic2D::fromSRID(Geographic2D::EPSG_WGS_84);
-            $transformed_coords = [];
-
-            for ($i = 0; $i < count($coords_current); $i += 2) {
-                $p = ProjectedPoint::create(
-                    $fromCRS,
-                    new Metre($coords_current[$i]),
-                    new Metre($coords_current[$i + 1]),
-                    null,
-                    null
-                );
-
-                $to = $p->convert($toCRS);
-                $transformed_coords = array_merge(
-                    $transformed_coords,
-                    [
-                        $to->getLongitude()->getValue(),
-                        $to->getLatitude()->getValue()
-                    ]
-                );
-            }
-            return $transformed_coords;
-        } catch (Exception $e) {
-            throw new TransformCoordsException();
-        }
     }
 
     /**

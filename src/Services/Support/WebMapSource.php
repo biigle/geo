@@ -3,6 +3,8 @@
 namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
+use Illuminate\Support\Str;
+use Biigle\Modules\Geo\Services\Support\Transformer;
 
 class WebMapSource
 {
@@ -99,6 +101,42 @@ class WebMapSource
         }
 
         return $xml;
+    }
+
+    /**
+     * Get coordinates of layer
+     *
+     * @param string $layerString Name of used layer
+     *
+     * @return array<array> Extent coordinates or empty array if no epsg is supported
+     */
+    public function getCoords($layerString)
+    {
+        $coord_info = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString . '"])[1]/BoundingBox[@SRS="EPSG:4326"]');
+
+        if (count($coord_info) > 0) {
+            $coord_info = (array) $coord_info[0];
+            $coord_info = $coord_info['@attributes'];
+            $res = [$coord_info['minx'], $coord_info['miny'], $coord_info['maxx'], $coord_info['maxy']];
+            return $res;
+        }
+
+        $coord_info = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString . '"])[1]/BoundingBox');
+        foreach ($coord_info as $arr) {
+            $coords = (array) $arr;
+            $coords = $coords['@attributes'];
+            $code = intval(Str::after($coords['SRS'], ':'));
+            if (32601 <= $code && $code <= 32660 || 32701 <= $code && $code <= 32760) { // check for correct ranges
+                try {
+                    $res = Transformer::transformToWGS84([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $coords['SRS']);
+                    return $res;
+                } catch (Exception $e) {
+                    // retry with next epsg code
+                }
+
+            }
+        }
+        return [];
     }
 
     /**

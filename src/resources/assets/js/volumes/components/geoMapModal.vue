@@ -29,7 +29,7 @@
                     <div v-if="geoOverlays.length !== 0">
                         <p class="help-block">Geo Overlays</p>
                         <div v-for="overlay in geoOverlays" :key="overlay.id">
-                            <button :id="overlay.id" :class="{active: activeIds.includes(overlay.id)}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)">
+                            <button :id="overlay.id" :class="{active: activeIds.includes(overlay.id)}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)" :disabled="isDisabled(overlay.id)">
                                 <span class="ellipsis" :title="overlay.name" v-text="overlay.name"></span>
                             </button>
                         </div> 
@@ -79,7 +79,8 @@ export default {
             activeIds: [],
             geoOverlays: [],
             overlayUrlTemplate: '',
-            lastAction: []
+            lastAction: [],
+            disabledIds: [],
         }
     },
     computed: {
@@ -121,9 +122,16 @@ export default {
 
             let lastOverlayId = this.lastAction[1];
             this.lastAction = ['filter-map-changed', lastOverlayId];
+        },
+        addToDisabledIds(id) {
+            this.disabledIds.push(id);
+        },
+        isDisabled(id) {
+            return this.disabledIds.includes(id);
         }
     },
     created() {
+        Events.on('disable-overlay-btn', (id) => this.addToDisabledIds(id));
         Events.on('filter-map-action', () => this.changeLastAction());
         // show the modal upon trigger-event
         this.startLoading();
@@ -193,6 +201,10 @@ export default {
     .list-group-item.active {
         background-color: #353535;
         color: #ffffff;
+    }
+
+    .list-group-item:hover:disabled {
+        background-color: transparent;
     }
 
     .layer-button {

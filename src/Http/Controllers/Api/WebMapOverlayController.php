@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Geo\GeoOverlay;
-use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
 use Exception;
+use Biigle\Modules\Geo\GeoOverlay;
+use Biigle\Http\Controllers\Api\Controller;
 use Illuminate\Validation\ValidationException;
+use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
 
 class WebMapOverlayController extends Controller
 {
@@ -38,7 +38,9 @@ class WebMapOverlayController extends Controller
             throw ValidationException::withMessages(['noValidLayer' => "Could not find any valid layers within the WMS resource."]);
         }
 
-        $overlay = GeoOverlay::build($volumeId, $webmapTitle, 'webmap', [$webmapSource->baseUrl, $webmapLayers]);
+        $firstLayerName = $webmapLayers[0];
+        $coords = $webmapSource->getCoords($firstLayerName);
+        $overlay = GeoOverlay::build($volumeId, $webmapTitle, 'webmap', [$coords, $webmapSource->baseUrl, $webmapLayers]);
         return $overlay->fresh();
     }
 }

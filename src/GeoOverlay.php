@@ -147,25 +147,38 @@ class GeoOverlay extends Model
         $overlay->type = $type;
         $overlay->name = $name;
         $overlay->layer_index = null;
-        if ($type === 'geotiff') {
-            $precision = 13;
-            [$coords, $pixelDimensions] = $attrs;
+        $overlay->attrs = [];
+        $round = fn ($c) => round($c, 13);
+        $coords = array_map($round, $attrs[0]);
+
+        // ignore coords if webmap server does not provide supported epsg codes
+        if (count($coords) > 0) {
             $overlay->attrs = [
-                "top_left_lng" => round($coords[0], $precision),
-                "top_left_lat" => round($coords[1], $precision),
-                "bottom_right_lng" => round($coords[2], $precision),
-                "bottom_right_lat" => round($coords[3], $precision),
-                "width" => $pixelDimensions[0],
-                "height" => $pixelDimensions[1]
+                "top_left_lng" => $coords[0],
+                "top_left_lat" => $coords[1],
+                "bottom_right_lng" => $coords[2],
+                "bottom_right_lat" => $coords[3],
             ];
+        }
+
+        if ($type === 'geotiff') {
+            [$w, $h] = $attrs[1];
+            $overlay->attrs = array_merge($overlay->attrs, [
+                "width" => $w,
+                "height" => $h
+            ]);
         } else {
-            [$url, $layers] = $attrs;
-            $overlay->attrs = [
+            $url = $attrs[1];
+            $layers = $attrs[2];
+
+            $overlay->attrs = array_merge($overlay->attrs, [
                 'url' => $url,
                 'layers' => $layers,
-            ];
+            ]);
+            // set to true since overlay will not be tiled
             $overlay->processed = true;
         }
+
         $overlay->save();
         return $overlay;
     }

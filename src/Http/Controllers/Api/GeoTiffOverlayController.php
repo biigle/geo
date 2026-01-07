@@ -2,14 +2,15 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
 use Exception;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Illuminate\Validation\ValidationException;
+use Biigle\Modules\Geo\Services\Support\Transformer;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
+use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
 
 class GeoTiffOverlayController extends Controller
 {
@@ -61,7 +62,7 @@ class GeoTiffOverlayController extends Controller
             $coords = $geotiff->convertToModelSpace($corners);
 
             if ($epsg != 4326) {
-                $coords = $geotiff->transformModelSpace($coords, "EPSG:{$epsg}");
+                $coords = Transformer::transformToWGS84($coords, "EPSG:{$epsg}");
             }
 
             // Handle coordinates at wrap point
