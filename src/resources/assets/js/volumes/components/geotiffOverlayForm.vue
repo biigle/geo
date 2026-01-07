@@ -48,6 +48,7 @@ export default {
                     this.error = "An unknown error occured. Please retry later."
                 }
             }
+            this.$emit('upload', false);
         },
         submitGeoTiff() {
             // Cannot use $refs, ref() or useTemplateRef()
