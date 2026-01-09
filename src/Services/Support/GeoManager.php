@@ -131,7 +131,7 @@ class GeoManager extends Transformer
      * 
      * @return Array the outer coordinates [$top_left, $bottom_left, $top_right, $bottom_right]
      */
-    public function getCorners()
+    protected function getCorners()
     {
         [$width, $height] = $this->getPixelSize();
 
@@ -153,7 +153,7 @@ class GeoManager extends Transformer
      *
      * @return array containing the transformed coordinates
      */
-    public function convertToModelSpace($corners) 
+    protected function convertToModelSpace($corners)
     {
         // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-transformations
         if (array_key_exists('IFD0:PixelScale', $this->exif) && array_key_exists('IFD0:ModelTiePoint', $this->exif)) {
@@ -214,6 +214,28 @@ class GeoManager extends Transformer
         }
 
         return $min_max_coords;
+    }
+
+    public function getCoords()
+    {
+        // Convert corners from RASTER-SPACE to MODEL-SPACE
+        $epsg = $this->getEpsgCode();
+        $corners = $this->getCorners();
+        $coords = $this->convertToModelSpace($corners);
+
+        if ($epsg != 4326) {
+            $coords = $this->transformToWGS84($coords, "EPSG:{$epsg}");
+        }
+
+        // Handle coordinates at wrap point
+        // Transform edges:
+        //        _               _
+        //  from   | + |_ to |_ +  |
+        if ($coords[0] > 0 && $coords[2] < 0) {
+            $coords[2] += 360;
+        }
+
+        return $coords;
     }
 
     /**

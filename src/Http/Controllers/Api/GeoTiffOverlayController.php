@@ -44,9 +44,8 @@ class GeoTiffOverlayController extends Controller
      *
      * @param StoreGeotiffOverlay $request
      */
-    public function storeGeoTiff(StoreGeotiffOverlay $request, Transformer $transformer)
+    public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
-
         $file = $request->file('geotiff');
         $fileName = $request->input('name', $file->getClientOriginalName());
         // create GeoManager-class from uploadedFile
@@ -54,25 +53,10 @@ class GeoTiffOverlayController extends Controller
         $volumeId = $request->volume->id;
 
         $pixelDimensions = $geotiff->getPixelSize();
-        $corners = $geotiff->getCorners();
         $epsg = $geotiff->getEpsgCode();
 
         try {
-            // Convert corners from RASTER-SPACE to MODEL-SPACE
-            $coords = $geotiff->convertToModelSpace($corners);
-
-            if ($epsg != 4326) {
-                $coords = $transformer->transformToWGS84($coords, "EPSG:{$epsg}");
-            }
-
-            // Handle coordinates at wrap point
-            // Transform edges:
-            //   _               _
-            //    | + |_ to |_ +  |
-            if ($coords[0] > 0 && $coords[2] < 0) {
-                $coords[2] += 360;
-            }
-
+            $coords = $geotiff->getCoords();
             $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
             TileSingleOverlay::dispatch($overlay, $request->user(),  $geotiff->exif);
