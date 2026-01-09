@@ -44,7 +44,7 @@ class GeoTiffOverlayController extends Controller
      *
      * @param StoreGeotiffOverlay $request
      */
-    public function storeGeoTiff(StoreGeotiffOverlay $request)
+    public function storeGeoTiff(StoreGeotiffOverlay $request, Transformer $transformer)
     {
 
         $file = $request->file('geotiff');
@@ -62,7 +62,7 @@ class GeoTiffOverlayController extends Controller
             $coords = $geotiff->convertToModelSpace($corners);
 
             if ($epsg != 4326) {
-                $coords = Transformer::transformToWGS84($coords, "EPSG:{$epsg}");
+                $coords = $transformer->transformToWGS84($coords, "EPSG:{$epsg}");
             }
 
             // Handle coordinates at wrap point
