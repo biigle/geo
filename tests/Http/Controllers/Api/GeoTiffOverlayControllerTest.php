@@ -12,7 +12,6 @@ use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Support\Facades\Queue;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Biigle\Modules\Geo\Services\Support\GeoManager;
-use Biigle\Modules\Geo\Services\Support\Transformer;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 
 class GeoTiffOverlayControllerTest extends ApiTestCase
@@ -256,9 +255,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         ];
 
         $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
-        $mock = Mockery::mock(Transformer::class);
-        $this->app->bind(Transformer::class, fn() => $mock);
-        $mock->shouldReceive('transformToWGS84')->andThrow(new TransformCoordsException());
+        $this->mock->shouldReceive('transformToWGS84')->andThrow(new TransformCoordsException());
         $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $this->postJson(
