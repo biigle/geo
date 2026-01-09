@@ -4,9 +4,8 @@ namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
 use Illuminate\Support\Str;
-use Biigle\Modules\Geo\Services\Support\Transformer;
 
-class WebMapSource
+class WebMapSource extends Transformer
 {
     /**
      * The raw url input string
@@ -128,7 +127,7 @@ class WebMapSource
             $code = intval(Str::after($coords['SRS'], ':'));
             if (32601 <= $code && $code <= 32660 || 32701 <= $code && $code <= 32760) { // check for correct ranges
                 try {
-                    $res = Transformer::transformToWGS84([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $coords['SRS']);
+                    $res = $this->transformToWGS84([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $coords['SRS']);
                     return $res;
                 } catch (Exception $e) {
                     // retry with next epsg code

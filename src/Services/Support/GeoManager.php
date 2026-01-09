@@ -7,7 +7,7 @@ use PHPExif\Enum\ReaderType;
 use Illuminate\Http\UploadedFile;
 use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
 
-class GeoManager
+class GeoManager extends Transformer
 {
     /**
      * The raw metadata provided by the geoTIFF.
