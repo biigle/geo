@@ -12,7 +12,7 @@ use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
 class Transformer {
 
     /**
-     * Transform coordinates to wgs84
+     * Transform coordinates to epsg 4326
      *
      * @param $coords_current min and max coordinates of the geoTIFF
      * @param $pcs_code from the ProjectedCSTypeTag of the geoTIFF
@@ -21,7 +21,7 @@ class Transformer {
      *
      * @return array in form [min_x, min_y, max_x, max_y]
      */
-    public function transformToWGS84($coords_current, $pcs_code)
+    public function transformToEPSG4326($coords_current, $pcs_code)
     {
         try {
             $crs = str_replace(':', '::', $pcs_code);

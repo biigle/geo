@@ -224,7 +224,7 @@ class GeoManager extends Transformer
         $coords = $this->convertToModelSpace($corners);
 
         if ($epsg != 4326) {
-            $coords = $this->transformToWGS84($coords, "EPSG:{$epsg}");
+            $coords = $this->transformToEPSG4326($coords, "EPSG:{$epsg}");
         }
 
         // Handle coordinates at wrap point

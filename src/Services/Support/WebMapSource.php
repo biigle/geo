@@ -127,7 +127,7 @@ class WebMapSource extends Transformer
             $code = intval(Str::after($coords['SRS'], ':'));
             if (32601 <= $code && $code <= 32660 || 32701 <= $code && $code <= 32760) { // check for correct ranges
                 try {
-                    $res = $this->transformToWGS84([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $coords['SRS']);
+                    $res = $this->transformToEPSG4326([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $coords['SRS']);
                     return $res;
                 } catch (Exception $e) {
                     // retry with next epsg code
