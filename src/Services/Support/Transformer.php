@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo\Services\Support;
 use Exception;
 use PHPCoord\Point\ProjectedPoint;
 use PHPCoord\UnitOfMeasure\Length\Metre;
+use PHPCoord\CoordinateReferenceSystem\Projected;
 use PHPCoord\CoordinateReferenceSystem\Geographic2D;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
@@ -51,6 +52,24 @@ class Transformer {
         } catch (Exception $e) {
             throw new TransformCoordsException();
         }
+    }
+
+    /**
+     * Check if the CRS is projected
+     *
+     * @param mixed $code EPSG code
+     *
+     * @return bool true if the CRS is projected, otherwise false
+     */
+    public function isProjected($code)
+    {
+        try {
+            $code = str_replace(':', '::', $code);
+            Projected::fromSRID("urn:ogc:def:crs:" . $code);
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
     }
 
 }
