@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
+use Exception;
 use Mockery;
 use ApiTestCase;
 use Illuminate\Support\Str;
@@ -115,6 +116,119 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals($url, $overlay['attrs']['url']);
         $this->assertEquals([$xml_array[1]['Name']], $overlay['attrs']['layers']);
         $this->assertEquals($xml_array[1]['Title'], $overlay['name']);
+    }
+
+    public function testStoreNoValidLayer()
+    {
+        $id = $this->volume()->id;
+        $xml = $this->getXMLResponse(1, true);
+        $this->beAdmin();
+
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'volumeId' => $id
+        ])->assertInvalid(['noValidLayer']);
+    }
+
+    public function testStoreWebMapServiceWithCoordsEPSG4326()
+    {
+
+        $this->beAdmin();
+        $id = $this->volume()->id;
+        // CRS with EPSG:4326 does not need transformation
+        $xml = '<?xml version="1.0" encoding="UTF-8" ?><Capability><Layer><Layer>' .
+            '<Name>Name_0</Name><Title>Title_0</Title>' .
+            '<BoundingBox SRS="EPSG:3785" minx="618304.4021614345" miny="5922088.138387541" maxx="1749459.3099797484" maxy="7349826.105804681"/>
+        <BoundingBox SRS="EPSG:4326" minx="5.554322947" miny="47.069383893" maxx="15.715660370999998" maxy="55.118670158"/>' .
+            '</Layer></Layer></Capability>';
+
+        $xml_array = $this->XmlToJson($xml)['Layer']['Layer'];
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'volumeId' => $id
+        ])->assertSuccessful();
+
+        $round = fn($c) => round($c, 13);
+        $coords = $xml_array['BoundingBox'][1]['@attributes'];
+        $overlay = json_decode($response->getContent(), true);
+        $this->assertNotNull($overlay);
+        $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals($url, $overlay['attrs']['url']);
+        $this->assertEquals([$xml_array['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Title'], $overlay['name']);
+        $this->assertEquals('EPSG:4326', $coords['SRS']);
+        $this->assertEquals($round($coords['minx']), $overlay['attrs']['top_left_lng']);
+        $this->assertEquals($round($coords['miny']), $overlay['attrs']['top_left_lat']);
+        $this->assertEquals($round($coords['maxx']), $overlay['attrs']['bottom_right_lng']);
+        $this->assertEquals($round($coords['maxy']), $overlay['attrs']['bottom_right_lat']);
+    }
+
+    public function testStoreWebMapServiceWithCoordsEPSG32647()
+    {
+
+        $this->beAdmin();
+        $id = $this->volume()->id;
+        // CRS with EPSG:32647 needs transformation
+        $xml = '<?xml version="1.0" encoding="UTF-8" ?><Capability><Layer><Layer>' .
+            '<Name>Name_0</Name><Title>Title_0</Title>' .
+            '<BoundingBox SRS="EPSG:32647" minx="166021.44" miny="1116915.04" maxx="500000.0" maxy="5572242.78"/>' .
+            '</Layer></Layer></Capability>';
+
+        $xml_array = $this->XmlToJson($xml)['Layer']['Layer'];
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'volumeId' => $id
+        ])->assertSuccessful();
+
+        $overlay = json_decode($response->getContent(), true);
+        $this->assertNotNull($overlay);
+        $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals($url, $overlay['attrs']['url']);
+        $this->assertEquals([$xml_array['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Title'], $overlay['name']);
+        $this->assertEquals(95.9531411952078, $overlay['attrs']['top_left_lng']);
+        $this->assertEquals(10.0899544815049, $overlay['attrs']['top_left_lat']);
+        $this->assertEquals(99, $overlay['attrs']['bottom_right_lng']);
+        $this->assertEquals(50.3023009095724, $overlay['attrs']['bottom_right_lat']);
+    }
+
+    public function testStoreWebMapServiceWithCoordsOutOfBounds()
+    {
+
+        $this->beAdmin();
+        $id = $this->volume()->id;
+        // CRS with EPSG:32647 needs transformation but contains coordinates out of bounds
+        $xml = '<?xml version="1.0" encoding="UTF-8" ?><Capability><Layer><Layer>' .
+            '<Name>Name_0</Name><Title>Title_0</Title>' .
+            '<BoundingBox SRS="EPSG:32647" minx="100000" miny="1000000" maxx="500000.0" maxy="5572242.78"/>' .
+            '</Layer></Layer></Capability>';
+
+        $xml_array = $this->XmlToJson($xml)['Layer']['Layer'];
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'volumeId' => $id
+        ])->assertSuccessful();
+
+        // Although the transformation failed, an valid overlay is still generated
+        $overlay = json_decode($response->getContent(), true);
+        $this->assertNotNull($overlay);
+        $this->assertTrue($overlay['browsing_layer']);
+        $this->assertCount(2, $overlay['attrs']);
+        $this->assertEquals($url, $overlay['attrs']['url']);
+        $this->assertEquals([$xml_array['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Title'], $overlay['name']);
     }
 
     public function getXMLResponse($layers, $hasInvalidLayer = false)
