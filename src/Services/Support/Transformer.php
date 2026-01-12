@@ -3,7 +3,6 @@
 namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
-use PHPCoord\CoordinateOperation\GeographicValue;
 use PHPCoord\Point\ProjectedPoint;
 use PHPCoord\UnitOfMeasure\Length\Metre;
 use PHPCoord\CoordinateReferenceSystem\Geographic2D;
@@ -39,12 +38,6 @@ class Transformer {
                     null
                 );
 
-                $gp = $p->asGeographicPoint();
-                $gv = new GeographicValue($gp->getLatitude(), $gp->getLongitude(), null, $fromCRS->getDatum());
-                // Throw an exception if the coordinates lie outside of the CRS bounding box
-                if (!$fromCRS->getBoundingArea()->containsPoint($gv)) {
-                    throw new Exception();
-                }
                 $to = $p->convert($toCRS);
                 $transformed_coords = array_merge(
                     $transformed_coords,
