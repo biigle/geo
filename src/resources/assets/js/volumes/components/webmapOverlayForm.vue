@@ -31,6 +31,7 @@ export default {
     handleError(response) {
       let knownError = response.body.errors && (
         response.body.errors.url ||
+        response.body.errors.tooManyLayers ||
         response.body.errors.invalidWMS ||
         response.body.errors.noValidLayer ||
         response.body.errors.uniqueUrl

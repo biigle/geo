@@ -60,6 +60,12 @@ class StoreWebMapOverlay extends FormRequest
                 throw ValidationException::withMessages(['invalidRequest' => 'The Web map URL is missing']);
             }
 
+            parse_str(urldecode($this->input('url')), $output);
+            $hasMultipleLayer = !empty($output['layers']) && Str::contains($output['layers'], ",");
+            if ($hasMultipleLayer) {
+                throw ValidationException::withMessages(['tooManyLayers' => "The url must not contain more than one layer."]);
+            }
+
             try {
                 $this->webmapSource->useUrl($this->input('url'));
             } catch (Exception $e) {
