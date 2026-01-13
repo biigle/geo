@@ -27,18 +27,13 @@
     </ol>
     <h3>Web Map Service (WMS)</h3>
     <p>
-        The second option to embed an overlay is by providing the URL to a WMS source. If only the base URL of the WMS is provided the first layer of the WMS is selected as the overlay, e.g.,
-        <div class="panel panel-info">
-            <div class="panel-body">
-                <code>https://example.com/geoserver/namespace/wms</code>.
-            </div>
-        </div>
+        The second option to embed an overlay is by providing the URL to a WMS source. If only the base URL of the WMS is provided the first layer of the WMS is selected as the overlay.
     </p>
     <p>
-        By providing a URL with query parameters it is also possible to specify WHICH layer(s) of the WMS shall be used. The uploaded overlay will contain ALL the layers specified in the layers-parameter of the URL, e.g.,
+        By providing a URL with query parameters it is also possible to specify which layer of the WMS shall be used, e.g.,
         <div class="panel panel-info">
             <div class="panel-body">
-                <code>https://example.com/geoserver/namespace/wms?service=WMS&version=1.1.0&request=GetMap&layers=LAYER1,LAYER5</code>.
+                <code>https://example.com/ows?service=WMS&version=1.3.0&request=GetCapabilities&layers=LAYER</code>.
             </div>
         </div> 
     </p>
