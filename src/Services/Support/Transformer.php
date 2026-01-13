@@ -24,7 +24,7 @@ class Transformer {
      */
     public function transformToEPSG4326($coords_current, $pcs_code)
     {
-        if ($pcs_code === 4326) {
+        if (str_ends_with($pcs_code, ":4326")) {
             return $coords_current;
         }
 
