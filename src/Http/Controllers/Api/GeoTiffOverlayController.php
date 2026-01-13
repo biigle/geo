@@ -22,27 +22,31 @@ class GeoTiffOverlayController extends Controller
      * @apiName VolumesStoreGeoTiff
      * @apiPermission projectAdmin
      *
-     * @apiParam {Number} volumeId The volume ID.
      * @apiParam (Required attributes) {File} geotiff The geotiff file of the geo overlay. Allowed file formats are TIFF. The file must not be larger than 50 GByte.
      * 
      * @apiParamExample {String} Request example:
-     * volumeId: 1
      * geotiff: bath_map_1.tif
      *
      * @apiSuccessExample {json} Success response:
      * {
-     *   "volume_id" => 1
-     *   "name" => "standardEPSG2013.tif"
-     *   "top_left_lng" => "-2.9198048485707"
-     *   "top_left_lat" => "57.0974838573358"
-     *   "bottom_right_lng" => "-2.9170062535908"
-     *   "bottom_right_lat" => "57.0984589659731"
-     *   "id" => 3
-     *   "browsing_layer" => false
-     *   "attrs" => {"width": 648, "height": 480}
+     * "id" => 1
+     * "name" => "standardEPSG2013.tif"
+     * "type" => "geotiff"
+     * "browsing_layer" => true
+     * "layer_index" => null
+     * "attrs" => [
+     *  "top_left_lng" => -2.9213164328107
+     *  "top_left_lat" => 57.096651484989
+     *  "bottom_right_lng" => -2.9185182540292
+     *  "bottom_right_lat" => 57.097626526122
+     *  "width" => 3
+     *  "height" => 2
+     *  ]
      * }
      *
      * @param StoreGeotiffOverlay $request
+     *
+     * @return GeoOverlay
      */
     public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
