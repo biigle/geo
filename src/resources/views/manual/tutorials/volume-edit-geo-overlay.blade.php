@@ -1,11 +1,11 @@
 @extends('manual.base')
 
-@section('manual-title') Geo overlays @stop
+@section('manual-title') Geo Overlays @stop
 
 @section('manual-content')
 <div class="row">
     <p class="lead">
-        Geo overlays are geo-referenced layers that can be used on maps to filter images.
+        Geo Overlays are geo-referenced layers that can be used on maps to filter images.
     </p>
     <p>
         In the Geo Overlays panel, overlays can be created by uploading geoTIFF-files or linking web-map-services (WMS) via URLs.
@@ -44,25 +44,18 @@
     </p>
     <h3>Overlay Usage</h3>
     <p>
-        In the Geo Overlay panel, each overlay is listed with its name and a <button class="btn btn-default btn-xs" title="Show"><i class="fa fa-power-off"></i></button> button to show or hide it on the map. 
+        In the Geo Overlay panel, each overlay is listed with its name and a <button class="btn btn-default btn-xs" title="Show"><i class="fa fa-power-off"></i></button> button to show or hide it on the volume map. 
         It can be removed by using the corresponding <button type="button" class="close">&times;</button> button.
     </p>
     <div class="panel panel-info">
         <div class="panel-body">
             <p>
-                Overlapping overlays can be displayed in a certain order on the map. In the Geo Overlays panel, drag the overlay via the  <button class="btn btn-default btn-xs"><i class="fas fa-grip-lines"></i></button> button to the desired position (highest = top).
+                Overlapping overlays can be displayed in a custom order on the volume map. To sort overlays, drag the them via the  <button class="btn btn-default btn-xs"><i class="fas fa-grip-lines"></i></button> button to the desired position (highest = top) in the Geo Overlays panel.
             </p>
         </div>
     </div>
-
     <p>
-        Images can be filtered by using geo overlays in the volume overview via the <button class="btn btn-default btn-xs"><i class="fa fa-filter"></i></button> filter. Add a new filter by following the steps:
-        <ol>
-            <li>Select <button class="btn btn-default btn-xs">geo selection <i class="fa fa-angle-down"></i></button> in dropdown menu</li>
-            <li>Click on the <button class="btn btn-default btn-xs">Add rule</button> button</li>
-            <li>Show the overlay list by clicking on <button class="btn btn-default btn-xs"><i class="fas fa-layer-group"></i></button> and select overlay(s)</li>
-        </ol>
+        Images can be filtered by using the <a href="{{route('manual-tutorials', ['geo','volume-map'])}}">Geo Filter</a> in the volume overview.
     </p>
-
 </div>
 @endsection
