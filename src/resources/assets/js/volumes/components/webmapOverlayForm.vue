@@ -50,7 +50,6 @@ export default {
         this.$emit('upload', true);
         let data = new FormData();
         data.append('url', event.target[0].value); 
-        data.append('volumeId', this.volumeId);
         geoApi.saveWebMap({id: this.volumeId}, data)
           .then(this.handleSuccess, this.handleError)
           .finally(() => this.$emit('upload', false))

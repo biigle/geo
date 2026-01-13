@@ -46,7 +46,7 @@ class WebMapOverlayController extends Controller
      */
     public function store(StoreWebMapOverlay $request)
     {
-        $volumeId = $request->input('volumeId');
+        $volumeId = $request->volume->id;
         $webmapSource = $request->webmapSource;
 
         try {

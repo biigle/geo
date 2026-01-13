@@ -49,7 +49,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertStatus(403);
 
@@ -71,7 +70,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertSuccessful();
 
@@ -112,7 +110,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertSuccessful();
 
@@ -155,7 +152,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertSuccessful();
 
@@ -196,7 +192,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         );
         $response->assertSuccessful();
@@ -234,7 +229,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['affineTransformation']);
         Queue::assertNothingPushed();
@@ -262,7 +256,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['failedTransformation']);
         Queue::assertNothingPushed();
@@ -290,7 +283,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['failedUpload']);
         Queue::assertNothingPushed();
@@ -315,7 +307,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['MissingModelType']);
         Queue::assertNothingPushed();
@@ -340,7 +331,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['wrongModelType', 'noPCSKEY']);
         Queue::assertNothingPushed();
@@ -369,7 +359,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['invalidColorSpace']);
         Queue::assertNothingPushed();
@@ -392,7 +381,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
                 'geotiff' => $file,
-                'volumeId' => $id
             ]
         )->assertInvalid(['userDefined']);
         Queue::assertNothingPushed();
