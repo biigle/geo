@@ -222,20 +222,8 @@ class GeoManager extends Transformer
         $epsg = $this->getEpsgCode();
         $corners = $this->getCorners();
         $coords = $this->convertToModelSpace($corners);
-
-        if ($epsg != 4326) {
-            $coords = $this->transformToEPSG4326($coords, "EPSG:{$epsg}");
-        }
-
-        // Handle coordinates at wrap point
-        // Transform edges:
-        //        _               _
-        //  from   | + |_ to |_ +  |
-        if ($coords[0] > 0 && $coords[2] < 0) {
-            $coords[2] += 360;
-        }
-
-        return $coords;
+        $coords = $this->transformToEPSG4326($coords, "EPSG:{$epsg}");
+        return $this->maybeFixCoords($coords);
     }
 
     /**

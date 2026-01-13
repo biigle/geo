@@ -128,11 +128,10 @@ class WebMapSource extends Transformer
             if ($this->isProjected($pcrs)) {
                 try {
                     $res = $this->transformToEPSG4326([$coords['minx'], $coords['miny'], $coords['maxx'], $coords['maxy']], $pcrs);
-                    return $res;
+                    return $this->maybeFixCoords($res);
                 } catch (Exception $e) {
                     // retry with next epsg code
                 }
-
             }
         }
         return [];

@@ -24,6 +24,10 @@ class Transformer {
      */
     public function transformToEPSG4326($coords_current, $pcs_code)
     {
+        if ($pcs_code === 4326) {
+            return $coords_current;
+        }
+
         try {
             $crs = str_replace(':', '::', $pcs_code);
             $fromCRS = CoordinateReferenceSystem::fromSRID('urn:ogc:def:crs:' . $crs);
@@ -48,10 +52,10 @@ class Transformer {
                     ]
                 );
             }
-            return $transformed_coords;
         } catch (Exception $e) {
             throw new TransformCoordsException();
         }
+        return $transformed_coords;
     }
 
     /**
@@ -70,6 +74,26 @@ class Transformer {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Fix corner sorting from UR -> LL to LL -> UR
+     *
+     * @param mixed $coords
+     *
+     * @return array
+     */
+    public function maybeFixCoords($coords)
+    {
+        // Handle coordinates at wrap point
+        // Transform edges:
+        //        _               _
+        //  from   | + |_ to |_ +  |
+        if ($coords[0] > $coords[2]) {
+            $coords[2] += 360;
+        }
+
+        return $coords;
     }
 
 }
