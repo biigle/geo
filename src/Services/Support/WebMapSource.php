@@ -155,7 +155,7 @@ class WebMapSource extends Transformer
      *
      * @throws Exception if xml contains no valid layer.
      */
-    public function firstValidLayer()
+    protected function firstValidLayer()
     {
         // select only those layers that have no Child layers within them
         $layers = $this->xml->xpath('//*[local-name()="Layer"][not(.//*[local-name()="Layer"])]');
@@ -167,7 +167,7 @@ class WebMapSource extends Transformer
             // If the layer has a Title but no Name, then that layer is only a category title for
             // all the layers nested within (the latter case should not occur due to xpath query above)
             if (!empty($layer->Name)) {
-                $webmapLayers = [(string) $layer->Name];
+                $webmapLayers = (string) $layer->Name;
                 return [$webmapTitle, $webmapLayers];
             }
         }
@@ -178,9 +178,9 @@ class WebMapSource extends Transformer
      * Finds the corresponding Title to a WMS Layer-Name (defaults to input name)
      * 
      * @param $layerString A Layer Name of the WMS
-     * @return String
+     * @return string
      */
-    public function getLayerTitle($layerString)
+    protected function getLayerTitle($layerString)
     {
         // xpath query to find the corresponding layer-title in the getCapabilities xml
         $titleArray = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString . '"])[1]/Title');
@@ -193,34 +193,37 @@ class WebMapSource extends Transformer
     }
 
     /**
-     * Takes the query-string of the url and extracts the layer parameter
+     * Return layer name if it is present in the url.
      * 
-     * Example: https://.../CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=CONMAR,3A_04e_wrecks&bbox=6.1...
-     * method would return array ['CONMAR', '3A_04e_wrecks']
-     * 
-     * @return null,Array
+     * @return null|string
      */
-    public function extractLayersFromQueryUrl()
+    protected function getLayerNameFromUrl()
     {
-        $queryString = $this->parsedUrl['query'];
-        // split the query-string into its compartments
-        parse_str(urldecode($queryString), $output);
+        parse_str(urldecode($this->parsedUrl['query']), $output);
 
-        // if queryString is empty or does not contain the layers parameter
-        if (empty($queryString) || empty($output['layers'])) {
+        if (empty($output) || empty($output['layers'])) {
             return null;
-        } else {
-            // Extract layers from url query-string
-            $layerString = $output['layers'];
-            // if multiple layers are defined in url layers-parameter:
-            if (str_contains($layerString, ',')) {
-                $webmapLayers = explode(',', $layerString);
-            } else {
-                // if $layerString contains only one layer
-                $webmapLayers = [$layerString];
-            }
-            return $webmapLayers;
         }
+
+        return $output['layers'];
+    }
+
+    /**
+     * Return layer title and name
+     *
+     * @return array
+     */
+    public function getLayer()
+    {
+        if($this->isQueryUrl()) {
+            $layerName = $this->getLayerNameFromUrl();
+            if ($layerName) {
+                $webmapTitle = $this->getLayerTitle($layerName);
+                return [$webmapTitle, $layerName];
+            }
+        }
+
+        return $this->firstValidLayer();
     }
 
 
