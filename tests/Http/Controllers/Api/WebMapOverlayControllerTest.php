@@ -90,6 +90,17 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
     }
 
+    public function testStoreTooManyLayers()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0,Name_1';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+        ])->assertInvalid(['tooManyLayers']);
+    }
+
     public function testStoreWebMapBaseURL()
     {
         $id = $this->volume()->id;
