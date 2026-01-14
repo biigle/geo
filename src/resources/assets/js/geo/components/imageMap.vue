@@ -242,7 +242,7 @@ export default {
                 let wmsTileLayer =  new TileLayer({
                     source: new TileWMS({
                         url: this.overlays[i].attrs.url,
-                        params: {'LAYERS': this.overlays[i].attrs.layers, 'TILED': true},
+                        params: {'LAYERS': this.overlays[i].attrs.layer, 'TILED': true},
                         serverType: 'geoserver',
                         transition: 0,
                     }),

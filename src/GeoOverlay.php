@@ -47,7 +47,6 @@ class GeoOverlay extends Model
      */
     protected $casts = [
         'attrs' => 'array',
-        'attrs->layers' => 'array'
     ];
 
 
@@ -169,11 +168,11 @@ class GeoOverlay extends Model
             ]);
         } else {
             $url = $attrs[1];
-            $layers = $attrs[2];
+            $layer = $attrs[2];
 
             $overlay->attrs = array_merge($overlay->attrs, [
                 'url' => $url,
-                'layers' => $layers,
+                'layer' => $layer,
             ]);
             // set to true since overlay will not be tiled
             $overlay->processed = true;
