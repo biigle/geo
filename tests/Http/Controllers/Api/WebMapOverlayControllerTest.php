@@ -62,11 +62,11 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
-        $this->assertEquals([$xml_array['Layer']['Layer']['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Layer']['Layer']['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Layer']['Layer']['Title'], $overlay['name']);
     }
 
-    public function testStoreWebMapLayers()
+    public function testStoreWebMapLayer()
     {
         $id = $this->volume()->id;
         $this->beAdmin();
@@ -77,7 +77,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->mock->shouldReceive('request')->once()->andReturn($xml);
 
         // test upload of valid WMS-URL (with query-parameters and SEVERAL LAYERS declared)
-        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0,Name_1,Name_2';
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
         ])->assertSuccessful();
@@ -86,7 +86,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
-        $this->assertEquals($xml_names, $overlay['attrs']['layers']);
+        $this->assertEquals($xml_names[0], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
     }
 
@@ -109,7 +109,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals([$xml_array[1]['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array[1]['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array[1]['Title'], $overlay['name']);
     }
 
@@ -153,7 +153,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals([$xml_array['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Title'], $overlay['name']);
         $this->assertEquals('EPSG:4326', $coords['SRS']);
         $this->assertEquals($round($coords['minx']), $overlay['attrs']['top_left_lng']);
@@ -185,7 +185,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals([$xml_array['Name']], $overlay['attrs']['layers']);
+        $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Title'], $overlay['name']);
         $this->assertEquals(95.9531411952078, $overlay['attrs']['top_left_lng']);
         $this->assertEquals(10.0899544815049, $overlay['attrs']['top_left_lat']);
