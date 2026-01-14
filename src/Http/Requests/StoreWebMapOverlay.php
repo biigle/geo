@@ -74,14 +74,16 @@ class StoreWebMapOverlay extends FormRequest
 
             $overlay = GeoOverlay::where('volume_id', $this->volume->id)
                 ->where('type', 'webmap')
-                ->whereJSONContains('attrs', ['url' => $this->webmapSource->baseUrl]);
+                ->whereJSONContains('attrs', [
+                    'url' => $this->webmapSource->baseUrl,
+                    'layer' => $this->webmapSource->getLayer()[1],
+                ]);
 
             if ($overlay->exists()) {
-                $urlShort = Str::limit($this->webmapSource->baseUrl, 80);
-                $name = $overlay->first()->name;
+                $name = Str::limit($overlay->first()->name, 40);
                 $validator->errors()->add(
                     'uniqueUrl',
-                    "The url \"{$urlShort}\" has already been uploaded (Filename: \"{$name}\").",
+                    "The resource \"{$name}\" has already been uploaded.",
                 );
             }
         });
