@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
+use Biigle\Modules\Geo\Exceptions\WebMapSourceException;
 
 class WebMapSource extends Transformer
 {
@@ -35,6 +36,20 @@ class WebMapSource extends Transformer
     public $baseUrl;
 
     /**
+     * Layer name
+     *
+     * @var string
+     */
+    protected $layerName;
+
+    /**
+     * Layer title
+     *
+     * @var string
+     */
+    protected $layerTitle;
+
+    /**
      * Use url to retrieve XML from source.
      *
      * @param string $url The uploaded raw url.
@@ -47,6 +62,7 @@ class WebMapSource extends Transformer
         $this->parsedUrl = parse_url($url);
         $this->baseUrl = $this->unparseUrlBase();
         $this->xml = $this->getCapabilities();
+        [$this->layerTitle, $this->layerName] = $this->extractLayerNameAndTitle();
     }
 
     /**
@@ -80,6 +96,8 @@ class WebMapSource extends Transformer
     /**
      * Checks whether the base-url is an actual WMS resource and sets global XML variable
      *
+     * @throws WebMapSourceException if xml is invalid
+     *
      * @return \SimpleXMLElement xml from source
      */
     protected function getCapabilities()
@@ -90,7 +108,7 @@ class WebMapSource extends Transformer
 
         // xml can be a non-boolean value which is interpreted as boolean false
         if ($xml === false) {
-            throw new Exception();
+            throw new WebMapSourceException( "The url does not lead to a WMS resource.", "invalidWMS");
         }
 
         return $xml;
@@ -147,7 +165,7 @@ class WebMapSource extends Transformer
      *
      * @return array containing the title and name of the layer.
      *
-     * @throws Exception if xml contains no valid layer.
+     * @throws WebMapSourceException if xml contains no valid layer.
      */
     protected function firstValidLayer()
     {
@@ -165,25 +183,28 @@ class WebMapSource extends Transformer
                 return [$webmapTitle, $webmapLayers];
             }
         }
-        throw new Exception();
+        throw new WebMapSourceException("Could not find any valid layers within the WMS resource.", "noValidLayer");
     }
 
     /**
      * Finds the corresponding Title to a WMS Layer-Name (defaults to input name)
      * 
+     * @throws WebMapSourceException if layer name does not exist
+     *
      * @param $layerString A Layer Name of the WMS
-     * @return string
+     *
+     * @return null|string
      */
     protected function getLayerTitle($layerString)
     {
         // xpath query to find the corresponding layer-title in the getCapabilities xml
         $titleArray = $this->xml->xpath('(//*[local-name()="Layer"]/*[Name="' . $layerString . '"])[1]/Title');
-        if (count($titleArray) !== 0) {
-            $webmapTitle = (string) $titleArray[0];
-        } else { // default case
-            $webmapTitle = $layerString;
+
+        if (count($titleArray) === 0) {
+            throw new WebMapSourceException("Layer with name \"$layerString\" does not exist.", "noValidLayer");
         }
-        return $webmapTitle;
+
+        return (string) $titleArray[0];
     }
 
     /**
@@ -207,9 +228,9 @@ class WebMapSource extends Transformer
      *
      * @return array
      */
-    public function getLayer()
+    protected function extractLayerNameAndTitle()
     {
-        if($this->isQueryUrl()) {
+        if ($this->isQueryUrl()) {
             $layerName = $this->getLayerNameFromUrl();
             if ($layerName) {
                 $webmapTitle = $this->getLayerTitle($layerName);
@@ -220,5 +241,8 @@ class WebMapSource extends Transformer
         return $this->firstValidLayer();
     }
 
-
+    public function getLayer()
+    {
+        return [$this->layerTitle, $this->layerName];
+    }
 }

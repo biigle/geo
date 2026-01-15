@@ -2,13 +2,14 @@
 
 namespace Biigle\Modules\Geo\Http\Requests;
 
-use Biigle\Volume;
 use Exception;
+use Biigle\Volume;
 use Illuminate\Support\Str;
 use Biigle\Modules\Geo\GeoOverlay;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 use Biigle\Modules\Geo\Services\Support\WebMapSource;
+use Biigle\Modules\Geo\Exceptions\WebMapSourceException;
 
 class StoreWebMapOverlay extends FormRequest
 {
@@ -68,8 +69,14 @@ class StoreWebMapOverlay extends FormRequest
 
             try {
                 $this->webmapSource->useUrl($this->input('url'));
-            } catch (Exception $e) {
-                throw ValidationException::withMessages(['invalidWMS' => "The url does not lead to a WMS resource."]);
+            } catch (WebMapSourceException | Exception $e) {
+                $msg = [];
+
+                if ($e instanceof WebMapSourceException) {
+                    $msg = $e->getMessageArray();
+                }
+
+                throw ValidationException::withMessages($msg);
             }
 
             $overlay = GeoOverlay::where('volume_id', $this->volume->id)

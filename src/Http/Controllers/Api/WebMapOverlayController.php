@@ -49,13 +49,9 @@ class WebMapOverlayController extends Controller
         $volumeId = $request->volume->id;
         $webmapSource = $request->webmapSource;
 
-        try {
-            [$layerTitle, $layerName] = $webmapSource->getLayer();
-        } catch (Exception $e) {
-            throw ValidationException::withMessages(['noValidLayer' => "Could not find any valid layers within the WMS resource."]);
-        }
-
+        [$layerTitle, $layerName] = $webmapSource->getLayer();
         $coords = $webmapSource->getCoords($layerName);
+
         $overlay = GeoOverlay::build($volumeId, $layerTitle, 'webmap', [$coords, $webmapSource->baseUrl, $layerName]);
         return $overlay->fresh();
     }
