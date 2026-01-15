@@ -99,6 +99,11 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
         ])->assertInvalid(['tooManyLayers']);
+
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0 Name_1';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+        ])->assertInvalid(['tooManyLayers']);
     }
 
     public function testStoreWebMapBaseURL()
@@ -202,6 +207,20 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals(10.0899544815049, $overlay['attrs']['top_left_lat']);
         $this->assertEquals(99, $overlay['attrs']['bottom_right_lng']);
         $this->assertEquals(50.3023009095724, $overlay['attrs']['bottom_right_lat']);
+    }
+
+    public function storeNotExistingLayer()
+    {
+        $id = $this->volume()->id;
+        $xml = $this->getXMLResponse(1);
+        $this->beAdmin();
+
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap&layers=test123';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+        ])->assertInvalid(['noValidLayer']);
     }
 
     public function getXMLResponse($layers, $hasInvalidLayer = false)
