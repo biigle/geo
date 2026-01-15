@@ -8,18 +8,18 @@
         Geo Overlays are geo-referenced layers that can be used on maps to filter images.
     </p>
     <p>
-        In the Geo Overlays panel, overlays can be created by uploading geoTIFF-files or linking web-map-services (WMS) via URLs.
+        In the Geo Overlays panel, overlays can be created by uploading GeoTIFF files or linking web-map-services (WMS) via URLs.
         The panel is located in the Volume Edit View (click the <button class="btn btn-default btn-xs" title="Edit"><i class="fa fa-pencil-alt"></i></button> button in the volume overview). It is displayed only if at least one image in the volume contains geo information.
         Show available upload options by using the <button class="btn btn-default btn-xs"><i class="fa fa-plus"></i></button> button in the top-right corner of the Geo Overlays panel.
     </p>
     <h3>GeoTIFF</h3>
     <p>
-        The first option to upload an overlay is to provide a geoTIFF-file (.tif or .tiff). The upload allows only GeoTIFFs that have projected coordinate reference systems (CRS) and use the common <a href="https://epsg.org/home.html" target="_blank">EPSG Geodetic Parameter Dataset</a> codes (e.g. EPSG:4326 for WGS84 CRS). It does not support user-defined projected CRS. <br>
-        When uploaded, the geoTIFF is tiled into JPG files for web-opimization. Therefore, some information that is contained in the original geoTiff is lost. You should take one of the precautionary steps below to ensure the uploaded geoTiff is displayed as expected in BIIGLE:
+        The first upload option is to provide a GeoTIFF file (.tif or .tiff). The upload allows only GeoTIFFs that have projected coordinate reference systems (CRS) and use the common <a href="https://epsg.org/home.html" target="_blank">EPSG Geodetic Parameter Dataset</a> codes (e.g. EPSG:4326 for WGS84 CRS). It does not support user-defined projected CRS. <br>
+        After the upload, the GeoTIFF is tiled into lower-resolution JPG files for web-opimization. To ensure that the uploaded GeoTIFF is displayed as expected, check the following two properties:
     </p>
     <ol>
         <li>
-            Make sure that the color-band of the geoTIFF is normalized to the range of 0 to 255.
+            Make sure that the color-band of the GeoTIFF is normalized to the range of 0 to 255.
         </li>
         <li>
             The NoData value should be smaller than the minimum value of all color bands (e.g. -9999).
@@ -27,10 +27,10 @@
     </ol>
     <h3>Web Map Service (WMS)</h3>
     <p>
-        The second option to embed an overlay is by providing the URL to a WMS source. If only the base URL of the WMS is provided the first layer of the WMS is selected as the overlay.
+        The second option to embed an overlay is by providing the URL to a WMS source. If only the base URL of the WMS is given, the first layer of the WMS is selected as the overlay.
     </p>
     <p>
-        By providing a URL with query parameters it is also possible to specify which layer of the WMS shall be used, e.g.,
+        By providing an URL with query parameters, it is also possible to specify which layer of the WMS shall be used, e.g.,
         <div class="panel panel-info">
             <div class="panel-body">
                 <code>https://example.com/ows?service=WMS&version=1.3.0&request=GetCapabilities&layers=LAYER</code>.
@@ -39,8 +39,8 @@
     </p>
     <h3>Overlay Usage</h3>
     <p>
-        In the Geo Overlay panel, each overlay is listed with its name and a <button class="btn btn-default btn-xs" title="Show"><i class="fa fa-power-off"></i></button> button to show or hide it on the volume map. 
-        It can be removed by using the corresponding <button type="button" class="close">&times;</button> button.
+        In the Geo Overlay panel, each overlay is listed with its name and a <button class="btn btn-default btn-xs" title="Show"><i class="fa fa-power-off"></i></button> button to show or hide it on the image volume map.
+        It can be removed by using the corresponding <button type="button" class="close" style="float: none;">&times;</button> button.
     </p>
     <div class="panel panel-info">
         <div class="panel-body">

@@ -1,9 +1,9 @@
 <h4>
-    <a href="{{route('manual-tutorials', ['geo', 'volume-edit-geo-overlay'])}}">Geo overlays</a>
+    <a href="{{route('manual-tutorials', ['geo', 'volume-edit-geo-overlay'])}}">Geo Overlays</a>
 </h4>
 
 <p>
-    Geo overlays are geo-referenced layers that can be used on maps to filter images.
+    Geo Overlays can be used to filter images on the image volume map.
 </p>
 
 <h4>
@@ -11,5 +11,5 @@
 </h4>
 
 <p>
-    Image volume map.
+    An image volume map shows image locations on a world map.
 </p>
