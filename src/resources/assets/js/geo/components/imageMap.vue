@@ -71,10 +71,10 @@ export default {
                 return '';
             }
         },
-        activeIds: {
-            type: Array,
+        hideIds: {
+            type: Set,
             default() {
-                return [];
+                return new Set();
             }
         }
     },
@@ -187,6 +187,9 @@ export default {
             const tileGroup = Math.floor(tileIndex / 256);
             
             return `${url}TileGroup${tileGroup}/${z}-${x}-${y}.png`;
+        },
+        setLayerVisbility(e) {
+            e.layer.setVisible(!this.hideIds.has(e.layer.values_.id));
         }
     },
     watch: {
@@ -203,16 +206,6 @@ export default {
             this.source.clear();
             this.source.addFeatures(features);
         },
-        // set the visibility of overlay-layer based on activeIds Array
-        activeIds(idArray) {
-            this.overlayGroup.getLayers().forEach((layer) => {
-                if(idArray.includes(layer.getProperties().id)) {
-                    layer.setVisible(true);
-                } else {
-                    layer.setVisible(false);
-                }
-            });
-        }
     },
     created() {
         // Set this directly so it is not made reactive.
@@ -235,6 +228,7 @@ export default {
                 layers: [],
                 name: 'overlayGroup'
         });
+        this.overlayGroup.on('addlayer', (e) => this.setLayerVisbility(e));
 
         // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
         for(let i = this.overlays.length - 1; i >= 0; i--) {

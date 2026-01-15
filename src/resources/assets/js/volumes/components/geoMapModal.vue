@@ -8,7 +8,7 @@
       >
     <div class="content">
         <div class="cell cell-map">
-            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :active-ids="activeIds" :last-action="lastAction"></image-map>
+            <image-map v-if="showOverlay" :images="images" :selectable="true" v-on:select="handleSelectedImages" :overlays="geoOverlays" :overlay-url-template="overlayUrlTemplate" :last-action="lastAction" :hide-ids="hideIds"></image-map>
         </div>
         <div class="cell cell-edit">
             <div v-if="geoOverlays.length === 0">
@@ -81,6 +81,7 @@ export default {
             overlayUrlTemplate: '',
             lastAction: [],
             disabledIds: [],
+            hideIds: new Set(),
         }
     },
     computed: {
@@ -127,7 +128,7 @@ export default {
             this.disabledIds.push(id);
         },
         isDisabled(id) {
-            return this.disabledIds.includes(id);
+            return this.disabledIds.includes(id) || this.hideIds.has(id);
         }
     },
     created() {
@@ -145,6 +146,8 @@ export default {
             .then(response => {
                 this.overlayUrlTemplate = response.body.urlTemplate;
                 this.geoOverlays = response.body.geoOverlays;
+                this.hideIds = new Set(this.geoOverlays.filter(o => !o.browsing_layer).map(o => o.id));
+
             }, this.handleErrorResponse)
             .finally(this.finishLoading);
 
