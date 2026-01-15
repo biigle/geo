@@ -29,7 +29,7 @@
                     <div v-if="geoOverlays.length !== 0">
                         <p class="help-block">Geo Overlays</p>
                         <div v-for="overlay in geoOverlays" :key="overlay.id">
-                            <button :id="overlay.id" :class="{active: activeIds.includes(overlay.id)}" class="list-group-item custom" v-on:click="toggleActive(overlay.id)" :disabled="isDisabled(overlay.id)">
+                            <button :id="overlay.id" class="list-group-item custom" v-on:click="setLastAction(overlay.id)" :disabled="isDisabled(overlay.id)">
                                 <span class="ellipsis" :title="overlay.name" v-text="overlay.name"></span>
                             </button>
                         </div> 
@@ -76,7 +76,6 @@ export default {
             images: [],
             disabled: true,
             imageIds: [],
-            activeIds: [],
             geoOverlays: [],
             overlayUrlTemplate: '',
             lastAction: [],
@@ -107,13 +106,7 @@ export default {
                 this.disabled = true;
             }
         },
-        toggleActive(id) {
-            if (this.activeIds.includes(id)) {
-                let index = this.activeIds.indexOf(id);
-                this.activeIds.splice(index, 1);
-            } else {
-                this.activeIds.push(id);
-            }
+        setLastAction(id) {
             this.lastAction = ['selectedOverlay', id];
         },
         changeLastAction() {
@@ -150,9 +143,6 @@ export default {
 
             }, this.handleErrorResponse)
             .finally(this.finishLoading);
-
-        // initially fill activeIds with selected overlays
-        this.activeIds = this.geoOverlays.map(x => x.id);
     }
 }
 </script>
