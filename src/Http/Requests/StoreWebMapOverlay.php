@@ -62,7 +62,7 @@ class StoreWebMapOverlay extends FormRequest
             }
 
             parse_str(urldecode($this->input('url')), $output);
-            $hasMultipleLayer = !empty($output['layers']) && Str::contains($output['layers'], ",");
+            $hasMultipleLayer = !empty($output['layers']) && Str::contains($output['layers'], [",", " "]);
             if ($hasMultipleLayer) {
                 throw ValidationException::withMessages(['tooManyLayers' => "The url must not contain more than one layer."]);
             }
