@@ -3,44 +3,41 @@
 namespace Biigle\Modules\Geo\Services\Support;
 
 use Exception;
-use Illuminate\Support\Str;
 
 class WebMapSource extends Transformer
 {
     /**
      * The raw url input string
      * 
-     * @var String
+     * @var string
      */
     protected $rawUrl;
 
     /**
      * The xml object from getCapabilities request
      * 
-     * @var Object
+     * @var object
      */
     protected $xml;
 
     /**
      * The parsed web-map-service url compartments
      *
-     * @var Array
+     * @var array
      */
     public $parsedUrl;
 
     /**
      * The base url String (without any query parameters)
      * 
-     * @var String
+     * @var string
      */
     public $baseUrl;
-
-
 
     /**
      * Use url to retrieve XML from source.
      *
-     * @param String $url The uploaded raw url.
+     * @param string $url The uploaded raw url.
      *
      * @return void
      */
@@ -55,7 +52,7 @@ class WebMapSource extends Transformer
     /**
      * Checks if the url contains any query-parameters
      * 
-     * @return Boolean 
+     * @return bool
      */
     public function isQueryUrl()
     {
@@ -65,7 +62,7 @@ class WebMapSource extends Transformer
     /**
      * Re-assemble a parsed url and return only the url-base
      * 
-     * @return String
+     * @return string
      */
     protected function unparseUrlBase()
     {
@@ -76,9 +73,6 @@ class WebMapSource extends Transformer
         $pass = isset($this->parsedUrl['pass']) ? ':' . $this->parsedUrl['pass'] : '';
         $pass = ($user || $pass) ? "$pass@" : '';
         $path = isset($this->parsedUrl['path']) ? $this->parsedUrl['path'] : '';
-        // return only the base url without query or fragment parameters
-        $query = isset($this->parsedUrl['query']) ? '?' . $this->parsedUrl['query'] : '';
-        $fragment = isset($this->parsedUrl['fragment']) ? '#' . $this->parsedUrl['fragment'] : '';
 
         return "$scheme$user$pass$host$port$path";
     }
