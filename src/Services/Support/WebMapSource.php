@@ -217,7 +217,7 @@ class WebMapSource extends Transformer
         parse_str(urldecode($this->parsedUrl['query']), $output);
 
         if (empty($output) || empty($output['layers'])) {
-            return null;
+            return;
         }
 
         return $output['layers'];
