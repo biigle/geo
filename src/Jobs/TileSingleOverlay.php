@@ -29,12 +29,32 @@ class TileSingleOverlay extends TileSingleObject
      */
     public $genericFile;
 
+    /**
+     * Image to process
+     *
+     * @var VipsImage
+     */
     protected $vipsImage;
 
+    /**
+     * Image's exif data
+     *
+     * @var array
+     */
     protected $exif;
 
+    /**
+     * Value representing missing data
+     *
+     * @var int|float
+     */
     protected $noDataValue;
 
+    /**
+     * User of the request
+     *
+     * @var User
+     */
     protected $user;
 
     /**
@@ -80,14 +100,14 @@ class TileSingleOverlay extends TileSingleObject
     {
         $this->vipsImage = $this->getVipsImage($path);
 
-        // Fail job if image doesn't use BW or RGB(A) color space
+        // Fail job if image doesn't use BW, Grayscale or RGB(A) color space
         if ($this->vipsImage->bands > 4) {
             if (GeoOverlay::find($this->file->id)->exists()) {
                 $this->file->delete();
             }
             $file = $this->file->name;
             $ccount = $this->vipsImage->bands;
-            $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels given.";
+            $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels are given.";
             GeoTiffUploadFailed::dispatch($this->user, $msg);
             $this->fail();
         }
