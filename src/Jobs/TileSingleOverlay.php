@@ -118,11 +118,15 @@ class TileSingleOverlay extends TileSingleObject
         $this->vipsImage = $this->maybeAddAlpha($alpha);
 
         // Casted images can cause segmentation faults when using dzsave.
-        // Reread images to fully apply cast instead of libvips doing it dynamically.
+        // Recreate images to apply type cast completely before tiling.
         if ($this->vipsImage->format != 'uchar') {
             $this->vipsImage = $this->vipsImage->cast('uchar');
-            $this->vipsImage = $this->vipsImage->tiffsave_buffer();
-            $this->vipsImage = VipsImage::newFromBuffer($this->vipsImage);
+            $w = $this->vipsImage->width;
+            $h = $this->vipsImage->height;
+            $f = $this->vipsImage->format;
+            $b = $this->vipsImage->bands;
+            $this->vipsImage = $this->vipsImage->writeToMemory();
+            $this->vipsImage = VipsImage::newFromMemory($this->vipsImage, $w, $h, $b, $f);
         }
 
         $this->vipsImage->dzsave($this->tempPath, [
