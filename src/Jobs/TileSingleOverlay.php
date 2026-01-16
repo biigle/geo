@@ -100,18 +100,7 @@ class TileSingleOverlay extends TileSingleObject
     {
         $this->vipsImage = $this->getVipsImage($path);
 
-        // Fail job if image doesn't use BW, Grayscale or RGB(A) color space
-        if ($this->vipsImage->bands > 4) {
-            if (GeoOverlay::find($this->file->id)->exists()) {
-                $this->file->delete();
-            }
-            $file = $this->file->name;
-            $ccount = $this->vipsImage->bands;
-            $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels are given.";
-            GeoTiffUploadFailed::dispatch($this->user, $msg);
-            $this->fail();
-        }
-
+        $this->validateImage();
         $this->setNoDataValue();
 
         $min = $this->getMin();
@@ -144,6 +133,27 @@ class TileSingleOverlay extends TileSingleObject
         ]);
 
         GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
+    }
+
+    /**
+     * Check whether image color channel count is valid.
+     * If more than 4 channels are given, fail this job and dispatch a fail event.
+     *
+     * @return void
+     */
+    protected function validateImage()
+    {
+        // Fail job if image doesn't use BW, Grayscale or RGB(A) color space
+        if ($this->vipsImage->bands > 4) {
+            if (GeoOverlay::find($this->file->id)->exists()) {
+                $this->file->delete();
+            }
+            $file = $this->file->name;
+            $ccount = $this->vipsImage->bands;
+            $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels are given.";
+            GeoTiffUploadFailed::dispatch($this->user, $msg);
+            $this->fail();
+        }
     }
 
     /**
