@@ -2,15 +2,16 @@
 
 namespace Biigle\Modules\Geo\Jobs;
 
-use Biigle\Modules\Geo\Events\GeoTiffUploadFailed;
-use Biigle\Modules\Geo\Events\GeoTiffUploadSucceeded;
 use File;
 use FileCache;
+use Throwable;
 use Biigle\User;
 use Biigle\FileCache\GenericFile;
 use Biigle\Jobs\TileSingleObject;
 use Biigle\Modules\Geo\GeoOverlay;
 use Jcupitt\Vips\Image as VipsImage;
+use Biigle\Modules\Geo\Events\GeoTiffUploadFailed;
+use Biigle\Modules\Geo\Events\GeoTiffUploadSucceeded;
 
 class TileSingleOverlay extends TileSingleObject
 {
@@ -145,14 +146,10 @@ class TileSingleOverlay extends TileSingleObject
     {
         // Fail job if image doesn't use BW, Grayscale or RGB(A) color space
         if ($this->vipsImage->bands > 4) {
-            if (GeoOverlay::find($this->file->id)->exists()) {
-                $this->file->delete();
-            }
             $file = $this->file->name;
             $ccount = $this->vipsImage->bands;
             $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels are given.";
-            GeoTiffUploadFailed::dispatch($this->user, $msg);
-            $this->fail();
+            $this->failAndNotify($msg);
         }
     }
 
@@ -288,5 +285,34 @@ class TileSingleOverlay extends TileSingleObject
         return $this->vipsImage
             ->subtract($min)
             ->multiply(255 / ($max - $min));
+    }
+
+    /**
+     * Delete overlay, dispatch fail event and fail job.
+     *
+     * @param mixed $msg Error message
+     *
+     * @return void
+     */
+    protected function failAndNotify($msg)
+    {
+        if (GeoOverlay::find($this->file->id)->exists()) {
+            $this->file->delete();
+        }
+        GeoTiffUploadFailed::dispatch($this->user, $msg);
+        $this->fail();
+    }
+
+    /**
+     * Dispatch fail event after job failed
+     *
+     * @param mixed $exception
+     *
+     * @return void
+     */
+    public function failed(?Throwable $exception)
+    {
+        $file = $this->file->name;
+        $this->failAndNotify("Upload of '$file' failed. Please try again.");
     }
 }
