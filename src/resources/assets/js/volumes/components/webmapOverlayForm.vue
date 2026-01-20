@@ -65,7 +65,7 @@ export default {
         const layers = url.searchParams.get('layers');
 
         // Reject urls containing multiple layers separated by whitespaces or commas
-        if (layers.match(/\s|\,/g)) {
+        if (layers && layers.match(/\s|\,/g)) {
           this.error = "The url must not contain more than one layer.";
           this.$emit('upload', false);
           return true;
