@@ -91,7 +91,7 @@ class TileSingleOverlay extends TileSingleObject
         }
     }
 
-     /**
+    /**
      * Generate tiles for the object and put them to temporary storage.
      *
      * @param File $file
@@ -106,27 +106,30 @@ class TileSingleOverlay extends TileSingleObject
 
         $min = $this->getMin();
         $max = $this->vipsImage->max();
+        $isBlackImg = (int) $min === 0 && (int) $max === 0;
 
-        // Must be called before imageNormalization since pixel values could be changed
-        $alpha = $this->generateAlphaMask();
+        if (!$isBlackImg) {
+            // Must be called before imageNormalization since pixel values could be changed
+            $alpha = $this->generateAlphaMask();
 
-        // If smaller or larger range is used, normalize pixel range to enhance contrast
-        if ($min != 0 && $max != 255) {
-            $this->vipsImage = $this->imageNormalization($min, $max);
-        }
+            // If smaller or larger range is used, normalize pixel range to enhance contrast
+            if (($min != 0 || $max != 255) && !$isBlackImg) {
+                $this->vipsImage = $this->imageNormalization($min, $max);
+            }
 
-        $this->vipsImage = $this->maybeAddAlpha($alpha);
+            $this->vipsImage = $this->maybeAddAlpha($alpha);
 
-        // Casted images can cause segmentation faults when using dzsave.
-        // Recreate images to apply type cast completely before tiling.
-        if ($this->vipsImage->format != 'uchar') {
-            $this->vipsImage = $this->vipsImage->cast('uchar');
-            $w = $this->vipsImage->width;
-            $h = $this->vipsImage->height;
-            $f = $this->vipsImage->format;
-            $b = $this->vipsImage->bands;
-            $this->vipsImage = $this->vipsImage->writeToMemory();
-            $this->vipsImage = VipsImage::newFromMemory($this->vipsImage, $w, $h, $b, $f);
+            // Casted images can cause segmentation faults when using dzsave.
+            // Recreate images to apply type cast completely before tiling.
+            if ($this->vipsImage->format != 'uchar') {
+                $this->vipsImage = $this->vipsImage->cast('uchar');
+                $w = $this->vipsImage->width;
+                $h = $this->vipsImage->height;
+                $f = $this->vipsImage->format;
+                $b = $this->vipsImage->bands;
+                $this->vipsImage = $this->vipsImage->writeToMemory();
+                $this->vipsImage = VipsImage::newFromMemory($this->vipsImage, $w, $h, $b, $f);
+            }
         }
 
         $this->vipsImage->dzsave($this->tempPath, [
@@ -283,12 +286,13 @@ class TileSingleOverlay extends TileSingleObject
      * 
      * @return \Jcupitt\Vips\Image
      */
-    public function imageNormalization($min, $max)
+    protected function imageNormalization($min, $max)
     {
         // band intensity normalization x' = (x - $min) / ($max - $min) * 255
         return $this->vipsImage
             ->subtract($min)
-            ->multiply(255 / ($max - $min));
+            ->multiply(255 / ($max - $min))
+            ->rint();
     }
 
     /**
