@@ -108,12 +108,12 @@ class TileSingleOverlay extends TileSingleObject
         $max = $this->vipsImage->max();
         $isBlackImg = (int) $min === 0 && (int) $max === 0;
 
-        if (!$isBlackImg) {
+        if (!$isBlackImg && $this->vipsImage->bands === 1) {
             // Must be called before imageNormalization since pixel values could be changed
             $alpha = $this->generateAlphaMask();
 
             // If smaller or larger range is used, normalize pixel range to enhance contrast
-            if (($min != 0 || $max != 255) && !$isBlackImg) {
+            if ($min != 0 || $max != 255) {
                 $this->vipsImage = $this->imageNormalization($min, $max);
             }
 
@@ -250,19 +250,10 @@ class TileSingleOverlay extends TileSingleObject
             return $this->vipsImage;
         }
 
-        $image = null;
         // alpha mask is a 'uchar' matrix which must have the same format as the image
         $alpha = $alpha->cast($this->vipsImage->format);
         // Set transparency to 0 if pixel is a no data value
-        if ($this->vipsImage->bands === 4) {
-            // replace old alpha channel in RGBA image
-            $image = $this->vipsImage->extract_band(0, ['n' => 3]);
-            $image = $image->bandjoin($alpha);
-        } else {
-            $image = $this->vipsImage->bandjoin($alpha);
-        }
-
-        return $image;
+        return $this->vipsImage->bandjoin($alpha);
     }
 
     /**
