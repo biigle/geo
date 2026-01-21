@@ -130,7 +130,6 @@ class TileSingleOverlay extends TileSingleObject
             'container' => 'fs',
             'strip' => true,
             'suffix' => '.png[bitdepth=8]',
-            'background' => [255, 255, 255, 0],
         ]);
 
         GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
