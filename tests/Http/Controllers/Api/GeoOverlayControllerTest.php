@@ -65,6 +65,7 @@ class GeoOverlayControllerTest extends ApiTestCase
 
     public function testGetOverlays()
     {
+        $urlTemplate = "http://localhost:8000/storage/geo-overlays/:id/:id_tiles//{TileGroup}/{z}-{x}-{y}.png";
         // This overlay is still processing and should not be returned
         GeoOverlay::factory()->create(['volume_id' => $this->volume()->id]);
         // This overlay is already processed
@@ -82,6 +83,7 @@ class GeoOverlayControllerTest extends ApiTestCase
 
         $this->assertEquals(2, $overlayCount);
         $this->assertCount(1, $overlay['geoOverlays']);
+        $this->assertEquals($urlTemplate, $overlay["urlTemplate"]);
     }
 
     public function testDestroy()
