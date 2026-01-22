@@ -294,7 +294,7 @@ export default {
             }));
         }
 
-        this.map.on('moveend', () => throttle(() => Events.emit('filter-map-action'), 1000));
+        this.map.on('moveend', () => throttle(() => Events.emit('geo-map-action'), 1000));
 
 
         if (this.selectable) {

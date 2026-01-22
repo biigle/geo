@@ -128,7 +128,7 @@ export default {
     },
     created() {
         Events.on('disable-overlay-btn', (id) => this.addToDisabledIds(id));
-        Events.on('filter-map-action', () => this.changeLastAction());
+        Events.on('geo-map-action', () => this.changeLastAction());
         // show the modal upon trigger-event
         this.startLoading();
         this.show = true;
