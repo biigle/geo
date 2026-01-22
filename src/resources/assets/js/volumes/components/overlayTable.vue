@@ -81,25 +81,22 @@ export default {
                 this.sortedOverlays.unshift(overlays.find(x => x.id === addedId[0]));
             }
         },
-        sortedOverlays(sortedArray) {
-            if (this.dataLoaded) {
-                // save the new overlay-order in geo_overlays table
-                for (let [idx, overlay] of sortedArray.entries()) {
-                    GeoApi.updateGeoOverlay({ id: this.volumeId, id2: overlay.id }, {
-                        layer_index: idx,
-                    })
-                        .catch(handleErrorResponse);
-                }
+        sortedOverlays(sortedArray, oldArray) {
+            if (oldArray.length === 0) {
+                return;
+            }
+
+            // save the new overlay-order in geo_overlays table
+            for (let [idx, overlay] of sortedArray.entries()) {
+                GeoApi.updateGeoOverlay({ id: this.volumeId, id2: overlay.id }, {
+                    layer_index: idx,
+                }).catch(handleErrorResponse);
             }
         }
     },
     mounted() {
         this.sortedOverlays = this.overlays.slice(0, this.overlays.length);
         this.sortedOverlays.sort((a, b) => a.layer_index - b.layer_index);
-
-        this.$nextTick(() => { //with this skip the first change of sortedOverlays
-            this.dataLoaded = true;
-        })
     },
     components: {
         overlayItem: OverlayItem,
