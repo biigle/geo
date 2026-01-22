@@ -6,5 +6,5 @@
             <button class="btn btn-default" type="submit">Upload geoTIFF</button>
         </div>
     </form>
-    <div class="alert alert-danger" v-if="error" v-text="error" v-cloak></div>
+    <div class="alert alert-danger" v-if="error.length > 0" v-text="error" v-cloak></div>
 </div>

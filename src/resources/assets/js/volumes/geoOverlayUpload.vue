@@ -3,7 +3,7 @@ import Api from './api/geoOverlays.js';
 import GeotiffOverlayForm from './components/geotiffOverlayForm.vue';
 import WebmapOverlayForm from './components/webmapOverlayForm.vue';
 import OverlayTable from './components/overlayTable.vue';
-import { Messages, handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs, Echo } from './import.js';
+import { handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs, Echo } from './import.js';
 
 export default {
     mixins: [
@@ -21,6 +21,7 @@ export default {
         return {
             geoOverlays: [],
             userId: -1,
+            jobError: ''
         }
     },
     computed: {
@@ -64,10 +65,11 @@ export default {
             }
         },
         handleSuccess(res) {
+            this.jobError = '';
             this.addOverlay(res.overlay)
         },
         handleFail(res) {
-            Messages.danger(res.error);
+            this.jobError = res.error
             this.finishLoading();
         }
     },

@@ -17,7 +17,7 @@
         <div class="panel-body" v-if="editing" v-cloak>
             <tabs>
                 <tab title="geoTIFF" :disabled="loading">
-                    <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:upload="handleUpload"
+                    <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:upload="handleUpload" :job-error="jobError"
                         v-slot="{ submitGeoTiff, uploadGeoTiff, error }">
                         @include('geo::volumes.edit.geotiffOverlayForm')
                     </geotiff-overlay-form>

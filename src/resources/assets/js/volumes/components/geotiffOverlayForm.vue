@@ -11,10 +11,14 @@ export default {
             type: Number,
             required: true,
         },
+        jobError: {
+            type: String,
+            default: ''
+        }
     },
     data() {
         return {
-            error: false,
+            error: '',
         };
     },
     emits: [
@@ -65,6 +69,11 @@ export default {
             data.append('geotiff', event.target.files[0]);
             this.upload(data).catch(this.handleError)
         },
+    },
+    watch: {
+        jobError() {
+            this.error = this.jobError
+        }
     }
 }
 </script>
