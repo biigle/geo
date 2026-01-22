@@ -125,12 +125,6 @@ export default {
                 projection: projection,
             });
 
-            sourceLayer.setTileUrlFunction((coords) => {
-                let url = this.overlayUrlTemplate.replaceAll(':id', overlay.id);
-                let maxZ = sourceLayer.getTileGrid().getMaxZoom();
-                return this.pngTileUrl(coords, url, maxZ)
-            });
-
             let extentEPSG4326 = [
                 overlay.attrs.top_left_lng,
                 overlay.attrs.top_left_lat,
@@ -175,18 +169,6 @@ export default {
             });
 
             return tileLayer;
-        },
-        pngTileUrl(coords, url, maxZ) {
-            if (!coords) {
-                return undefined;
-            }
-
-            const [z, x, y] = coords;
-            const scale = maxZ - z;
-            const tileIndex = x + y * Math.pow(2, scale);
-            const tileGroup = Math.floor(tileIndex / 256);
-
-            return `${url}TileGroup${tileGroup}/${z}-${x}-${y}.png`;
         },
         setLayerVisbility(e) {
             e.layer.setVisible(!this.hideIds.has(e.layer.values_.id));
@@ -313,6 +295,7 @@ export default {
         }
 
         this.map.on('moveend', () => throttle(() => Events.emit('filter-map-action'), 1000));
+
 
         if (this.selectable) {
             let selectInteraction = new Select({
