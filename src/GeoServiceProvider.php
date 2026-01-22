@@ -19,22 +19,22 @@ class GeoServiceProvider extends ServiceProvider
      */
     public function boot(Modules $modules, Router $router)
     {
-        $this->loadViewsFrom(__DIR__.'/resources/views', 'geo');
-        $this->loadMigrationsFrom(__DIR__.'/Database/migrations');
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'geo');
+        $this->loadMigrationsFrom(__DIR__ . '/Database/migrations');
 
         $this->publishes([
-            __DIR__.'/public' => public_path('vendor/geo'),
+            __DIR__ . '/public' => public_path('vendor/geo'),
         ], 'public');
 
         $this->publishes([
-            __DIR__.'/config/geo.php' => config_path('geo.php'),
+            __DIR__ . '/config/geo.php' => config_path('geo.php'),
         ], 'config');
 
         $router->group([
             'namespace' => 'Biigle\Modules\Geo\Http\Controllers',
             'middleware' => 'web',
         ], function ($router) {
-            require __DIR__.'/routes.php';
+            require __DIR__ . '/routes.php';
         });
 
         \Biigle\Volume::observe(new Observers\VolumeObserver);
@@ -53,7 +53,7 @@ class GeoServiceProvider extends ServiceProvider
                 'volumesEditScripts',
                 'volumesEditStyles'
             ],
-            'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
+            'apidoc' => [__DIR__ . '/Http/Controllers/Api/'],
         ]);
     }
 
@@ -64,7 +64,7 @@ class GeoServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/config/geo.php', 'geo');
+        $this->mergeConfigFrom(__DIR__ . '/config/geo.php', 'geo');
 
         $this->app->singleton('command.geo.publish', function ($app) {
             return new \Biigle\Modules\Geo\Console\Commands\Publish();

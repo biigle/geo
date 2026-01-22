@@ -3,7 +3,7 @@ import Api from './api/geoOverlays.js';
 import GeotiffOverlayForm from './components/geotiffOverlayForm.vue';
 import WebmapOverlayForm from './components/webmapOverlayForm.vue';
 import OverlayTable from './components/overlayTable.vue';
-import {Messages, handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs, Echo} from './import.js';
+import { Messages, handleErrorResponse, LoaderMixin, EditorMixin, Tab, Tabs, Echo } from './import.js';
 
 export default {
     mixins: [
@@ -43,12 +43,12 @@ export default {
         },
         handleRemove(overlay) {
             this.startLoading();
-            Api.deleteGeoOverlay({id: overlay.id})
+            Api.deleteGeoOverlay({ id: overlay.id })
                 .then(() => this.overlayRemoved(overlay))
                 .catch(handleErrorResponse)
                 .finally(this.finishLoading);
         },
-        overlayRemoved(overlay) {            
+        overlayRemoved(overlay) {
             for (let i = this.geoOverlays.length - 1; i >= 0; i--) {
                 if (this.geoOverlays[i].id === overlay.id) {
                     this.geoOverlays.splice(i, 1);
@@ -57,7 +57,7 @@ export default {
             }
         },
         handleUpload(uploadInProgress) {
-            if(uploadInProgress) {
+            if (uploadInProgress) {
                 this.startLoading();
             } else {
                 this.finishLoading();

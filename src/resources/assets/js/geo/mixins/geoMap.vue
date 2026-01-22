@@ -1,10 +1,10 @@
 <script>
 import ImageMap from '../components/imageMap.vue';
-import {Events} from '../import.js';
-import {handleErrorResponse} from '../import.js';
-import {LabelTrees} from '../import.js';
-import {SidebarTab} from '../import.js';
-import {Sidebar} from '../import.js';
+import { Events } from '../import.js';
+import { handleErrorResponse } from '../import.js';
+import { LabelTrees } from '../import.js';
+import { SidebarTab } from '../import.js';
+import { Sidebar } from '../import.js';
 
 /**
  * Things that are used by both the project and volume geo map.
@@ -16,7 +16,7 @@ export default {
         sidebarTab: SidebarTab,
         labelTrees: LabelTrees,
     },
-    data: function() {
+    data: function () {
         return {
             selectedLabels: [],
             filteredImageCache: {},

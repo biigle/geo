@@ -20,7 +20,7 @@ let style = {
 style.default = new Style({
     image: new Circle({
         radius: style.radius.default,
-        fill: new Fill({color: style.colors.blue}),
+        fill: new Fill({ color: style.colors.blue }),
         stroke: new Stroke({
             color: style.colors.white,
             width: style.strokeWidth.default,
@@ -31,7 +31,7 @@ style.default = new Style({
 style.selected = new Style({
     image: new Circle({
         radius: style.radius.default,
-        fill: new Fill({color: style.colors.orange}),
+        fill: new Fill({ color: style.colors.orange }),
         stroke: new Stroke({
             color: style.colors.white,
             width: style.strokeWidth.default,

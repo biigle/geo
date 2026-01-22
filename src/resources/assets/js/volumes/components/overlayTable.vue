@@ -12,8 +12,9 @@
             </thead>
             <draggable v-model="sortedOverlays" tag="tbody" handle=".handle" item-key="id">
                 <template #item="{ element: overlay, index }">
-                    <overlay-item :key="overlay.id" :class="{'list-group-item-success': overlay.isNew}" :index="index" :overlay="overlay" :volume-id="volumeId" v-on:remove="remove(overlay)">
-                    </overlay-item >
+                    <overlay-item :key="overlay.id" :class="{ 'list-group-item-success': overlay.isNew }" :index="index"
+                        :overlay="overlay" :volume-id="volumeId" v-on:remove="remove(overlay)">
+                    </overlay-item>
                 </template>
             </draggable>
         </table>
@@ -24,7 +25,7 @@
 import OverlayItem from './overlayItem.vue';
 import draggable from 'vuedraggable';
 import GeoApi from '../api/geoOverlays.js';
-import {handleErrorResponse} from '../../geo/import.js';
+import { handleErrorResponse } from '../../geo/import.js';
 
 
 
@@ -68,7 +69,7 @@ export default {
             let sortedOverlaysId = this.sortedOverlays.map(x => x.id);
 
             // in case an overlay was deleted
-            if(overlays.length < this.sortedOverlays.length) {
+            if (overlays.length < this.sortedOverlays.length) {
                 // find the id of the removed overlay 
                 let removedId = sortedOverlaysId.filter(x => !overlaysId.includes(x));
                 // remove the deleted overlay from sortedOverlays-array
@@ -81,13 +82,13 @@ export default {
             }
         },
         sortedOverlays(sortedArray) {
-            if(this.dataLoaded) {
+            if (this.dataLoaded) {
                 // save the new overlay-order in geo_overlays table
-                for(let [idx, overlay] of sortedArray.entries()) {
-                    GeoApi.updateGeoOverlay({id: this.volumeId, id2: overlay.id}, {
+                for (let [idx, overlay] of sortedArray.entries()) {
+                    GeoApi.updateGeoOverlay({ id: this.volumeId, id2: overlay.id }, {
                         layer_index: idx,
                     })
-                    .catch(handleErrorResponse);
+                        .catch(handleErrorResponse);
                 }
             }
         }
@@ -108,7 +109,6 @@ export default {
 </script>
 
 <style scoped>
-
 .table-responsive {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));

@@ -13,11 +13,11 @@ class GeoOverlayControllerTest extends ApiTestCase
     {
         Storage::fake('geo-overlays');
         $id = $this->volume()->id;
-    
+
         // Create overlay-instance
         $overlay = GeoOverlay::factory()->create();
         $overlay->save();
-       
+
         $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}");
 
         $this->beEditor();
@@ -26,13 +26,13 @@ class GeoOverlayControllerTest extends ApiTestCase
             'browsing_layer' => true,
             'use_layer' => true
         ])
-        ->assertStatus(403);
+            ->assertStatus(403);
 
         $this->beAdmin();
         // 422: The request was well-formed but was unable to be followed due to semantic errors.
         // reason: no input data
         $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}")
-        ->assertStatus(422);
+            ->assertStatus(422);
 
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
             'browsing_layer' => 'test',

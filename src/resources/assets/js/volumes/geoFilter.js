@@ -1,5 +1,5 @@
-import {VolumeFilters} from './import.js';
-import {FilterList} from './import.js';
+import { VolumeFilters } from './import.js';
+import { FilterList } from './import.js';
 import FilterSelect from '../volumes/components/filterByLocationComponent.vue';
 
 /**
@@ -24,7 +24,7 @@ if (Array.isArray(VolumeFilters)) {
             extends: FilterSelect,
         },
         getSequence(volumeId, data) {
-            return Promise.resolve({data});
+            return Promise.resolve({ data });
         }
     });
 }

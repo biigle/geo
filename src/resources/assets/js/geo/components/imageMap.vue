@@ -20,12 +20,12 @@ import VectorSource from '@biigle/ol/source/Vector';
 import View from '@biigle/ol/View';
 import ZoomifySource from '@biigle/ol/source/Zoomify';
 import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
-import {defaults as defaultControls} from '@biigle/ol/control';
-import {defaults as defaultInteractions} from '@biigle/ol/interaction';
-import {Events, throttle} from '../import';
-import {platformModifierKeyOnly} from '@biigle/ol/events/condition';
-import {Projection, addCoordinateTransforms, fromLonLat, transformExtent} from '@biigle/ol/proj';
-import {getHeight, getWidth} from '@biigle/ol/extent';
+import { defaults as defaultControls } from '@biigle/ol/control';
+import { defaults as defaultInteractions } from '@biigle/ol/interaction';
+import { Events, throttle } from '../import';
+import { platformModifierKeyOnly } from '@biigle/ol/events/condition';
+import { Projection, addCoordinateTransforms, fromLonLat, transformExtent } from '@biigle/ol/proj';
+import { getHeight, getWidth } from '@biigle/ol/extent';
 
 /**
  * An element displaying the position of a single image on a map.
@@ -118,11 +118,11 @@ export default {
             });
 
             let sourceLayer = new ZoomifySource({
-                    url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
-                    size: [overlay.attrs.width, overlay.attrs.height],
-                    crossOrigin: 'anonymous',
-                    zDirection: -1, // Ensure we get a tile with the screen resolution or higher
-                    projection: projection,
+                url: this.overlayUrlTemplate.replaceAll(':id', overlay.id),
+                size: [overlay.attrs.width, overlay.attrs.height],
+                crossOrigin: 'anonymous',
+                zDirection: -1, // Ensure we get a tile with the screen resolution or higher
+                projection: projection,
             });
 
             sourceLayer.setTileUrlFunction((coords) => {
@@ -132,9 +132,9 @@ export default {
             });
 
             let extentEPSG4326 = [
-                overlay.attrs.top_left_lng, 
-                overlay.attrs.top_left_lat, 
-                overlay.attrs.bottom_right_lng, 
+                overlay.attrs.top_left_lng,
+                overlay.attrs.top_left_lat,
+                overlay.attrs.bottom_right_lng,
                 overlay.attrs.bottom_right_lat
             ];
             // define the source extent (units = pixels) and targetExtent (EPSG:3857, units = meters)
@@ -147,9 +147,9 @@ export default {
             // (default transforms the point from pixel to EPSG:4326, units = degrees)
             projection.setGetPointResolution(
                 (r) => r * Math.max(
-                            getWidth(targetExtent) / getWidth(extent),
-                            getHeight(targetExtent) / getHeight(extent)
-                        )
+                    getWidth(targetExtent) / getWidth(extent),
+                    getHeight(targetExtent) / getHeight(extent)
+                )
             );
 
             // add coordinate transforms between the source-projection and target projection (same as view-projection)
@@ -169,14 +169,14 @@ export default {
                     ((y - targetExtent[1]) * getHeight(extent)) / getHeight(targetExtent),
                 ]
             );
-            
+
             let tileLayer = new TileLayer({
                 source: sourceLayer,
             });
 
             return tileLayer;
         },
-        pngTileUrl(coords, url, maxZ){
+        pngTileUrl(coords, url, maxZ) {
             if (!coords) {
                 return undefined;
             }
@@ -185,7 +185,7 @@ export default {
             const scale = maxZ - z;
             const tileIndex = x + y * Math.pow(2, scale);
             const tileGroup = Math.floor(tileIndex / 256);
-            
+
             return `${url}TileGroup${tileGroup}/${z}-${x}-${y}.png`;
         },
         setLayerVisbility(e) {
@@ -215,7 +215,7 @@ export default {
         this.source.addFeatures(this.features);
         let extent = this.source.getExtent();
 
-        let basemap = new TileLayer({source: new OSMSource()});
+        let basemap = new TileLayer({ source: new OSMSource() });
 
         let vectorLayer = new VectorLayer({
             source: this.source,
@@ -225,18 +225,18 @@ export default {
         });
 
         this.overlayGroup = new LayerGroup({
-                layers: [],
-                name: 'overlayGroup'
+            layers: [],
+            name: 'overlayGroup'
         });
         this.overlayGroup.on('addlayer', (e) => this.setLayerVisbility(e));
 
         // include the WebMapService overlays as TileLayers (in reverse order so top layer gets added last)
-        for(let i = this.overlays.length - 1; i >= 0; i--) {
-            if(this.overlays[i].type == 'webmap') {
-                let wmsTileLayer =  new TileLayer({
+        for (let i = this.overlays.length - 1; i >= 0; i--) {
+            if (this.overlays[i].type == 'webmap') {
+                let wmsTileLayer = new TileLayer({
                     source: new TileWMS({
                         url: this.overlays[i].attrs.url,
-                        params: {'LAYERS': this.overlays[i].attrs.layer, 'TILED': true},
+                        params: { 'LAYERS': this.overlays[i].attrs.layer, 'TILED': true },
                         serverType: 'geoserver',
                         transition: 0,
                     }),
@@ -266,7 +266,7 @@ export default {
                 this.overlayGroup.getLayers().push(tileLayer);
             }
         }
-       
+
         // this.map makes map available in methods without being reactive
         this.map = new Map({
             target: this.$el,
@@ -285,7 +285,7 @@ export default {
                 pinchRotate: false,
                 pinchZoom: this.interactive,
             }),
-            controls: defaultControls({zoom: this.interactive}),
+            controls: defaultControls({ zoom: this.interactive }),
         });
 
         this.map.addLayer(vectorLayer);
@@ -307,8 +307,8 @@ export default {
             this.map.addControl(new OverviewMap({
                 collapsed: false,
                 collapsible: false,
-                layers: [new TileLayer({source: basemap.getSource()})],
-                view: new View({zoom: 1, maxZoom: 1})
+                layers: [new TileLayer({ source: basemap.getSource() })],
+                view: new View({ zoom: 1, maxZoom: 1 })
             }));
         }
 
@@ -327,11 +327,11 @@ export default {
                 this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
             });
 
-            let dragBox = new DragBox({condition: platformModifierKeyOnly});
+            let dragBox = new DragBox({ condition: platformModifierKeyOnly });
             this.map.addInteraction(dragBox);
             dragBox.on('boxend', () => {
                 selectedFeatures.clear();
-                this.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function(feature) {
+                this.source.forEachFeatureIntersectingExtent(dragBox.getGeometry().getExtent(), function (feature) {
                     selectedFeatures.push(feature);
                 });
                 this.$emit('select', this.parseSelectedFeatures(selectedFeatures));
@@ -339,7 +339,7 @@ export default {
         }
 
         Events.on('sidebar.toggle', function () {
-            if(this.map) {
+            if (this.map) {
                 this.map.updateSize();
             }
         });

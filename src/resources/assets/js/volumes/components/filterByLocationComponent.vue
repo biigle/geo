@@ -1,6 +1,7 @@
 <template>
     <div class="filter-select">
-        <geo-map-modal v-if="showModal" :volumeId="volumeId" v-on:on="submit" v-on:close-modal="hideModal"></geo-map-modal>
+        <geo-map-modal v-if="showModal" :volumeId="volumeId" v-on:on="submit"
+            v-on:close-modal="hideModal"></geo-map-modal>
         <button type="submit" class="btn btn-default pull-right position" @click="showModal = true">Add rule</button>
     </div>
 </template>
@@ -49,7 +50,7 @@ export default {
     margin-top: -15px;
 }
 
-.filter-select > .position {
+.filter-select>.position {
     position: relative;
     margin-top: 15px;
 }

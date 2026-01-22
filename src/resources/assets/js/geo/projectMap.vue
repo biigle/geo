@@ -14,7 +14,7 @@ export default {
     },
     methods: {
         getImageFilterApi(id) {
-            return Api.get({pid: this.projectId, lid: id}, {});
+            return Api.get({ pid: this.projectId, lid: id }, {});
         },
     },
     created() {

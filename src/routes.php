@@ -5,12 +5,12 @@ $router->group([
     'namespace' => 'Views',
 ], function ($router) {
     $router->get('volumes/{id}/geo', [
-        'as'   => 'volume-geo',
+        'as' => 'volume-geo',
         'uses' => 'VolumeController@show',
     ]);
 
     $router->get('projects/{id}/geo', [
-        'as'   => 'project-geo',
+        'as' => 'project-geo',
         'uses' => 'ProjectController@show',
     ]);
 });
@@ -27,7 +27,7 @@ $router->group([
     $router->get('volumes/{id}/coordinates', [
         'uses' => 'FileCoordinatesController@index',
     ]);
-    
+
     // GeoTIFF
     $router->post('volumes/{id}/geo-overlays/geotiff', [
         'uses' => 'GeoTiffOverlayController@storeGeoTiff',
@@ -37,7 +37,7 @@ $router->group([
     $router->post('volumes/{id}/geo-overlays/webmap', [
         'uses' => 'WebMapOverlayController@store',
     ]);
-    
+
     // GeoOverlays
     $router->get('volumes/{id}/geo-overlays', [
         'uses' => 'GeoOverlayController@getOverlays',
@@ -47,7 +47,7 @@ $router->group([
         'only' => ['destroy'],
         'parameters' => ['geo-overlays' => 'id'],
     ]);
-    
+
     $router->put('volumes/{id}/geo-overlays/{id2}', [
         'uses' => 'GeoOverlayController@updateGeoOverlay',
     ]);

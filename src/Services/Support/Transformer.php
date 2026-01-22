@@ -10,7 +10,8 @@ use PHPCoord\CoordinateReferenceSystem\Geographic2D;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 use PHPCoord\CoordinateReferenceSystem\CoordinateReferenceSystem;
 
-class Transformer {
+class Transformer
+{
 
     /**
      * Transform coordinates to epsg 4326

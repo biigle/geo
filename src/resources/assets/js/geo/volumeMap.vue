@@ -15,7 +15,7 @@ export default {
     },
     methods: {
         getImageFilterApi(id) {
-            return Api.get({vid: this.volumeId, lid: id}, {});
+            return Api.get({ vid: this.volumeId, lid: id }, {});
         },
     },
     created() {

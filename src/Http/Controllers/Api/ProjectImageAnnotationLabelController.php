@@ -36,14 +36,14 @@ class ProjectImageAnnotationLabelController extends Controller
         $this->authorize('access', $project);
 
         return ImageAnnotation::join('image_annotation_labels', 'image_annotations.id', '=', 'image_annotation_labels.annotation_id')
-                ->join('images', 'image_annotations.image_id', '=', 'images.id')
-                ->where('image_annotation_labels.label_id', $lid)
-                ->whereIn('images.volume_id', function ($query) use ($pid) {
-                    return $query->select('volume_id')
-                        ->from('project_volume')
-                        ->where('project_id', $pid);
-                })
-                ->groupBy('images.id')
-                ->pluck('images.id');
+            ->join('images', 'image_annotations.image_id', '=', 'images.id')
+            ->where('image_annotation_labels.label_id', $lid)
+            ->whereIn('images.volume_id', function ($query) use ($pid) {
+                return $query->select('volume_id')
+                    ->from('project_volume')
+                    ->where('project_id', $pid);
+            })
+            ->groupBy('images.id')
+            ->pluck('images.id');
     }
 }

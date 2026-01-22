@@ -108,7 +108,7 @@ class WebMapSource extends Transformer
 
         // xml can be a non-boolean value which is interpreted as boolean false
         if ($xml === false) {
-            throw new WebMapSourceException( "The url does not lead to a WMS resource.", "invalidWMS");
+            throw new WebMapSourceException("The url does not lead to a WMS resource.", "invalidWMS");
         }
 
         return $xml;

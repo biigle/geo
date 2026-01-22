@@ -35,9 +35,9 @@ class CreateGeoOverlaysTable extends Migration
 
             $table->integer('volume_id')->unsigned()->index();
             $table->foreign('volume_id')
-                  ->references('id')
-                  ->on('volumes')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('volumes')
+                ->onDelete('cascade');
         });
     }
 

@@ -82,7 +82,7 @@ class GeoManager extends Transformer
      */
     public function getKey($geoKey)
     {
-        if(array_key_exists($geoKey, $this->exif)) {
+        if (array_key_exists($geoKey, $this->exif)) {
             return $this->exif[$geoKey];
         }
         return null;
@@ -119,10 +119,10 @@ class GeoManager extends Transformer
      * 
      * @return Array the model-space width and height [$width, $height] 
      */
-    public function getModelSize($coords) 
+    public function getModelSize($coords)
     {
         $width = number_format($coords[2] - $coords[0], 13);
-        $height = number_format($coords[3] -$coords[1], 13);
+        $height = number_format($coords[3] - $coords[1], 13);
         return [$width, $height];
     }
 
@@ -159,12 +159,12 @@ class GeoManager extends Transformer
         if (array_key_exists('IFD0:PixelScale', $this->exif) && array_key_exists('IFD0:ModelTiePoint', $this->exif)) {
             // PixelScale = (Sx, Sy, Sz)
             $pixelScale = array_map('floatval', explode(" ", $this->exif['IFD0:PixelScale']));
-             // modelTiePointTag = (I,J,K,X,Y,Z)
-             $modelTiePoints = array_map('floatval', explode(" ", $this->exif['IFD0:ModelTiePoint']));
-             $tie_point_keys = ['I', 'J', 'K', 'X', 'Y', 'Z'];
-             $tie_points_combined = array_combine($tie_point_keys, $modelTiePoints);
-             // make variables availabe ($I, $J, $K, $X, $Y, $Z)
-             extract($tie_points_combined);
+            // modelTiePointTag = (I,J,K,X,Y,Z)
+            $modelTiePoints = array_map('floatval', explode(" ", $this->exif['IFD0:ModelTiePoint']));
+            $tie_point_keys = ['I', 'J', 'K', 'X', 'Y', 'Z'];
+            $tie_points_combined = array_combine($tie_point_keys, $modelTiePoints);
+            // make variables availabe ($I, $J, $K, $X, $Y, $Z)
+            extract($tie_points_combined);
 
             // if PixelScale is ill-defined, skip to next section
             if (($pixelScale[0] !== 0 && $pixelScale[1] !== 0)) {
@@ -183,7 +183,7 @@ class GeoManager extends Transformer
                 foreach ($corners as $corner) {
                     $projected[] = [
                         ($pixelScale[0] * $corner[0]) + $Tx,
-                        - ($pixelScale[1] * $corner[1]) + $Ty,
+                        -($pixelScale[1] * $corner[1]) + $Ty,
                     ];
                 }
                 // get the minimum and maximum coordinates of the geoTIFF
@@ -235,8 +235,8 @@ class GeoManager extends Transformer
      */
     protected function getMinMaxCoordinate($projected)
     {
-        $x_coordinates = array_map(fn ($pt) => $pt[0], $projected);
-        $y_coordinates = array_map(fn ($pt) => $pt[1], $projected);
+        $x_coordinates = array_map(fn($pt) => $pt[0], $projected);
+        $y_coordinates = array_map(fn($pt) => $pt[1], $projected);
 
         return [
             min($x_coordinates),

@@ -1,5 +1,5 @@
 <template>
-  <slot :submitGeoTiff="submitGeoTiff" :uploadGeoTiff="uploadGeoTiff" :error="error" ></slot>
+    <slot :submitGeoTiff="submitGeoTiff" :uploadGeoTiff="uploadGeoTiff" :error="error"></slot>
 </template>
 
 <script>
@@ -24,14 +24,14 @@ export default {
     methods: {
         handleError(response) {
             let knownError = response.body.errors && (
-                response.body.errors.geotiff || 
+                response.body.errors.geotiff ||
                 response.body.errors.fileExists ||
                 response.body.errors.invalidColorSpace ||
                 response.body.errors.noPCSKEY ||
                 response.body.errors.failedTransformation ||
                 response.body.errors.missingModelTiePoints ||
-                response.body.errors.missingModelType || 
-                response.body.errors.wrongModelType || 
+                response.body.errors.missingModelType ||
+                response.body.errors.wrongModelType ||
                 response.body.errors.affineTransformation ||
                 response.body.errors.userDefined ||
                 response.body.errors.unDefined ||
@@ -57,7 +57,7 @@ export default {
             document.getElementById('geoTiffInput').click();
         },
         upload(data) {
-            return Api.saveGeoTiff({id: this.volumeId}, data);
+            return Api.saveGeoTiff({ id: this.volumeId }, data);
         },
         uploadGeoTiff(event) {
             this.$emit('upload', true);

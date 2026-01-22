@@ -53,23 +53,25 @@ class GeoOverlay extends Model
     /**
      * Getter for the attrs json column
      */
-    protected function attrs(): Attribute {
-        
+    protected function attrs(): Attribute
+    {
+
         return Attribute::make(
             get: function (mixed $value): array {
-            $value = json_decode($value, true);
-            $float_array = ['top_left_lng', 'top_left_lat', 'bottom_right_lng', 'bottom_right_lat'];
-            
-            foreach($value as $entry) {
-                if (in_array($entry, $float_array)) {
-                    $value[$entry] = floatval($value[$entry]);
-                }
-            }
+                $value = json_decode($value, true);
+                $float_array = ['top_left_lng', 'top_left_lat', 'bottom_right_lng', 'bottom_right_lat'];
 
-            return $value;
-        });
+                foreach ($value as $entry) {
+                    if (in_array($entry, $float_array)) {
+                        $value[$entry] = floatval($value[$entry]);
+                    }
+                }
+
+                return $value;
+            }
+        );
     }
-    
+
     /**
      * The volume, this overlay belongs to.
      *
@@ -147,7 +149,7 @@ class GeoOverlay extends Model
         $overlay->name = $name;
         $overlay->layer_index = null;
         $overlay->attrs = [];
-        $round = fn ($c) => round($c, 13);
+        $round = fn($c) => round($c, 13);
         $coords = array_map($round, $attrs[0]);
 
         // ignore coords if webmap server does not provide supported epsg codes

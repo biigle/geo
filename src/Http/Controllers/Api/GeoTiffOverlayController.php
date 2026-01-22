@@ -7,7 +7,6 @@ use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
 use Illuminate\Validation\ValidationException;
-use Biigle\Modules\Geo\Services\Support\Transformer;
 use Biigle\Modules\Geo\Http\Requests\StoreGeotiffOverlay;
 use Biigle\Modules\Geo\Exceptions\TransformCoordsException;
 use Biigle\Modules\Geo\Exceptions\ConvertModelSpaceException;
@@ -61,9 +60,9 @@ class GeoTiffOverlayController extends Controller
 
         try {
             $coords = $geotiff->getCoords();
-            $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff' , [$coords, $pixelDimensions]);
+            $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff', [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
-            TileSingleOverlay::dispatch($overlay, $request->user(),  $geotiff->exif);
+            TileSingleOverlay::dispatch($overlay, $request->user(), $geotiff->exif);
             return $overlay->fresh();
 
         } catch (ConvertModelSpaceException | TransformCoordsException | Exception $e) {

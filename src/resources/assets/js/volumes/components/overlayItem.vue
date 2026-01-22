@@ -11,20 +11,22 @@
         </td>
         <td>
             <span class="power-toggle">
-                <button class="btn btn-default btn-sm" :class="{'active btn-info': browsingLayer}" v-on:click="updateShowLayer" title="Add overlay to geo-selection filter">
+                <button class="btn btn-default btn-sm" :class="{ 'active btn-info': browsingLayer }"
+                    v-on:click="updateShowLayer" title="Add overlay to geo-selection filter">
                     <i class="fa fa-fw fa-power-off"></i>
                 </button>
             </span>
         </td>
         <td>
-            <button type="button" class="close" :title="title" v-on:click="remove" v-once><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" :title="title" v-on:click="remove" v-once><span
+                    aria-hidden="true">&times;</span></button>
         </td>
     </tr>
 </template>
 
 <script>
 import Api from '../api/geoOverlays.js';
-import {handleErrorResponse} from '../../geo/import.js';
+import { handleErrorResponse } from '../../geo/import.js';
 
 
 export default {
@@ -34,9 +36,9 @@ export default {
         }
     },
     props: {
-        overlay: {type: Object, required: true},
-        volumeId: {type: Number, required: true,},
-        index: {type: Number, required: true},
+        overlay: { type: Object, required: true },
+        volumeId: { type: Number, required: true, },
+        index: { type: Number, required: true },
     },
     computed: {
         title() {
@@ -74,18 +76,23 @@ tr:has(.handle:active) {
 td:nth-child(1) {
     width: 30px;
 }
+
 td:nth-child(2) {
     width: 35px;
 }
+
 td:nth-child(3) {
     width: 200px;
 }
+
 td:nth-child(4) {
     min-width: 90px;
 }
+
 td:nth-child(5) {
     min-width: 80px;
 }
+
 td:nth-child(6) {
     min-width: 65px;
 }

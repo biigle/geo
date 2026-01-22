@@ -29,9 +29,9 @@ class AddGeoOverlaysTable extends Migration
             $table->string('name', 512);
             $table->integer('volume_id')->unsigned()->index();
             $table->foreign('volume_id')
-                  ->references('id')
-                  ->on('volumes')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('volumes')
+                ->onDelete('cascade');
             $table->string('type', 10)->nullable();
             $table->boolean('browsing_layer')->default(0);
             $table->boolean('context_layer')->default(0);
