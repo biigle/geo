@@ -77,7 +77,7 @@ class StoreGeotiffOverlay extends FormRequest
 
             $colorCount = $this->geotiff->getKey('IFD0:SamplesPerPixel');
             if (!is_null($colorCount) && $colorCount > 4) {
-                $validator->errors()->add('invalidColorSpace', "Invalid color space. The image can have at most 4 color channels, but $colorCount channels are given. Please use BW, Grayscale, RGB or RGBA images.");
+                $validator->errors()->add('invalidColorSpace', "Invalid color space. The image can have at most 4 color channels, but $colorCount channels are given.");
             }
 
             $modelType = $this->geotiff->getCoordSystemType();
