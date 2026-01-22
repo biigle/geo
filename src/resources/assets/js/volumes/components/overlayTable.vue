@@ -30,6 +30,10 @@ import { handleErrorResponse } from '../../geo/import.js';
 
 
 export default {
+    components: {
+        overlayItem: OverlayItem,
+        draggable,
+    },
     data() {
         return {
             sortedOverlays: [],
@@ -97,10 +101,6 @@ export default {
     mounted() {
         this.sortedOverlays = this.overlays.slice(0, this.overlays.length);
         this.sortedOverlays.sort((a, b) => a.layer_index - b.layer_index);
-    },
-    components: {
-        overlayItem: OverlayItem,
-        draggable,
     }
 };
 </script>
