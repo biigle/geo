@@ -71,7 +71,7 @@ class GeoOverlayController extends Controller
 
         $urlTemplate = Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/');
         // Use the full template, since openalayer's default file extension is JPG
-        $urlTemplate .= "/{TileGroup}/{z}-{x}-{y}.png";
+        $urlTemplate .= "{TileGroup}/{z}-{x}-{y}.png";
 
         return response([
             'geoOverlays' => $overlays,
