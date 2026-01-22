@@ -86,6 +86,7 @@ class TileSingleOverlay extends TileSingleObject
             FileCache::getOnce($this->genericFile, [$this, 'generateTiles']);
             $this->uploadToStorage();
             $this->file->save();
+            GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
         } finally {
             File::deleteDirectory($this->tempPath);
         }
@@ -131,8 +132,6 @@ class TileSingleOverlay extends TileSingleObject
             'strip' => true,
             'suffix' => '.png[bitdepth=8]',
         ]);
-
-        GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
     }
 
     /**
