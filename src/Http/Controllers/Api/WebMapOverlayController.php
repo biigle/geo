@@ -2,10 +2,8 @@
 
 namespace Biigle\Modules\Geo\Http\Controllers\Api;
 
-use Exception;
 use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Http\Controllers\Api\Controller;
-use Illuminate\Validation\ValidationException;
 use Biigle\Modules\Geo\Http\Requests\StoreWebMapOverlay;
 
 class WebMapOverlayController extends Controller
