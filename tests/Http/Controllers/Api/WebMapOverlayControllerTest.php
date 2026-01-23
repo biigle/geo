@@ -30,6 +30,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
             "/api/v1/volumes/{$id}/geo-overlays/webmap",
             [
                 'url' => 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms',
+                'layer_index' => 0
             ]
         )->assertStatus(403);
 
@@ -44,6 +45,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         // test upload of invalid WMS-URL (should cause invalidWMS error)
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => 'https://google.com',
+            'layer_index' => 0
         ])->assertStatus(422);
 
         $xml = $this->getXMLResponse(1);
@@ -56,11 +58,13 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertSuccessful();
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
         $this->assertEquals($xml_array['Layer']['Layer']['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Layer']['Layer']['Title'], $overlay['name']);
@@ -80,11 +84,13 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertSuccessful();
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
         $this->assertEquals($xml_names[0], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
@@ -98,11 +104,13 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0,Name_1';
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertInvalid(['tooManyLayers']);
 
         $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0 Name_1';
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertInvalid(['tooManyLayers']);
     }
 
@@ -119,11 +127,13 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertSuccessful();
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
         $this->assertEquals($xml_array[1]['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array[1]['Title'], $overlay['name']);
@@ -140,6 +150,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertInvalid(['noValidLayer']);
     }
 
@@ -161,6 +172,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertSuccessful();
 
         $round = fn($c) => round($c, 13);
@@ -168,6 +180,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
         $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Title'], $overlay['name']);
@@ -195,11 +208,13 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
         $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertSuccessful();
 
         $overlay = json_decode($response->getContent(), true);
         $this->assertNotNull($overlay);
         $this->assertTrue($overlay['browsing_layer']);
+        $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
         $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
         $this->assertEquals($xml_array['Title'], $overlay['name']);
@@ -220,7 +235,23 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap&layers=test123';
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
             'url' => $url,
+            'layer_index' => 0
         ])->assertInvalid(['noValidLayer']);
+    }
+
+    public function testStoreInvalidLayerIndex()
+    {
+        $id = $this->volume()->id;
+        $xml = $this->getXMLResponse(1);
+        $this->beAdmin();
+
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        $url = 'https://maps.geomar.de/geoserver/GEOMAR-Bathymetry/wms?service=WMS&version=1.1.0&request=GetMap';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 99
+        ])->assertInvalid(['layer_index']);
     }
 
     public function getXMLResponse($layers, $hasInvalidLayer = false)
