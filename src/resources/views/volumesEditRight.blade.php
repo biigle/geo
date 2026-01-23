@@ -17,13 +17,13 @@
         <div class="panel-body" v-if="editing" v-cloak>
             <tabs>
                 <tab title="geoTIFF" :disabled="loading">
-                    <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:upload="handleUpload" :job-error="jobError"
+                    <geotiff-overlay-form :volume-id="{{$volume->id}}" v-on:upload="handleUpload" :job-error="jobError" :overlay-count="geoOverlays.length"
                         v-slot="{ submitGeoTiff, uploadGeoTiff, error }">
                         @include('geo::volumes.edit.geotiffOverlayForm')
                     </geotiff-overlay-form>
                 </tab>
                 <tab title="WMS" :disabled="loading">
-                    <webmap-overlay-form :volume-id="{{$volume->id}}" v-on:success="addOverlay" v-on:upload="handleUpload"
+                    <webmap-overlay-form :volume-id="{{$volume->id}}" v-on:success="addOverlay" v-on:upload="handleUpload" :overlay-count="geoOverlays.length"
                         v-slot="{ submitWebMap, error }">
                         @include('geo::volumes.edit.webmapOverlayForm')
                     </webmap-overlay-form>

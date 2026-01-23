@@ -49,8 +49,10 @@ class StoreWebMapOverlay extends FormRequest
      */
     public function rules(): array
     {
+        $overlayCount = GeoOverlay::where('volume_id', $this->volume->id)->count();
         return [
             'url' => 'required|url:http,https|max:512',
+            'layer_index' => "required|integer|between:0,$overlayCount",
         ];
     }
 

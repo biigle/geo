@@ -50,8 +50,10 @@ class StoreGeotiffOverlay extends FormRequest
      */
     public function rules()
     {
+        $overlayCount = GeoOverlay::where('volume_id', $this->volume->id)->count();
         return [
             'geotiff' => 'required|file|mimetypes:image/tiff',
+            'layer_index' => "required|integer|between:0,$overlayCount",
         ];
     }
 

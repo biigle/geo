@@ -34,9 +34,10 @@ class UpdateOverlay extends FormRequest
      */
     public function rules(): array
     {
+        $overlayCount = GeoOverlay::where('volume_id', $this->volume->id)->count();
         return [
             'browsing_layer' => 'filled|boolean',
-            'layer_index' => 'filled|integer|gte:0',
+            'layer_index' => "filled|integer|between:0,$overlayCount",
         ];
     }
 
@@ -45,14 +46,6 @@ class UpdateOverlay extends FormRequest
         $validator->after(function ($validator) {
             if (count($this->all()) === 0) {
                 $validator->errors()->add('invalidRequest', 'The request body is missing. No updates performed.');
-            }
-
-            if ($this->has('layer_index')) {
-                $idx = $this->input('layer_index');
-                $overlayCount = GeoOverlay::count() - 1;
-                if ($idx > $overlayCount) {
-                    $validator->errors()->add('invalidLayerIndex', 'The layer index is invalid.');
-                }
             }
         });
     }

@@ -66,7 +66,7 @@ class GeoOverlayController extends Controller
 
         $overlays = GeoOverlay::where('volume_id', $volume->id)
             ->where('processed', true)
-            ->orderBy('layer_index')
+            ->orderBy('layer_index', 'desc')
             ->get();
 
         $urlTemplate = Storage::disk(config('geo.tiles.overlay_storage_disk'))->url(':id/:id_tiles/');

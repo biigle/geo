@@ -17,6 +17,10 @@ export default {
       type: Number,
       required: true,
     },
+    overlayCount: {
+      type: Number,
+      default: 0
+    }
   },
   emits: [
     'success',
@@ -56,6 +60,7 @@ export default {
       }
 
       data.append('url', event.target[0].value);
+      data.append('layer_index', this.overlayCount);
       geoApi.saveWebMap({ id: this.volumeId }, data)
         .then(this.handleSuccess, this.handleError)
         .finally(() => this.$emit('upload', false))

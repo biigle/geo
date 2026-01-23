@@ -32,7 +32,7 @@ class GeoTiffOverlayController extends Controller
      * "name" => "standardEPSG2013.tif"
      * "type" => "geotiff"
      * "browsing_layer" => true
-     * "layer_index" => null
+     * "layer_index" => 1
      * "attrs" => [
      *  "top_left_lng" => -2.9213164328107
      *  "top_left_lat" => 57.096651484989
@@ -54,13 +54,14 @@ class GeoTiffOverlayController extends Controller
         // create GeoManager-class from uploadedFile
         $geotiff = $request->geotiff;
         $volumeId = $request->volume->id;
+        $layerIdx = $request->input('layer_index');
 
         $pixelDimensions = $geotiff->getPixelSize();
         $epsg = $geotiff->getEpsgCode();
 
         try {
             $coords = $geotiff->getCoords();
-            $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff', [$coords, $pixelDimensions]);
+            $overlay = GeoOverlay::build($volumeId, $fileName, 'geotiff', $layerIdx, [$coords, $pixelDimensions]);
             $overlay->storeFile($file);
             TileSingleOverlay::dispatch($overlay, $request->user(), $geotiff->exif);
             return $overlay->fresh();

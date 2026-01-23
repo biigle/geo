@@ -30,7 +30,7 @@ class WebMapOverlayController extends Controller
      * "name" => "Title_0"
      * "type" => "webmap"
      * "browsing_layer" => true
-     * "layer_index" => null
+     * "layer_index" => 1
      *   "attrs" => {
      *      "top_left_lng" => "-2.9198048485707",
      *      "top_left_lat" => "57.0974838573358",
@@ -47,12 +47,13 @@ class WebMapOverlayController extends Controller
     public function store(StoreWebMapOverlay $request)
     {
         $volumeId = $request->volume->id;
+        $layerIdx = $request->input('layer_index');
         $webmapSource = $request->webmapSource;
 
         [$layerTitle, $layerName] = $webmapSource->getLayer();
         $coords = $webmapSource->getCoords($layerName);
 
-        $overlay = GeoOverlay::build($volumeId, $layerTitle, 'webmap', [$coords, $webmapSource->baseUrl, $layerName]);
+        $overlay = GeoOverlay::build($volumeId, $layerTitle, 'webmap', $layerIdx, [$coords, $webmapSource->baseUrl, $layerName]);
         return $overlay->fresh();
     }
 }

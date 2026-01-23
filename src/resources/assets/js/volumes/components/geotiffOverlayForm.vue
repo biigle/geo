@@ -14,6 +14,10 @@ export default {
         jobError: {
             type: String,
             default: ''
+        },
+        overlayCount: {
+            type: Number,
+            default: 0
         }
     },
     data() {
@@ -67,6 +71,7 @@ export default {
             this.$emit('upload', true);
             let data = new FormData();
             data.append('geotiff', event.target.files[0]);
+            data.append('layer_index', this.overlayCount);
             this.upload(data).catch(this.handleError)
         },
     },

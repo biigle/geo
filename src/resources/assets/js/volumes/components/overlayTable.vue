@@ -92,15 +92,16 @@ export default {
 
             // save the new overlay-order in geo_overlays table
             for (let [idx, overlay] of sortedArray.entries()) {
+                let pos = sortedArray.length - idx;
                 GeoApi.updateGeoOverlay({ id: this.volumeId, id2: overlay.id }, {
-                    layer_index: idx,
+                    layer_index: pos,
                 }).catch(handleErrorResponse);
             }
         }
     },
     mounted() {
         this.sortedOverlays = this.overlays.slice(0, this.overlays.length);
-        this.sortedOverlays.sort((a, b) => a.layer_index - b.layer_index);
+        this.sortedOverlays.sort((a, b) => b.layer_index - a.layer_index);
     }
 };
 </script>

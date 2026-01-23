@@ -138,16 +138,17 @@ class GeoOverlay extends Model
      * @param mixed $id Id of the used volume
      * @param mixed $name File name
      * @param string $type GeoOverlay type (geotiff or webmap)
+     * @param int $layerIdx Layer index of overlay
      * @param mixed $attrs Array containing the corresponding attributes
      * @return GeoOverlay
      */
-    public static function build($id, $name, $type, $attrs)
+    public static function build($id, $name, $type, $layerIdx, $attrs)
     {
         $overlay = new static;
         $overlay->volume_id = $id;
         $overlay->type = $type;
         $overlay->name = $name;
-        $overlay->layer_index = null;
+        $overlay->layer_index = $layerIdx;
         $overlay->attrs = [];
         $round = fn($c) => round($c, 13);
         $coords = array_map($round, $attrs[0]);
