@@ -65,10 +65,11 @@ class StoreGeotiffOverlay extends FormRequest
      */
     public function withValidator($validator)
     {
+        if ($validator->errors()->isNotEmpty()) {
+            return;
+        }
+
         $validator->after(function ($validator) {
-            if (!$this->hasFile('geotiff')) {
-                throw ValidationException::withMessages(['invalid' => 'Invalid request. Geotiff is missing.']);
-            }
 
             if ($this->volume->isVideoVolume()) {
                 $validator->errors()->add('id', 'Geo overlays are not available for video volumes.');
