@@ -303,18 +303,8 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $this->beAdmin();
-        $exif = [
-            'IFD0:ImageWidth' => 768,
-            'IFD0:ImageHeight' => 608,
-            'IFD0:ModelTransform' => '0.0132309081041667 0 0 5.554322947 0 -0.0132389576726974 0 55.118670158 0 0 0 0 0 0 0 1',
-            'IFD0:GDALNoData' => 0.0,
-            'GeoTiff:GTModelType' => 1,
-            'GeoTiff:GTRasterType' => 1,
-            'GeoTiff:ProjectedCSType' => 32701,
-        ];
 
-        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
-        $this->mock->shouldReceive('convertToModelSpace')->andThrow(new Exception());
+        $this->mock->shouldReceive('getExifData')->never();
         $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
 
         $this->postJson(
