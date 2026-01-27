@@ -86,7 +86,12 @@ export default {
             }
         },
         sortedOverlays(sortedArray, oldArray) {
-            if (oldArray.length === 0) {
+            if (oldArray.length === 0 || sortedArray.length === 0) {
+                return;
+            }
+
+            // Do nothing if the last elemnt was delted
+            if (oldArray.length - sortedArray.length === 1 && oldArray[oldArray.length - 1] != sortedArray[sortedArray.length - 1]) {
                 return;
             }
 
