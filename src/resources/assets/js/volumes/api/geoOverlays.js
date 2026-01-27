@@ -12,9 +12,9 @@ import { Resource } from '../import.js';
  */
 export default Resource('api/v1/geo-overlays{/id}', {}, {
     // GeoOverlay
-    updateGeoOverlay: {
+    updateGeoOverlays: {
         method: 'PUT',
-        url: 'api/v1/volumes{/id}/geo-overlays{/id2}',
+        url: 'api/v1/volumes{/id}/geo-overlays',
     },
     deleteGeoOverlay: {
         method: 'DELETE',

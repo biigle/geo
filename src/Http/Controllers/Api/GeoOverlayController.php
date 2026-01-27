@@ -13,39 +13,31 @@ class GeoOverlayController extends Controller
 {
 
     /**
-     * Update the browsing_layer values
+     * Update the browsing_layer or layer_index values for a set of overlays
      * 
-     * @api {put} volumes/:id/geo-overlays/:geo_overlay_id Update a geo overlay
+     * @api {put} volumes/:id/geo-overlays Update a geo overlay
      * @apiGroup Geo
      * @apiName VolumesUpdateGeoOverlay
      * @apiPermission projectAdmin
      * 
      * @apiParam (Attributes that can be updated) {Boolean} browsing_layer Defines whether to show the geoOverlay as a browsing-visualisation layer.
+     * @apiParam (Attributes that can be updated) {integer} layer_index Represents the layer position among all layers.
      * 
      * @apiParamExample {String} Request example:
-     * browsing_layer: true
+     * [
+     *     [
+     *      'id' => 0,
+     *      'name' => 'overlay_name',
+     *      'volume_id' => 1,
+     *      'layer_index' => 4
+     *     ]
+     * ]
      * 
-     * @param UpdateOverlay $request
-     *
-     * @return GeoOverlay updated overlay
      */
-    public function updateGeoOverlay(UpdateOverlay $request)
+    public function updateGeoOverlays(UpdateOverlay $request)
     {
-        $overlay = GeoOverlay::findOrFail($request->id2);
-
-        if ($request->has('layer_index')) {
-            $overlay->update([
-                'layer_index' => $request->input('layer_index')
-            ]);
-        }
-
-        if ($request->has('browsing_layer') && $overlay->browsing_layer != $request->browsing_layer) {
-            $overlay->update([
-                'browsing_layer' => $request->input('browsing_layer')
-            ]);
-        }
-
-        return $overlay;
+        $updated_overlays = $request->input('updated_overlays');
+        GeoOverlay::upsert($updated_overlays, ['id'], [$request->updateKey]);
     }
 
     /**

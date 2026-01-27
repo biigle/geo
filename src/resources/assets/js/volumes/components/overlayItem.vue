@@ -51,13 +51,12 @@ export default {
                 this.$emit('remove', this.overlay);
             }
         },
-        // handle update of contextLayer & browsingLayer values in overlay
+        // handle update of browsingLayer values in overlay
         updateShowLayer() {
-            Api.updateGeoOverlay({ id: this.volumeId, id2: this.overlay.id }, { browsing_layer: !this.browsingLayer })
-                .then((res) => {
-                    let overlay = res.data;
-                    this.browsingLayer = overlay.browsing_layer;
-                }).catch(handleErrorResponse);
+            let updated_overlay = [{ id: this.overlay.id, name: this.overlay.name, volume_id: this.volumeId, browsing_layer: !this.browsingLayer }]
+            Api.updateGeoOverlays({ id: this.volumeId }, { updated_overlays: updated_overlay })
+                .then(() => this.browsingLayer = !this.browsingLayer)
+                .catch(handleErrorResponse);
         },
     },
     mounted() {

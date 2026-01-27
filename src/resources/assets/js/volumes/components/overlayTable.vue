@@ -90,13 +90,18 @@ export default {
                 return;
             }
 
+            let updated_overlays = [];
             // save the new overlay-order in geo_overlays table
             for (let [idx, overlay] of sortedArray.entries()) {
                 let pos = sortedArray.length - idx;
-                GeoApi.updateGeoOverlay({ id: this.volumeId, id2: overlay.id }, {
-                    layer_index: pos,
-                }).catch(handleErrorResponse);
+                pos = pos === 0 ? 0 : pos - 1;
+                if (oldArray[idx] != sortedArray[idx]) {
+                    updated_overlays.push({ id: overlay.id, layer_index: pos, name: overlay.name, volume_id: this.volumeId });
+                }
             }
+            GeoApi.updateGeoOverlays({ id: this.volumeId }, {
+                updated_overlays: updated_overlays,
+            }).catch(handleErrorResponse);
         }
     },
     mounted() {
