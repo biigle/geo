@@ -11,56 +11,138 @@ class GeoOverlayControllerTest extends ApiTestCase
 
     public function testUpdateGeoOverlay()
     {
-        Storage::fake('geo-overlays');
         $id = $this->volume()->id;
 
         // Create overlay-instance
-        $overlay = GeoOverlay::factory()->create();
-        $overlay->save();
+        $overlay = GeoOverlay::factory()->create(['volume_id' => $id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name,
+                'browsing_layer' => false
+            ]
+        ];
 
-        $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}");
+        $this->doTestApiRoute('PUT', "/api/v1/volumes/{$id}/geo-overlays");
 
         $this->beEditor();
         // 403: The client does not have access rights to the content
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'browsing_layer' => true,
-            'use_layer' => true
-        ])
-            ->assertStatus(403);
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertStatus(403);
 
         $this->beAdmin();
         // 422: The request was well-formed but was unable to be followed due to semantic errors.
         // reason: no input data
-        $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}")
-            ->assertStatus(422);
+        $this->json('PUT', "/api/v1/volumes/{$id}/geo-overlays")
+            ->assertInvalid(['updated_overlays']);
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'browsing_layer' => 'test',
-        ])->assertStatus(422);
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => []
+        ])->assertInvalid(['updated_overlays']);
 
-        $this->assertFalse($overlay->browsing_layer);
+        // invalid type
+        $updated_overlays[0]['browsing_layer'] = "test";
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['updated_overlays.0.browsing_layer']);
+
+        // invalid id
+        $updated_overlays[0]['id'] = 99;
+        $updated_overlays[0]['browsing_layer'] = true;
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['invalidIds']);
+
+        $updated_overlays[0]['id'] = $overlay->id;
         // now test if updating with data will succeed with the correct values being returned
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'browsing_layer' => true,
+        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
         ])->assertStatus(200);
 
-        $this->assertTrue(json_decode($response->getContent())->browsing_layer);
+        $this->assertTrue($overlay->refresh()->browsing_layer);
+    }
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => -1
-        ])->assertStatus(422);
+    public function testUpdateGeoOverlayLayerIndex()
+    {
+        $id = $this->volume()->id;
+        $overlay = GeoOverlay::factory()->create(['volume_id' => $id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name,
+                'layer_index' => 0
+            ]
+        ];
+        $this->beAdmin();
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => 1.1
-        ])->assertStatus(422);
+        $updated_overlays[0]['layer_index'] = -1;
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['updated_overlays.0.layer_index']);
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => GeoOverlay::count()
-        ])->assertStatus(422);
+        $updated_overlays[0]['layer_index'] = 0.1;
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['updated_overlays.0.layer_index']);
 
-        $this->putJson("/api/v1/volumes/{$id}/geo-overlays/{$overlay->id}", [
-            'layer_index' => 0
+        $updated_overlays[0]['layer_index'] = GeoOverlay::where('volume_id', $id)->count() + 1;
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['updated_overlays.0.layer_index']);
+
+        $updated_overlays[0]['layer_index'] = 0;
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
         ])->assertStatus(200);
+    }
+
+    public function testUpdateGeoOverlayInvalidRequest()
+    {
+        Storage::fake('geo-overlays');
+        $id = $this->volume()->id;
+        $overlay = GeoOverlay::factory()->create(['volume_id' => $id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name
+            ]
+        ];
+        $this->beAdmin();
+
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['invalidUpdateKey']);
+
+        $updated_overlays[0]['layer_index'] = 0;
+        $updated_overlays[0]['browsing_layer'] = true;
+
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['invalidUpdateKey']);
+
+        $overlay2 = GeoOverlay::factory()->create(['volume_id' => $id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name,
+                'browsing_layer' => true
+            ],
+            [
+                'id' => $overlay2->id,
+                'volume_id' => $overlay2->volume_id,
+                'name' => $overlay2->name,
+                'layer_index' => 1
+            ]
+        ];
+
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['invalidRequest']);
     }
 
     public function testGetOverlays()
