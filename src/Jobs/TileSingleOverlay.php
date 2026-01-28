@@ -111,7 +111,7 @@ class TileSingleOverlay extends TileSingleObject
 
         if (!$isBlackImg && $this->vipsImage->bands === 1) {
             // Must be called before imageNormalization since pixel values could be changed
-            $alpha = $this->generateAlphaMask();
+            $alpha = $this->maybeGenerateAlphaMask();
 
             // If smaller or larger range is used, normalize pixel range to enhance contrast
             if ($min != 0 || $max != 255) {
@@ -190,7 +190,7 @@ class TileSingleOverlay extends TileSingleObject
         }
 
         // If image's minimum equals the no data value,
-        // return the minimum because otherwise comparisons with the no data value will not work
+        // return the minimum because otherwise comparisons with the no data value would not work
         $this->noDataValue = $this->minimumEqualsNoDataValue() ? $this->vipsImage->min() : $this->noDataValue;
     }
 
@@ -215,7 +215,7 @@ class TileSingleOverlay extends TileSingleObject
      *
      * @return VipsImage|null
      */
-    protected function generateAlphaMask()
+    protected function maybeGenerateAlphaMask()
     {
         if (is_null($this->noDataValue)) {
             return;
