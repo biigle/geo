@@ -16,7 +16,7 @@
                         required>
                 </div>
             </div>
-            <button class="btn btn-default" type="submit">Upload WMS</button>
+            <button class="btn btn-default" type="submit" :disabled="loading">Upload WMS</button>
         </div>
     </form>
     <div class="alert alert-danger" v-if="error" v-text="error" v-cloak></div>
