@@ -147,9 +147,4 @@ class TileSingleOverlayStub extends TileSingleOverlay
 
         return VipsImage::black(5, 5);
     }
-
-    protected function getExifData($path)
-    {
-        return ['IFD0:GDALNoData' => 0];
-    }
 }
