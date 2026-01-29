@@ -111,6 +111,31 @@ class TileSingleOverlayTest extends TestCase
             File::deleteDirectory($job->tempPath);
         }
     }
+
+    public function testGenerateOverlayTilesWithNormalizationWithNoDataValue()
+    {
+        $file = new GenericFile("test");
+
+        $overlay = GeoOverlay::factory()->create();
+        $job = new TileSingleOverlayStub($overlay, $this->user, ['IFD0:GDALNoData' => 0]);
+        $job->useGrayImage = true;
+        $job->generateTiles($file, "test");
+        $getPixel = fn($img) => $img->getpoint(2, 3)[0];
+        $normImg = $job->outputImg;
+
+        $files = [
+            $job->tempPath . "/ImageProperties.xml",
+            $job->tempPath . "/TileGroup0/0-0-0.png",
+            $job->tempPath . '/vips-properties.xml'
+        ];
+
+        $this->assertEquals(0, $normImg->min());
+        $this->assertEquals(255, $normImg->max());
+        $this->assertEquals(49, $getPixel($normImg));
+        $this->assertCount(3, File::allFiles($job->tempPath));
+        $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
+
+    }
 }
 
 class TileSingleOverlayStub extends TileSingleOverlay
