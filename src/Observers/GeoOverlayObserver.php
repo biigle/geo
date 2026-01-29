@@ -6,8 +6,17 @@ use Biigle\Modules\Geo\GeoOverlay;
 
 class GeoOverlayObserver
 {
+    /**
+     * Delete overlay tiles if overlay is geotiff
+     *
+     * @param GeoOverlay $overlay
+     *
+     * @return void
+     */
     public function deleted(GeoOverlay $overlay)
     {
-        $overlay->deleteFile();
+        if ($overlay->type === 'geotiff') {
+            $overlay->deleteFile();
+        }
     }
 }
