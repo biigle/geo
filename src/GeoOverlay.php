@@ -153,35 +153,80 @@ class GeoOverlay extends Model
         $round = fn($c) => round($c, 13);
         $coords = array_map($round, $attrs[0]);
 
-        // ignore coords if webmap server does not provide supported epsg codes
-        if (count($coords) > 0) {
-            $overlay->attrs = [
-                "top_left_lng" => $coords[0],
-                "top_left_lat" => $coords[1],
-                "bottom_right_lng" => $coords[2],
-                "bottom_right_lat" => $coords[3],
-            ];
-        }
-
         if ($type === 'geotiff') {
-            [$w, $h] = $attrs[1];
-            $overlay->attrs = array_merge($overlay->attrs, [
-                "width" => $w,
-                "height" => $h
-            ]);
+            $overlay = self::createGeoTiff($overlay, $coords, $attrs);
         } else {
-            $url = $attrs[1];
-            $layer = $attrs[2];
-
-            $overlay->attrs = array_merge($overlay->attrs, [
-                'url' => $url,
-                'layer' => $layer,
-            ]);
-            // set to true since overlay will not be tiled
-            $overlay->processed = true;
+            $overlay = self::createWebMap($overlay, $coords, $attrs);
         }
 
         $overlay->save();
+        return $overlay;
+    }
+
+    /**
+     * Add geoTiff data to overlay
+     *
+     * @param GeoOverlay $overlay to be used
+     * @param array $coords extent coodrinates
+     * @param array $attrs geotiff attributes
+     *
+     * @return GeoOverlay
+     */
+    protected static function createGeoTiff($overlay, $coords, $attrs)
+    {
+        $overlay = self::setExtent($overlay, $coords);
+        [$w, $h] = $attrs[1];
+        $overlay->attrs = array_merge($overlay->attrs, [
+            "width" => $w,
+            "height" => $h
+        ]);
+        return $overlay;
+    }
+
+    /**
+     * Add webMap data to overlay
+     *
+     * @param GeoOverlay $overlay to be used
+     * @param array $coords extent coodrinates
+     * @param array $attrs geotiff attributes
+     *
+     * @return GeoOverlay
+     */
+    protected static function createWebMap($overlay, $coords, $attrs)
+    {
+        // ignore coords if webmap server does not provide supported epsg codes
+        if (count($coords) > 0) {
+            $overlay = self::setExtent($overlay, $coords);
+        }
+
+        $url = $attrs[1];
+        $layer = $attrs[2];
+
+        $overlay->attrs = array_merge($overlay->attrs, [
+            'url' => $url,
+            'layer' => $layer,
+        ]);
+        // set to true since overlay will not be tiled
+        $overlay->processed = true;
+        return $overlay;
+    }
+
+    /**
+     * Set extent coordinates
+     *
+     * @param GeoOverlay $overlay to be used
+     * @param array $coords
+     *
+     * @return GeoOverlay
+     */
+    protected static function setExtent($overlay, $coords)
+    {
+        $overlay->attrs = [
+            "top_left_lng" => $coords[0],
+            "top_left_lat" => $coords[1],
+            "bottom_right_lng" => $coords[2],
+            "bottom_right_lat" => $coords[3],
+        ];
         return $overlay;
     }
 }
