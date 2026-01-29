@@ -103,7 +103,11 @@ class StoreGeotiffOverlay extends FormRequest
             }
 
             $fileName = $this->input('name', $file->getClientOriginalName());
-            $overlayExists = GeoOverlay::where('volume_id', $this->volume->id)->where('name', $fileName)->exists();
+            $overlayExists = GeoOverlay::where('volume_id', $this->volume->id)
+                ->where('type', 'geotiff')
+                ->where('name', $fileName)
+                ->exists();
+
             if ($overlayExists) {
                 $fileNameShort = Str::limit($fileName, 25);
                 $validator->errors()->add('fileExists', "The geoTIFF \"{$fileNameShort}\" has already been uploaded.");
