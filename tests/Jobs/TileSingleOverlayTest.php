@@ -46,8 +46,6 @@ class TileSingleOverlayTest extends TestCase
     public function testGenerateOverlayTilesWithNormalization()
     {
         $file = new GenericFile("test");
-
-
         $overlay = GeoOverlay::factory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
         $job->useGrayImage = true;
