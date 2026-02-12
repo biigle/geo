@@ -82,6 +82,12 @@ class UpdateOverlay extends FormRequest
                 $missing = $missing->map(fn($e) => $e->id)->sort()->join(", ");
                 $validator->errors()->add('invalidIds', "GeoOverlay(s) with ids \"$missing\" do not exist.");
             }
+
+            $overlayVolIds = $overlays->pluck('volume_id')->unique();
+            if ($overlayVolIds->count() > 1 || $overlayVolIds->first() != $this->volume->id) {
+                $volId = $this->volume->id;
+                $validator->errors()->add('invalidIds', "GeoOverlay(s) do not belong to volume with id $volId");
+            }
         });
     }
 }
