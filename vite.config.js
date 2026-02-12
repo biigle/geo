@@ -22,7 +22,7 @@ export default defineConfig({
             input: [
                 'src/resources/assets/sass/main.scss',
                 'src/resources/assets/js/geo/main.js',
-                'src/resources/assets/js/volumes/main.js',
+                'src/resources/assets/js/volumes/volumes.js',
             ],
             hotFile: 'hot',
         }),
