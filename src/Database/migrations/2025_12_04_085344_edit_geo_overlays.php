@@ -22,7 +22,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('geo_overlays', function (Blueprint $table) {
-            $table->column('context_layer')->default(0);
+            $table->boolean('context_layer')->default(0);
             $table->boolean('browsing_layer')->default(0)->change();
         });
     }
