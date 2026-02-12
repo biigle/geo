@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
 use Storage;
 use ApiTestCase;
+use Biigle\Volume;
 use Biigle\Modules\Geo\GeoOverlay;
 
 class GeoOverlayControllerTest extends ApiTestCase
@@ -62,6 +63,42 @@ class GeoOverlayControllerTest extends ApiTestCase
         ])->assertStatus(200);
 
         $this->assertTrue($overlay->refresh()->browsing_layer);
+    }
+
+    public function testUpdateGeoOverlayWrongOverlayIds()
+    {
+        $id = $this->volume()->id;
+        $vol = Volume::factory()->create();
+
+        // Overlay belongs to other volume
+        $overlay = GeoOverlay::factory()->create(['volume_id' => $vol->id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name,
+                'layer_index' => 0
+            ]
+        ];
+        $this->beAdmin();
+
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertInvalid(['invalidIds']);
+
+        $overlay = GeoOverlay::factory()->create(['volume_id' => $id]);
+        $updated_overlays = [
+            [
+                'id' => $overlay->id,
+                'volume_id' => $overlay->volume_id,
+                'name' => $overlay->name,
+                'layer_index' => 0
+            ]
+        ];
+
+        $this->putJson("/api/v1/volumes/{$vol->id}/geo-overlays", [
+            'updated_overlays' => $updated_overlays
+        ])->assertForbidden();
     }
 
     public function testUpdateGeoOverlayLayerIndex()
