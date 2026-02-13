@@ -22,7 +22,7 @@ class GeoOverlayTest extends TestCase
         $this->assertTrue(is_int($geotiff->attrs['height']));
         $this->assertEquals($geotiff->type, 'geotiff');
 
-        $webmap = GeoOverlay::factory(true)->create();
+        $webmap = GeoOverlay::factory()->webMap()->create();
         $this->assertNotNull($webmap->name);
         $this->assertTrue(is_array($webmap->attrs['layers']));
         $this->assertTrue(is_string($webmap->attrs['url']));
