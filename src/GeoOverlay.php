@@ -2,14 +2,17 @@
 
 namespace Biigle\Modules\Geo;
 
-use Storage;
-use Biigle\Volume;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Geo\Database\factories\GeoOverlayFactory;
+use Biigle\Volume;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
+use Storage;
 
 class GeoOverlay extends Model
 {
+    use HasFactory;
+
     /**
      * Don't maintain timestamps for this model.
      *
@@ -99,12 +102,8 @@ class GeoOverlay extends Model
      * 
      * @return GeoOverlayFactory
      */
-    protected static function factory($isWebMap = false)
+    protected static function newFactory()
     {
-        if ($isWebMap) {
-            return GeoOverlayFactory::new()->webMap();
-        }
-
         return GeoOverlayFactory::new();
     }
 
