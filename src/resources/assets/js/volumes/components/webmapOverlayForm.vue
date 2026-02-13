@@ -55,7 +55,7 @@ export default {
       this.$emit('upload', true);
       let data = new FormData();
 
-      if (this.urlIsInvalid(event.target[0].value)) {
+      if (!this.urlIsValid(event.target[0].value)) {
         return;
       }
 
@@ -65,18 +65,15 @@ export default {
         .then(this.handleSuccess, this.handleError)
         .finally(() => this.$emit('upload', false))
     },
-    urlIsInvalid(link) {
-      const url = new URL(link);
-      const layers = url.searchParams.get('layers');
-
-      // Reject urls containing multiple layers separated by whitespaces or commas
-      if (layers && layers.match(/\s|\,/g)) {
-        this.error = "The url must not contain more than one layer.";
+    urlIsValid(link) {
+      try {
+        new URL(link);
+      } catch (e) {
+        this.error = "The URL is invalid."
         this.$emit('upload', false);
-        return true;
+        return false;
       }
-
-      return false;
+      return true;
     }
   },
 };
