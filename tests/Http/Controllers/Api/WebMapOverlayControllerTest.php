@@ -224,7 +224,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals(50.3023009095724, $overlay['attrs']['bottom_right_lat']);
     }
 
-    public function storeNotExistingLayer()
+    public function testStoreNotExistingLayer()
     {
         $id = $this->volume()->id;
         $xml = $this->getXMLResponse(1);
