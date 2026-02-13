@@ -6,7 +6,6 @@ use Storage;
 use Biigle\Volume;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Biigle\Modules\Geo\Database\factories\GeoOverlayFactory;
 
 class GeoOverlay extends Model
@@ -48,29 +47,6 @@ class GeoOverlay extends Model
     protected $casts = [
         'attrs' => 'array',
     ];
-
-
-    /**
-     * Getter for the attrs json column
-     */
-    protected function attrs(): Attribute
-    {
-
-        return Attribute::make(
-            get: function (mixed $value): array {
-                $value = json_decode($value, true);
-                $float_array = ['top_left_lng', 'top_left_lat', 'bottom_right_lng', 'bottom_right_lat'];
-
-                foreach ($value as $entry) {
-                    if (in_array($entry, $float_array)) {
-                        $value[$entry] = floatval($value[$entry]);
-                    }
-                }
-
-                return $value;
-            }
-        );
-    }
 
     /**
      * The volume, this overlay belongs to.
