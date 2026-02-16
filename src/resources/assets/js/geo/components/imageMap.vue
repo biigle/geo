@@ -237,7 +237,7 @@ export default {
                     let targetExtent = transformExtent(extentEPSG4326, 'EPSG:4326', 'EPSG:3857');
                     this.extents[this.overlays[i].id] = targetExtent;
                 } else {
-                    Events.$emit('disable-overlay-btn', this.overlays[i].id);
+                    Events.emit('disable-overlay-btn', this.overlays[i].id);
                 }
 
             } else { // if overlay.type == 'geotiff'
