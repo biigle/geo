@@ -182,11 +182,10 @@ class TileSingleOverlay extends TileSingleObject
             return;
         }
 
-        $hasMissingValues = $this->vipsImage->hist_find()->writeToArray()[$noDataValue] > 0;
+        $mask = $this->vipsImage->notEq($noDataValue);
+        $containsNoDataValue = $mask->min() == 0;
         // Create alpha mask if image contains noData values
-        return $hasMissingValues ?
-            $this->vipsImage->equal($noDataValue)->ifthenelse(0, 255, ['blend' => false]) :
-            null;
+        return $containsNoDataValue ? $mask : null;
     }
 
     /**
