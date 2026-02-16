@@ -251,7 +251,7 @@ class TileSingleOverlay extends TileSingleObject
      */
     protected function failAndNotify($msg)
     {
-        if (GeoOverlay::find($this->file->id)->exists()) {
+        if (GeoOverlay::where('id', $this->file->id)->exists()) {
             $this->file->delete();
         }
         GeoTiffUploadFailed::dispatch($this->user, $msg);
