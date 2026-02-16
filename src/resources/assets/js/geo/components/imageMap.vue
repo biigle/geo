@@ -3,29 +3,29 @@
 </template>
 
 <script>
-import DragBox from '@biigle/ol/interaction/DragBox';
-import Feature from '@biigle/ol/Feature';
-import LayerGroup from '@biigle/ol/layer/Group';
-import Map from '@biigle/ol/Map';
-import OSMSource from '@biigle/ol/source/OSM';
-import OverviewMap from '@biigle/ol/control/OverviewMap';
-import Point from '@biigle/ol/geom/Point';
-import ScaleLine from '@biigle/ol/control/ScaleLine';
-import Select from '@biigle/ol/interaction/Select';
+import DragBox from '@biigle/ol/interaction/DragBox.js';
+import Feature from '@biigle/ol/Feature.js';
+import LayerGroup from '@biigle/ol/layer/Group.js';
+import Map from '@biigle/ol/Map.js';
+import OSMSource from '@biigle/ol/source/OSM.js';
+import OverviewMap from '@biigle/ol/control/OverviewMap.js';
+import Point from '@biigle/ol/geom/Point.js';
+import ScaleLine from '@biigle/ol/control/ScaleLine.js';
+import Select from '@biigle/ol/interaction/Select.js';
 import Style from '../ol/style.js';
-import TileLayer from '@biigle/ol/layer/Tile';
-import TileWMS from '@biigle/ol/source/TileWMS';
-import VectorLayer from '@biigle/ol/layer/Vector';
-import VectorSource from '@biigle/ol/source/Vector';
-import View from '@biigle/ol/View';
-import ZoomifySource from '@biigle/ol/source/Zoomify';
-import ZoomToExtent from '@biigle/ol/control/ZoomToExtent';
-import { defaults as defaultControls } from '@biigle/ol/control';
-import { defaults as defaultInteractions } from '@biigle/ol/interaction';
-import { Events, throttle } from '../import';
-import { platformModifierKeyOnly } from '@biigle/ol/events/condition';
-import { Projection, addCoordinateTransforms, fromLonLat, transformExtent } from '@biigle/ol/proj';
-import { getHeight, getWidth } from '@biigle/ol/extent';
+import TileLayer from '@biigle/ol/layer/Tile.js';
+import TileWMS from '@biigle/ol/source/TileWMS.js';
+import VectorLayer from '@biigle/ol/layer/Vector.js';
+import VectorSource from '@biigle/ol/source/Vector.js';
+import View from '@biigle/ol/View.js';
+import ZoomifySource from '@biigle/ol/source/Zoomify.js';
+import ZoomToExtent from '@biigle/ol/control/ZoomToExtent.js';
+import { defaults as defaultControls } from '@biigle/ol/control.js';
+import { defaults as defaultInteractions } from '@biigle/ol/interaction.js';
+import { Events, throttle } from '../import.js';
+import { platformModifierKeyOnly } from '@biigle/ol/events/condition.js';
+import { Projection, addCoordinateTransforms, fromLonLat, transformExtent } from '@biigle/ol/proj.js';
+import { getHeight, getWidth } from '@biigle/ol/extent.js';
 
 /**
  * An element displaying the position of a single image on a map.
