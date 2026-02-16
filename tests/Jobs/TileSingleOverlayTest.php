@@ -103,7 +103,7 @@ class TileSingleOverlayTest extends TestCase
         $overlay = GeoOverlay::factory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
         $job->useGrayImage = true;
-        $job->edgeCase = true;
+        $job->edgeCase = 90;
         $job->generateTiles($file, "test");
         $normImg = $job->outputImg;
 
@@ -162,8 +162,38 @@ class TileSingleOverlayTest extends TestCase
         $this->assertEquals(49, $getPixel($normImg));
         $this->assertCount(3, File::allFiles($job->tempPath));
         $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
-
     }
+
+    public function testGenerateOverlayTilesCreateAlphaMask()
+    {
+        $file = new GenericFile("test");
+
+        $overlay = GeoOverlay::factory()->create();
+        $job = new TileSingleOverlayStub($overlay, $this->user, ['IFD0:GDALNoData' => -9999]);
+        $job->useGrayImage = true;
+        $job->edgeCase = -9999;
+        $job->generateTiles($file, "test");
+        $getPixel = fn($img) => $img->getpoint(2, 3)[0];
+        $normImg = $job->outputImg;
+        $mask = $normImg->extract_band(1);
+        $mask_hist = $mask->hist_find()->writeToArray();
+
+        $files = [
+            $job->tempPath . "/ImageProperties.xml",
+            $job->tempPath . "/TileGroup0/0-0-0.png",
+            $job->tempPath . '/vips-properties.xml'
+        ];
+
+        $this->assertTrue($normImg->hasAlpha());
+        $this->assertEquals(0, $normImg->getpoint(1, 0)[1]);
+        $this->assertEquals(1, $mask_hist[0]);
+        $this->assertEquals(0, $normImg->min());
+        $this->assertEquals(255, $normImg->max());
+        $this->assertEquals(60, $getPixel($normImg));
+        $this->assertCount(3, File::allFiles($job->tempPath));
+        $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
+    }
+
 }
 
 class TileSingleOverlayStub extends TileSingleOverlay
@@ -171,7 +201,7 @@ class TileSingleOverlayStub extends TileSingleOverlay
 
     public $useGrayImage = false;
 
-    public $edgeCase = false;
+    public $edgeCase = 0;
 
     public $outputImg;
 
@@ -193,8 +223,8 @@ class TileSingleOverlayStub extends TileSingleOverlay
                 [52, 89, 21, 68, 71],
             ];
 
-            if ($this->edgeCase) {
-                $pixels[0][1] = 90;
+            if ($this->edgeCase != 0) {
+                $pixels[0][1] = $this->edgeCase;
             }
 
             return VipsImage::newFromArray($pixels);
