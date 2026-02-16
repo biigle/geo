@@ -321,7 +321,7 @@ export default {
             });
         }
 
-        Events.on('sidebar.toggle', function () {
+        Events.on('sidebar.toggle', () => {
             if (this.map) {
                 this.map.updateSize();
             }
@@ -330,7 +330,7 @@ export default {
         // Update once to get the correct map size in case the map is used in combination
         // with other Components (like the sidebar). Else the select interaction may not
         // work correctly.
-        this.$nextTick(function () {
+        this.$nextTick(() => {
             this.map.updateSize();
         });
     },
