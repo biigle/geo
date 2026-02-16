@@ -2,15 +2,17 @@
 
 namespace Biigle\Tests\Modules\Geo\Jobs;
 
-use File;
-use TestCase;
-use Biigle\User;
-use Illuminate\Support\Arr;
 use Biigle\FileCache\GenericFile;
+use Biigle\Modules\Geo\Events\GeoTiffUploadFailed;
 use Biigle\Modules\Geo\GeoOverlay;
-use Jcupitt\Vips\Image as VipsImage;
-use Illuminate\Support\Facades\Storage;
 use Biigle\Modules\Geo\Jobs\TileSingleOverlay;
+use Biigle\User;
+use Exception;
+use File;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
+use Jcupitt\Vips\Image as VipsImage;
+use TestCase;
 
 
 
@@ -41,6 +43,34 @@ class TileSingleOverlayTest extends TestCase
 
         $this->assertCount(3, File::allFiles($job->tempPath));
         $this->assertSame($files, array_map(fn($f) => $f->getPathname(), File::allFiles($job->tempPath)));
+    }
+
+    public function testGenerateOverlayTilesInvalidColorspace()
+    {
+        $overlay = GeoOverlay::factory()->create();
+        $file = new GenericFile("test");
+
+        Event::fake();
+        $job = new TileSingleOverlayStub($overlay, $this->user, []);
+        $job->invalidColorspace = true;
+        $job->withFakeQueueInteractions();
+        $job->generateTiles($file, "test");
+
+        $job->assertFailed();
+        Event::assertDispatched(GeoTiffUploadFailed::class);
+        $this->assertFalse(GeoOverlay::where('id', $overlay->id)->exists());
+    }
+
+    public function testGenerateOverlayTilesThrowException()
+    {
+        $overlay = GeoOverlay::factory()->create();
+
+        Event::fake();
+        $job = new TileSingleOverlayStub($overlay, $this->user, []);
+        $job->failed(new Exception());
+
+        Event::assertDispatched(GeoTiffUploadFailed::class);
+        $this->assertFalse(GeoOverlay::where('id', $overlay->id)->exists());
     }
 
     public function testGenerateOverlayTilesWithNormalization()
@@ -145,6 +175,8 @@ class TileSingleOverlayStub extends TileSingleOverlay
 
     public $outputImg;
 
+    public $invalidColorspace = false;
+
     public function generateTiles($file, $path)
     {
         parent::generateTiles($file, $path);
@@ -166,6 +198,10 @@ class TileSingleOverlayStub extends TileSingleOverlay
             }
 
             return VipsImage::newFromArray($pixels);
+        }
+
+        if ($this->invalidColorspace) {
+            return VipsImage::black(5, 5, ['bands' => 5]);
         }
 
         return VipsImage::black(5, 5);
