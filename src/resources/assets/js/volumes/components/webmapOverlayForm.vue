@@ -30,7 +30,7 @@ export default {
     handleSuccess(response) {
       this.error = false;
       this.success = true;
-      this.$emit('success', response.data);
+      this.$emit('success', response.body);
     },
     handleError(response) {
       let knownError = response.body.errors && (
