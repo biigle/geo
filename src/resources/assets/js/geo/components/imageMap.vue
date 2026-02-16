@@ -171,7 +171,7 @@ export default {
             return tileLayer;
         },
         setLayerVisbility(e) {
-            e.layer.setVisible(!this.hideIds.has(e.layer.values_.id));
+            e.layer.setVisible(!this.hideIds.has(e.layer.get('id')));
         }
     },
     watch: {
