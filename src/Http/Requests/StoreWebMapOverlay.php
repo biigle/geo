@@ -21,6 +21,13 @@ class StoreWebMapOverlay extends FormRequest
     public $volume;
 
     /**
+     * The webMapSource to process the xml
+     *
+     * @var WebMapSource
+     */
+    public $webmapSource;
+
+    /**
      * Indicates if the validator should stop on the first rule failure.
      *
      * @var bool
