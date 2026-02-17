@@ -50,15 +50,17 @@ class GeoOverlayControllerTest extends ApiTestCase
         ])->assertInvalid(['updated_overlays.0.browsing_layer']);
 
         // invalid id
-        $updated_overlays[0]['id'] = 99;
         $updated_overlays[0]['browsing_layer'] = true;
+        $updated_overlays[1] = $updated_overlays[0];
+        $updated_overlays[0]['id'] = 99;
         $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
             'updated_overlays' => $updated_overlays
-        ])->assertInvalid(['invalidIds']);
+        ])->assertJsonValidationErrors(['invalidIds' => 'GeoOverlay(s) with ids "99" do not exist.']);
 
         $updated_overlays[0]['id'] = $overlay->id;
+        unset($updated_overlays[1]);
         // now test if updating with data will succeed with the correct values being returned
-        $response = $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
+        $this->putJson("/api/v1/volumes/{$id}/geo-overlays", [
             'updated_overlays' => $updated_overlays
         ])->assertStatus(200);
 
