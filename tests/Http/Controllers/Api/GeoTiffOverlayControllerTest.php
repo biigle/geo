@@ -176,6 +176,156 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2['id']));
     }
 
+    public function testStoreGeotiffPixelScaleIllDefined()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        $exif = [
+            'IFD0:ImageWidth' => 5490,
+            'IFD0:ImageHeight' => 5490,
+            'IFD0:PixelScale' => '0 0 0',
+            'IFD0:ModelTiePoint' => '0 0 0 300000 3100000 0',
+            'IFD0:GDALNoData' => 0,
+            'GeoTiff:GTModelType' => 1,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:ProjectedCSType' => 32701,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_wrap_coords.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid('affineTransformation');
+
+        Queue::assertNotPushed(TileSingleOverlay::class);
+    }
+
+    public function testStoreGeotiffMissingData()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        // Missing PixelScale
+        $exif = [
+            'IFD0:ImageWidth' => 5490,
+            'IFD0:ImageHeight' => 5490,
+            'IFD0:ModelTiePoint' => '0 0 0 300000 3100000 0',
+            'IFD0:GDALNoData' => 0,
+            'GeoTiff:GTModelType' => 1,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:ProjectedCSType' => 32701,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_wrap_coords.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid('affineTransformation');
+
+        Queue::assertNotPushed(TileSingleOverlay::class);
+
+        // Missing ModelTiePoint
+        $exif = [
+            'IFD0:ImageWidth' => 5490,
+            'IFD0:ImageHeight' => 5490,
+            'IFD0:PixelScale' => '0 0 0',
+            'IFD0:GDALNoData' => 0,
+            'GeoTiff:GTModelType' => 1,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:ProjectedCSType' => 32701,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_wrap_coords.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid('affineTransformation');
+
+        Queue::assertNotPushed(TileSingleOverlay::class);
+
+        // No transform data given
+        $exif = [
+            "IFD0:ImageWidth" => 396,
+            "IFD0:ImageHeight" => 183,
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:ProjectedCSType" => 32632,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid(['affineTransformation']);
+        Queue::assertNothingPushed();
+    }
+
+    public function testStoreGeotiffPrioritizeModelTransform()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        // Pixelscale is ill-defined, so use ModelTransform instead
+        $exif = [
+            "System:FileName" => "geotiff_modelTransform.tiff",
+            "IFD0:ImageWidth" => 396,
+            "IFD0:ImageHeight" => 183,
+            'IFD0:PixelScale' => '0 0 0',
+            'IFD0:ModelTiePoint' => '0 0 0 300000 3100000 0',
+            "IFD0:ModelTransform" => "10 0 0 677920 0 10 0 5150930 0 0 0 0 0 0 0 1",
+            "GeoTiff:GTModelType" => 1,
+            "GeoTiff:GTRasterType" => 1,
+            "GeoTiff:ProjectedCSType" => 32632,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
+        $response = $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertSuccessful();
+
+        Queue::assertPushed(TileSingleOverlay::class);
+        $overlay2 = json_decode($response->getContent(), true);
+        $this->assertNotNull($overlay2);
+        $this->assertSame(46.4884400488204, $overlay2['attrs']['top_left_lat']);
+        $this->assertSame(11.3182638714155, $overlay2['attrs']['top_left_lng']);
+        $this->assertSame(46.503838038652, $overlay2['attrs']['bottom_right_lat']);
+        $this->assertSame(11.3705327969833, $overlay2['attrs']['bottom_right_lng']);
+        $this->assertSame(396, $overlay2['attrs']['width']);
+        $this->assertSame(183, $overlay2['attrs']['height']);
+        $this->assertSame('geotiff', $overlay2['type']);
+        $this->assertSame('geotiff_modelTransform.tiff', $overlay2['name']);
+        $this->assertTrue($overlay2['browsing_layer']);
+        $this->assertEquals(0, $overlay2['layer_index']);
+        $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2['id']));
+    }
+
+
     public function testStoreGeotiffWGS84()
     {
         $id = $this->volume()->id;
@@ -217,30 +367,6 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay2['browsing_layer']);
         $this->assertEquals(0, $overlay2['layer_index']);
         $this->assertTrue(Storage::disk('geo-overlays')->exists($overlay2['id']));
-    }
-
-    public function testStoreGeotiffMissingData()
-    {
-        $id = $this->volume()->id;
-        $this->beAdmin();
-        $exif = [
-            "IFD0:ImageWidth" => 396,
-            "IFD0:ImageHeight" => 183,
-            "GeoTiff:GTModelType" => 1,
-            "GeoTiff:ProjectedCSType" => 32632,
-        ];
-
-        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
-        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
-
-        $this->postJson(
-            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
-            [
-                'geotiff' => $file,
-                'layer_index' => 0
-            ]
-        )->assertInvalid(['affineTransformation']);
-        Queue::assertNothingPushed();
     }
 
     public function testStoreGeotiffTransformErr()
