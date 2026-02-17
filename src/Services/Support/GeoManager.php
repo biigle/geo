@@ -155,65 +155,73 @@ class GeoManager extends Transformer
      */
     protected function convertToModelSpace($corners)
     {
-        // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-transformations
-        if (array_key_exists('IFD0:PixelScale', $this->exif) && array_key_exists('IFD0:ModelTiePoint', $this->exif)) {
-            // PixelScale = (Sx, Sy, Sz)
-            $pixelScale = array_map('floatval', explode(" ", $this->exif['IFD0:PixelScale']));
-            // modelTiePointTag = (I,J,K,X,Y,Z)
-            $modelTiePoints = array_map('floatval', explode(" ", $this->exif['IFD0:ModelTiePoint']));
-            $tie_point_keys = ['I', 'J', 'K', 'X', 'Y', 'Z'];
-            $tie_points_combined = array_combine($tie_point_keys, $modelTiePoints);
-            // make variables availabe ($I, $J, $K, $X, $Y, $Z)
-            extract($tie_points_combined);
-
-            // if PixelScale is ill-defined, skip to next section
-            if (($pixelScale[0] !== 0 && $pixelScale[1] !== 0)) {
-                // modelTiePointTag = (I,J,K,X,Y,Z)
-                // Tx = X - I*Sx
-                $Tx = $X - ($I * $pixelScale[0]);
-                // Ty = Y + J*Sy
-                $Ty = $Y + ($J * $pixelScale[1]);
-                // Tz = Z - K*Sz (if not 0; aka. the 2D-case)
-                // $Tz = $pixelScale[2] === 0 ? 0 : ($Z - ($K * $pixelScale[1]));
-
-                // transformation matrix for relationship between raster and model space
-                // | Sx * I + Tx |
-                // | Sy * J + Ty |
-                // | Sz * k + Tz |
-                foreach ($corners as $corner) {
-                    $projected[] = [
-                        ($pixelScale[0] * $corner[0]) + $Tx,
-                        -($pixelScale[1] * $corner[1]) + $Ty,
-                    ];
-                }
-                // get the minimum and maximum coordinates of the geoTIFF
-                $min_max_coords = $this->getMinMaxCoordinate($projected);
-            }
-        } elseif (array_key_exists('IFD0:ModelTransform', $this->exif)) {
-            // another way of transforming raster- to model-space with ModelTransformationTag (only 2D case implemented)
-            $model_transform = array_map('doubleval', explode(" ", $this->exif['IFD0:ModelTransform']));
-            $keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            $var_array = array_combine($keys, array_slice($model_transform, 0, count($keys)));
-            // make variables availabe
-            extract($var_array);
-            $projected = [];
-            // transformation matrix for raster- to model-space, multiply with modelTiePoint (I,J,K)
-            // | a b 0 d |
-            // | e f 0 h |
-            // | 0 0 0 0 |
-            foreach ($corners as $corner) {
-                $projected[] = [
-                    (($a * $corner[0]) + ($b * $corner[1]) + $d),
-                    (($e * $corner[0]) + ($f * $corner[1]) + $h)
-                ];
-            }
-            // get the minimum and maximum coordinates of the geoTIFF
-            $min_max_coords = $this->getMinMaxCoordinate($projected);
-        } else {
-            throw new ConvertModelSpaceException();
+        if ((!isset($this->exif['IFD0:PixelScale']) || !isset($this->exif['IFD0:ModelTiePoint'])) && !isset($this->exif['IFD0:ModelTransform'])) {
+            throw new ConvertModelSpaceException("Either ModelTransform or PixelScale and ModelTiePoint must be present.");
         }
 
-        return $min_max_coords;
+        $useModelTransform = isset($this->exif['IFD0:ModelTransform']);
+
+        // see https://github.com/opengeospatial/geotiff/blob/master/GeoTIFF_Standard/standard/annex-b.adoc#coordinate-transformations
+        $projected = $useModelTransform ? $this->useModelTransform($corners) : $this->useModelTiePoint($corners);
+        return $this->getMinMaxCoordinate($projected);
+    }
+
+    public function useModelTransform($corners)
+    {
+        // another way of transforming raster- to model-space with ModelTransformationTag (only 2D case implemented)
+        $model_transform = array_map('doubleval', explode(" ", $this->exif['IFD0:ModelTransform']));
+        $keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        $var_array = array_combine($keys, array_slice($model_transform, 0, count($keys)));
+        // make variables availabe
+        extract($var_array);
+        $projected = [];
+        // transformation matrix for raster- to model-space, multiply with modelTiePoint (I,J,K)
+        // | a b 0 d |
+        // | e f 0 h |
+        // | 0 0 0 0 |
+        foreach ($corners as $corner) {
+            $projected[] = [
+                (($a * $corner[0]) + ($b * $corner[1]) + $d),
+                (($e * $corner[0]) + ($f * $corner[1]) + $h)
+            ];
+        }
+        return $projected;
+    }
+
+    public function useModelTiePoint($corners)
+    {
+        $pixelScale = array_map('floatval', explode(" ", $this->exif['IFD0:PixelScale']));
+        // if pixelScale is ill-defined, use modelTransform
+        if ($pixelScale[0] == 0 && $pixelScale[1] == 0) {
+            throw new ConvertModelSpaceException("The first two values of PixelScales must be greater than zero.");
+        }
+
+        // modelTiePointTag = (I,J,K,X,Y,Z)
+        $modelTiePoints = array_map('floatval', explode(" ", $this->exif['IFD0:ModelTiePoint']));
+        $tie_point_keys = ['I', 'J', 'K', 'X', 'Y', 'Z'];
+        $tie_points_combined = array_combine($tie_point_keys, $modelTiePoints);
+        // make variables availabe ($I, $J, $K, $X, $Y, $Z)
+        extract($tie_points_combined);
+        // modelTiePointTag = (I,J,K,X,Y,Z)
+        // Tx = X - I*Sx
+        $Tx = $X - ($I * $pixelScale[0]);
+        // Ty = Y + J*Sy
+        $Ty = $Y + ($J * $pixelScale[1]);
+        // Tz = Z - K*Sz (if not 0; aka. the 2D-case)
+        // $Tz = $pixelScale[2] === 0 ? 0 : ($Z - ($K * $pixelScale[1]));
+
+        // transformation matrix for relationship between raster and model space
+        // | Sx * I + Tx |
+        // | Sy * J + Ty |
+        // | Sz * k + Tz |
+        foreach ($corners as $corner) {
+            $projected[] = [
+                ($pixelScale[0] * $corner[0]) + $Tx,
+                -($pixelScale[1] * $corner[1]) + $Ty,
+            ];
+        }
+        // get the minimum and maximum coordinates of the geoTIFF
+        return $projected;
     }
 
     public function getCoords()

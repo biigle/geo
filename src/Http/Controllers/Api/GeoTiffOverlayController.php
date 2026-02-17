@@ -69,7 +69,7 @@ class GeoTiffOverlayController extends Controller
         } catch (ConvertModelSpaceException | TransformCoordsException | Exception $e) {
             $msg = [];
             if ($e instanceof ConvertModelSpaceException) {
-                $msg = ['affineTransformation' => 'The geoTIFF file does not have an affine transformation.'];
+                $msg = ['affineTransformation' => $e->getMessage()];
             } else if ($e instanceof TransformCoordsException) {
                 $msg = [
                     'failedTransformation' =>
