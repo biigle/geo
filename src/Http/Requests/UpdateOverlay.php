@@ -76,17 +76,20 @@ class UpdateOverlay extends FormRequest
             }
 
             $ids = array_map(fn($e) => $e['id'], $this->input('updated_overlays'));
-            $overlays = GeoOverlay::findMany($ids);
-            if (count($ids) != $overlays->count()) {
-                $missing = $overlays->reject(fn($e) => in_array($e->id, $ids));
-                $missing = $missing->map(fn($e) => $e->id)->sort()->join(", ");
-                $validator->errors()->add('invalidIds', "GeoOverlay(s) with ids \"$missing\" do not exist.");
-            }
+            $overlays = GeoOverlay::whereIn('id', $ids);
 
+            // Check if overlay belongs to volume
             $overlayVolIds = $overlays->pluck('volume_id')->unique();
             if ($overlayVolIds->count() > 1 || $overlayVolIds->first() != $this->volume->id) {
                 $volId = $this->volume->id;
                 $validator->errors()->add('invalidIds', "GeoOverlay(s) do not belong to volume with id $volId");
+            }
+
+            // Check if overlays exist
+            if (count($ids) != $overlays->count()) {
+                $invalidIds = collect($ids)->reject(fn($id) => $overlays->pluck('id')->contains($id));
+                $invalidIds = $invalidIds->sort()->join(", ");
+                $validator->errors()->add('invalidIds', "GeoOverlay(s) with ids \"$invalidIds\" do not exist.");
             }
         });
     }
