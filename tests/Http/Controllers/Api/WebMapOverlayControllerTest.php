@@ -154,6 +154,38 @@ class WebMapOverlayControllerTest extends ApiTestCase
         ])->assertInvalid(['noValidLayer']);
     }
 
+    public function testStoreInvalidUrl()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        $this->mock->shouldReceive('request')->never();
+
+        $url = 'https://localhost:8000/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid(['url']);
+
+        $url = 'https://127.0.0.1:8000/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid(['url']);
+
+        $url = 'https://[0:0:0:0:0:0:0:1]:8000/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid(['url']);
+
+        $url = 'https://[::1]:8000/wms?service=WMS&version=1.1.0&request=GetMap&layers=';
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid(['url']);
+    }
+
     public function testStoreWebMapServiceWithCoordsEPSG4326()
     {
 
