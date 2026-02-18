@@ -70,8 +70,17 @@ class StoreWebMapOverlay extends FormRequest
         }
 
         $validator->after(function ($validator) {
+            $url = $this->input('url');
+            $host = parse_url($url)['host'];
+            // Remove brackets from urls with ip6 adresses
+            $host = trim($host, '[]');
+
+            if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_IP)) {
+                throw ValidationException::withMessages(['url' => "URL must not contain 'localhost' or any IP adress."]);
+            }
+
             try {
-                $this->webmapSource->useUrl($this->input('url'));
+                $this->webmapSource->useUrl($url);
             } catch (WebMapSourceException | Exception $e) {
                 $msg = [];
 
