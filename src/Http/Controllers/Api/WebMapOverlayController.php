@@ -51,7 +51,7 @@ class WebMapOverlayController extends Controller
         [$layerTitle, $layerName] = $webmapSource->getLayer();
         $coords = $webmapSource->getCoords($layerName);
 
-        $overlay = GeoOverlay::build($volumeId, $layerTitle, 'webmap', $layerIdx, [$coords, $webmapSource->baseUrl, $layerName]);
+        $overlay = GeoOverlay::build($volumeId, $layerName, 'webmap', $layerIdx, [$coords, $webmapSource->baseUrl, $layerTitle]);
         return $overlay->fresh();
     }
 }
