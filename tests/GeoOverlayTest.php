@@ -24,7 +24,7 @@ class GeoOverlayTest extends TestCase
 
         $webmap = GeoOverlay::factory()->webMap()->create();
         $this->assertNotNull($webmap->name);
-        $this->assertTrue(is_array($webmap->attrs['layers']));
+        $this->assertTrue(is_string($webmap->attrs['layer']));
         $this->assertTrue(is_string($webmap->attrs['url']));
         $this->assertNull($webmap->created_at);
         $this->assertNull($webmap->updated_at);
