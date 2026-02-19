@@ -178,7 +178,7 @@ class WebMapSource extends Transformer
             // If, and only if, a layer has a <Name>, then it is a map layer that can be requested
             // If the layer has a Title but no Name, then that layer is only a category title for
             // all the layers nested within (the latter case should not occur due to xpath query above)
-            if (!empty($layer->Name)) {
+            if (!empty($layer->Name) && !empty((string) $layer->Name)) {
                 $webmapLayers = (string) $layer->Name;
                 return [$webmapTitle, $webmapLayers];
             }
