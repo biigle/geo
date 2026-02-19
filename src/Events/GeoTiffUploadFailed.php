@@ -3,7 +3,6 @@
 namespace Biigle\Modules\Geo\Events;
 
 use Biigle\User;
-use Biigle\Modules\Geo\GeoOverlay;
 use Biigle\Broadcasting\UserChannel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -22,21 +21,18 @@ class GeoTiffUploadFailed implements ShouldBroadcastNow
      */
     public $user;
 
-    public $overlay;
-
     /**
-     * Ignore this event if the overlay does not exist any more.
+     * Error message
      *
-     * @var bool
+     * @var string
      */
-    protected $deleteWhenMissingModels = true;
-
     protected $message;
 
     /**
      * Create a new event instance.
      *
      * @param User $user
+     *
      * @return void
      */
     public function __construct(User $user, string $message)
