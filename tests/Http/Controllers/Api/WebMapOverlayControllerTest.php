@@ -96,6 +96,65 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
     }
 
+    public function testStoreWebMapOverlayMaliciousXML()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        $xml = '<?xml version="1.0"?>
+        <!DOCTYPE lolz [
+        <!ENTITY lol "lol">
+        <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+        <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+        <!ENTITY lol4 "&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;">
+        <!ENTITY lol5 "&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;">
+        <!ENTITY lol6 "&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;">
+        <!ENTITY lol7 "&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;">
+        <!ENTITY lol8 "&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;">
+        <!ENTITY lol9 "&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;">
+        ]>
+        <lolz>&lol9;</lolz>';
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        // test billion laugh attack
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap&layers=Name_0';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid('invalidWMS');
+
+        $xml = '<?xml version="1.0"?>
+        <!DOCTYPE Layer [<!ENTITY harmless SYSTEM "php://filter/read=convert.base64-encode/resource=/var/www/.docker/app-php.ini">]>
+        <Capability><Layer>
+            <Layer><Title>&harmless;</Title><Name>&harmless;</Name></Layer>
+        </Layer></Capability>';
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        // test XEE
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid('noValidLayer');
+
+        $xml = '<?xml version="1.0"?>
+        <!DOCTYPE Layer [
+            <!ENTITY harmless SYSTEM "https://dsm-dataportal.geomar.de/geoserver/schemas/wms/1.1.1/WMS_MS_Capabilities.dtd">
+        ]>
+        <Capability><Layer>
+            <Layer><Title>&harmless;</Title><Name>&harmless;</Name></Layer>
+        </Layer></Capability>';
+
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        // test XEE with network access attempt
+        $url = 'https://maps.geomar.de/geoserver/CONMAR/wms?service=WMS&version=1.1.0&request=GetMap';
+        $response = $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid('noValidLayer');
+    }
+
     public function testStoreMultipleLayers()
     {
         $id = $this->volume()->id;
