@@ -496,6 +496,33 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         Queue::assertNothingPushed();
     }
 
+    public function testStoreGeotiffUndefinedCRS()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+        $exif = [
+            'IFD0:ImageWidth' => 768,
+            'IFD0:ImageHeight' => 608,
+            'IFD0:ModelTransform' => '0.0132309081041667 0 0 5.554322947 0 -0.0132389576726974 0 55.118670158 0 0 0 0 0 0 0 1',
+            'IFD0:GDALNoData' => 0.0,
+            'GeoTiff:GTModelType' => 2,
+            'GeoTiff:GTRasterType' => 1,
+            'GeoTiff:GeographicType' => 0,
+        ];
+
+        $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
+        $file = UploadedFile::fake()->create('geotiff_modelTransform.tiff', 1, 'image/tiff');
+
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid(['undefined']);
+        Queue::assertNothingPushed();
+    }
+
     public function testStoreGeotiffInvalidColorSpace()
     {
         $id = $this->volume()->id;
