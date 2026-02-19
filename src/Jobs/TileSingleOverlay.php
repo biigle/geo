@@ -21,7 +21,7 @@ class TileSingleOverlay extends TileSingleObject
      *
      * @var GeoOverlay
      */
-    public $file;
+    public $overlay;
 
     /**
      * The uploaded geoTIFF file fetched from geo.tiles.overlay_storage_disk
@@ -54,15 +54,15 @@ class TileSingleOverlay extends TileSingleObject
     /**
      * Create a new job instance.
      *
-     * @param GeoOverlay $file The Overlay to generate tiles for.
+     * @param GeoOverlay $overlay The Overlay to generate tiles for.
      *
      * @return void
      */
-    public function __construct(GeoOverlay $file, User $user, array $exif)
+    public function __construct(GeoOverlay $overlay, User $user, array $exif)
     {
-        parent::__construct(config('geo.tiles.overlay_storage_disk'), "{$file->id}/{$file->id}_tiles");
-        $this->file = $file;
-        $this->tempPath = config('geo.tiles.tmp_dir') . "/{$file->id}";
+        parent::__construct(config('geo.tiles.overlay_storage_disk'), "{$overlay->id}/{$overlay->id}_tiles");
+        $this->overlay = $overlay;
+        $this->tempPath = config('geo.tiles.tmp_dir') . "/{$overlay->id}";
         $this->exif = $exif;
         $this->user = $user;
     }
@@ -75,11 +75,11 @@ class TileSingleOverlay extends TileSingleObject
     public function handle()
     {
         try {
-            $this->genericFile = new GenericFile("{$this->storage}://{$this->file->path}");
+            $this->genericFile = new GenericFile("{$this->storage}://{$this->overlay->path}");
             FileCache::getOnce($this->genericFile, [$this, 'generateTiles']);
             $this->uploadToStorage();
-            $this->file->save();
-            GeoTiffUploadSucceeded::dispatch($this->file, $this->user);
+            $this->overlay->save();
+            GeoTiffUploadSucceeded::dispatch($this->overlay, $this->user);
         } finally {
             File::deleteDirectory($this->tempPath);
         }
@@ -144,7 +144,7 @@ class TileSingleOverlay extends TileSingleObject
     {
         // Fail job if image doesn't use BW, Grayscale or RGB(A) color space
         if ($this->vipsImage->bands > 4) {
-            $file = $this->file->name;
+            $file = $this->overlay->name;
             $ccount = $this->vipsImage->bands;
             $msg = "Upload of '$file' failed. Image can have at most 4 color channels, but $ccount channels are given.";
             $this->failAndNotify($msg);
@@ -250,8 +250,8 @@ class TileSingleOverlay extends TileSingleObject
      */
     protected function failAndNotify($msg)
     {
-        if (GeoOverlay::where('id', $this->file->id)->exists()) {
-            $this->file->delete();
+        if (GeoOverlay::where('id', $this->overlay->id)->exists()) {
+            $this->overlay->delete();
         }
         GeoTiffUploadFailed::dispatch($this->user, $msg);
         $this->fail();
@@ -266,7 +266,7 @@ class TileSingleOverlay extends TileSingleObject
      */
     public function failed(?Throwable $exception)
     {
-        $file = $this->file->name;
+        $file = $this->overlay->name;
         $this->failAndNotify("Upload of '$file' failed. Please try again.");
     }
 }
