@@ -50,7 +50,7 @@ class GeoTiffOverlayController extends Controller
     public function storeGeoTiff(StoreGeotiffOverlay $request)
     {
         $file = $request->file('geotiff');
-        $fileName = $request->input('name', $file->getClientOriginalName());
+        $fileName = $file->getClientOriginalName();
         // create GeoManager-class from uploadedFile
         $geotiff = $request->geotiff;
         $volumeId = $request->volume->id;

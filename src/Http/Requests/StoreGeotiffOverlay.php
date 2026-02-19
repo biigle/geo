@@ -72,10 +72,22 @@ class StoreGeotiffOverlay extends FormRequest
         $validator->after(function ($validator) {
 
             if ($this->volume->isVideoVolume()) {
-                $validator->errors()->add('id', 'Geo overlays are not available for video volumes.');
+                throw ValidationException::withMessages(["id" => "Geo overlays are not available for video volumes."]);
             }
 
             $file = $this->file('geotiff');
+
+            $fileName = $file->getClientOriginalName();
+            $overlayExists = GeoOverlay::where('volume_id', $this->volume->id)
+                ->where('type', 'geotiff')
+                ->where('name', $fileName)
+                ->exists();
+
+            if ($overlayExists) {
+                $fileNameShort = Str::limit($fileName, 25);
+                throw ValidationException::withMessages(["fileExists" => "The geoTIFF \"{$fileNameShort}\" has already been uploaded."]);
+            }
+
             $this->geotiff->useFile($file);
 
             $colorCount = $this->geotiff->getKey('IFD0:SamplesPerPixel');
@@ -100,17 +112,6 @@ class StoreGeotiffOverlay extends FormRequest
                 $validator->errors()->add('unDefined', "The coordinate reference system (CRS) is undefined. Please use a 'projected' CRS or EPSG:4326 instead.");
             } elseif ($epsg === 32767) {
                 $validator->errors()->add('userDefined', "User-defined coordinate reference systems (CRS) are not supported. Please use a 'projected' CRS or EPSG:4326 instead.");
-            }
-
-            $fileName = $this->input('name', $file->getClientOriginalName());
-            $overlayExists = GeoOverlay::where('volume_id', $this->volume->id)
-                ->where('type', 'geotiff')
-                ->where('name', $fileName)
-                ->exists();
-
-            if ($overlayExists) {
-                $fileNameShort = Str::limit($fileName, 25);
-                $validator->errors()->add('fileExists', "The geoTIFF \"{$fileNameShort}\" has already been uploaded.");
             }
         });
     }
