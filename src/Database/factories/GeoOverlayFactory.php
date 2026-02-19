@@ -40,7 +40,7 @@ class GeoOverlayFactory extends Factory
             return [
                 'type' => 'webmap',
                 'attrs' => [
-                    'layers' => [$this->faker->word(), $this->faker->word()],
+                    'layer' => $this->faker->word(),
                     'url' => $this->faker->url()
                 ]
             ];
