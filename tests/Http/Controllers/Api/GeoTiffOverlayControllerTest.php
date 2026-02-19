@@ -505,9 +505,9 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
             'IFD0:ImageHeight' => 608,
             'IFD0:ModelTransform' => '0.0132309081041667 0 0 5.554322947 0 -0.0132389576726974 0 55.118670158 0 0 0 0 0 0 0 1',
             'IFD0:GDALNoData' => 0.0,
-            'GeoTiff:GTModelType' => 2,
+            'GeoTiff:GTModelType' => 1,
             'GeoTiff:GTRasterType' => 1,
-            'GeoTiff:GeographicType' => 0,
+            'GeoTiff:ProjectedCSType' => 0,
         ];
 
         $this->mock->shouldReceive('getExifData')->once()->andReturn($exif);
@@ -519,7 +519,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
                 'geotiff' => $file,
                 'layer_index' => 0
             ]
-        )->assertInvalid(['undefined']);
+        )->assertInvalid(['unDefined']);
         Queue::assertNothingPushed();
     }
 
