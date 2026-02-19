@@ -182,7 +182,7 @@ export default {
 
             let id = action[1];
             let currentExtent = this.extents[id];
-            this.map.getView().fit(currentExtent, this.map.getSize());
+            this.map.getView().fit(currentExtent);
         },
         features(features) {
             this.source.clear();
@@ -272,7 +272,7 @@ export default {
 
         this.map.addLayer(vectorLayer);
 
-        this.map.getView().fit(extent, this.map.getSize());
+        this.map.getView().fit(extent);
 
         if (this.zoom) {
             this.map.getView().setZoom(this.zoom);
