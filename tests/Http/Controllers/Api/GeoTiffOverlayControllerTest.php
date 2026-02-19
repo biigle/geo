@@ -58,10 +58,13 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff")
             ->assertStatus(422);
 
-        $emptyFile = UploadedFile::fake()->create('overlay.tif');
+        $emptyFile = UploadedFile::fake()->create('overlay.tif', 0, 'image/tiff');
         // check if "empty" geotiff fails properly
-        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", ['geotiff' => $emptyFile])
-            ->assertStatus(422);
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff", [
+            'geotiff' => $emptyFile,
+            'layer_index' => 0
+            ])
+            ->assertInvalid('size');
 
         $this->assertFalse(GeoOverlay::exists());
 
