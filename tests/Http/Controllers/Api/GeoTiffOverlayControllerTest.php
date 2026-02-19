@@ -545,6 +545,27 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         Queue::assertNothingPushed();
     }
 
+    public function testStoreDupliate()
+    {
+        $id = $this->volume()->id;
+        $this->beAdmin();
+
+        GeoOverlay::newFactory()->create([
+            'volume_id' => $id,
+            'name' => 'test123.tiff'
+        ]);
+
+        $file = UploadedFile::fake()->create('test123.tiff', 1, 'image/tiff');
+        $this->postJson(
+            "/api/v1/volumes/{$id}/geo-overlays/geotiff",
+            [
+                'geotiff' => $file,
+                'layer_index' => 0
+            ]
+        )->assertInvalid(['fileExists']);
+        Queue::assertNothingPushed();
+    }
+
     public function testStoreVideoVolume()
     {
         $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
