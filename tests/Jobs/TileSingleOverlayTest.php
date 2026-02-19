@@ -29,7 +29,7 @@ class TileSingleOverlayTest extends TestCase
 
     public function testGenerateOverlayTiles()
     {
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $file = new GenericFile("test");
 
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
@@ -47,7 +47,7 @@ class TileSingleOverlayTest extends TestCase
 
     public function testGenerateOverlayTilesInvalidColorspace()
     {
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $file = new GenericFile("test");
 
         Event::fake();
@@ -63,7 +63,7 @@ class TileSingleOverlayTest extends TestCase
 
     public function testGenerateOverlayTilesThrowException()
     {
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
 
         Event::fake();
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
@@ -76,7 +76,7 @@ class TileSingleOverlayTest extends TestCase
     public function testGenerateOverlayTilesWithNormalization()
     {
         $file = new GenericFile("test");
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
         $job->useGrayImage = true;
         $job->generateTiles($file, "test");
@@ -100,7 +100,7 @@ class TileSingleOverlayTest extends TestCase
     {
         $file = new GenericFile("test");
         $getPixel = fn($img) => $img->getpoint(2, 3)[0];
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
         $job->useGrayImage = true;
         $job->edgeCase = 90;
@@ -123,7 +123,7 @@ class TileSingleOverlayTest extends TestCase
     public function testUploadOverlayToStorage()
     {
         config(['geo.tiles.overlay_storage_disk' => 'geo-overlays']);
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
 
         $targetPath = "{$overlay->id}/{$overlay->id}_tiles";
         $job = new TileSingleOverlayStub($overlay, $this->user, []);
@@ -144,7 +144,7 @@ class TileSingleOverlayTest extends TestCase
     {
         $file = new GenericFile("test");
 
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, ['IFD0:GDALNoData' => 0]);
         $job->useGrayImage = true;
         $job->generateTiles($file, "test");
@@ -168,7 +168,7 @@ class TileSingleOverlayTest extends TestCase
     {
         $file = new GenericFile("test");
 
-        $overlay = GeoOverlay::factory()->create();
+        $overlay = GeoOverlay::newFactory()->create();
         $job = new TileSingleOverlayStub($overlay, $this->user, ['IFD0:GDALNoData' => -9999]);
         $job->useGrayImage = true;
         $job->edgeCase = -9999;

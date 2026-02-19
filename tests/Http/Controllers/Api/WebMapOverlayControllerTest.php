@@ -348,7 +348,7 @@ class WebMapOverlayControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
-        GeoOverlay::newFactory()->webMap()->create([
+        GeoOverlay::factory()->webMap()->create([
             'volume_id' => $id,
             'name' => 'Name_1',
         ]);

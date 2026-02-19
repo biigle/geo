@@ -580,7 +580,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $id = $this->volume()->id;
         $this->beAdmin();
 
-        GeoOverlay::newFactory()->create([
+        GeoOverlay::factory()->create([
             'volume_id' => $id,
             'name' => 'test123.tiff'
         ]);
