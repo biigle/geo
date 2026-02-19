@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
-use Exception;
+use Biigle\Modules\Geo\GeoOverlay;
 use Mockery;
 use ApiTestCase;
 use Illuminate\Support\Str;
@@ -66,8 +66,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
-        $this->assertEquals($xml_array['Layer']['Layer']['Name'], $overlay['attrs']['layer']);
-        $this->assertEquals($xml_array['Layer']['Layer']['Title'], $overlay['name']);
+        $this->assertEquals($xml_array['Layer']['Layer']['Name'], $overlay['name']);
+        $this->assertEquals($xml_array['Layer']['Layer']['Title'], $overlay['attrs']['layer']);
     }
 
     public function testStoreWebMapLayer()
@@ -92,8 +92,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals(Str::before($url, '?'), $overlay['attrs']['url']);
-        $this->assertEquals($xml_names[0], $overlay['attrs']['layer']);
-        $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['name']);
+        $this->assertEquals($xml_names[0], $overlay['name']);
+        $this->assertEquals($xml_array['Layer']['Layer'][0]['Title'], $overlay['attrs']['layer']);
     }
 
     public function testStoreWebMapOverlayMaliciousXML()
@@ -194,8 +194,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals($xml_array[1]['Name'], $overlay['attrs']['layer']);
-        $this->assertEquals($xml_array[1]['Title'], $overlay['name']);
+        $this->assertEquals($xml_array[1]['Name'], $overlay['name']);
+        $this->assertEquals($xml_array[1]['Title'], $overlay['attrs']['layer']);
     }
 
     public function testStoreNoValidLayer()
@@ -273,8 +273,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
-        $this->assertEquals($xml_array['Title'], $overlay['name']);
+        $this->assertEquals($xml_array['Name'], $overlay['name']);
+        $this->assertEquals($xml_array['Title'], $overlay['attrs']['layer']);
         $this->assertEquals('EPSG:4326', $coords['SRS']);
         $this->assertEquals($round($coords['minx']), $overlay['attrs']['top_left_lng']);
         $this->assertEquals($round($coords['miny']), $overlay['attrs']['top_left_lat']);
@@ -307,8 +307,8 @@ class WebMapOverlayControllerTest extends ApiTestCase
         $this->assertTrue($overlay['browsing_layer']);
         $this->assertEquals(0, $overlay['layer_index']);
         $this->assertEquals($url, $overlay['attrs']['url']);
-        $this->assertEquals($xml_array['Name'], $overlay['attrs']['layer']);
-        $this->assertEquals($xml_array['Title'], $overlay['name']);
+        $this->assertEquals($xml_array['Name'], $overlay['name']);
+        $this->assertEquals($xml_array['Title'], $overlay['attrs']['layer']);
         $this->assertEquals(95.9531411952078, $overlay['attrs']['top_left_lng']);
         $this->assertEquals(10.0899544815049, $overlay['attrs']['top_left_lat']);
         $this->assertEquals(99, $overlay['attrs']['bottom_right_lng']);
