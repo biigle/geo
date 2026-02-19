@@ -344,6 +344,27 @@ class WebMapOverlayControllerTest extends ApiTestCase
         ])->assertInvalid(['layer_index']);
     }
 
+    public function testStoreDuplicate()
+    {
+        $id = $this->volume()->id;
+        $url = 'https://maps.geomar.de/geoserver/MSM96/wms';
+        GeoOverlay::newFactory()->webMap()->create([
+            'volume_id' => $id,
+            'name' => 'Name_1',
+        ]);
+
+        $this->beAdmin();
+
+        $xml = $this->getXMLResponse(3, true);
+        $this->mock->shouldReceive('request')->once()->andReturn($xml);
+
+        // test upload of valid WMS-URL (baseUrl without query-parameters)
+        $this->postJson("/api/v1/volumes/{$id}/geo-overlays/webmap", [
+            'url' => $url,
+            'layer_index' => 0
+        ])->assertInvalid('duplicate');
+    }
+
     public function getXMLResponse($layers, $hasInvalidLayer = false)
     {
         $content = '<?xml version="1.0" encoding="UTF-8" ?><Capability><Layer>';
