@@ -56,7 +56,7 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->beAdmin();
         // 422: The request was well-formed but was unable to be followed due to semantic errors.
         $this->postJson("/api/v1/volumes/{$id}/geo-overlays/geotiff")
-            ->assertStatus(422);
+            ->assertInvalid(['geotiff', 'layer_index']);
 
         $emptyFile = UploadedFile::fake()->create('overlay.tif', 0, 'image/tiff');
         // check if "empty" geotiff fails properly
@@ -577,10 +577,10 @@ class GeoTiffOverlayControllerTest extends ApiTestCase
         $this->postJson(
             "/api/v1/volumes/{$id}/geo-overlays/geotiff",
             [
-                'file' => $file,
+                'geotiff' => $file,
                 'layer_index' => 0
             ]
-        )->assertStatus(422);
+        )->assertInvalid('id');
         Queue::assertNothingPushed();
     }
 }
