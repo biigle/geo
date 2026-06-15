@@ -13,6 +13,7 @@ export default defineConfig({
                 {
                     src: 'src/resources/assets/images/*',
                     dest: 'assets',
+                    rename: { stripBase: true },
                 },
             ],
         }),
