@@ -1,34 +1,38 @@
 {
-  "_imageMap-vO89Fxth.js": {
-    "file": "assets/imageMap-vO89Fxth.js",
+  "_imageMap-D0XuqwCM.js": {
+    "file": "assets/imageMap-D0XuqwCM.js",
     "name": "imageMap"
   },
   "src/resources/assets/js/geo/main.js": {
-    "file": "assets/main-CVbg9mb4.js",
+    "file": "assets/main-CPMxOdYN.js",
     "name": "main",
     "src": "src/resources/assets/js/geo/main.js",
     "isEntry": true,
     "imports": [
-      "_imageMap-vO89Fxth.js"
+      "_imageMap-D0XuqwCM.js"
     ],
     "css": [
-      "assets/main-CmhLOP92.css"
+      "assets/main-hkusp5pz.css"
     ]
   },
   "src/resources/assets/js/volumes/main.js": {
-    "file": "assets/main-D3BTw6Lo.js",
+    "file": "assets/main-BJU04RVv.js",
     "name": "main",
     "src": "src/resources/assets/js/volumes/main.js",
     "isEntry": true,
     "imports": [
-      "_imageMap-vO89Fxth.js"
+      "_imageMap-D0XuqwCM.js"
     ],
     "css": [
-      "assets/main-BiON8o25.css"
+      "assets/main-CMtbvg-0.css"
     ]
   },
   "src/resources/assets/sass/main.scss": {
-    "file": "assets/main-CqSE4xPV.css",
+    "file": "assets/main-Bbb25q-x.css",
+    "name": "main",
+    "names": [
+      "main.css"
+    ],
     "src": "src/resources/assets/sass/main.scss",
     "isEntry": true
   }
