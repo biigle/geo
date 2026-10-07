@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Views;
 
 use ApiTestCase;
-use Biigle\MediaType;
+use Biigle\Enums\MediaType;
 use Biigle\Tests\ImageTest;
 
 class VolumeControllerTest extends ApiTestCase
