@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Views;
 
 use ApiTestCase;
-use Biigle\MediaType;
+use Biigle\Enums\MediaType;
 use Biigle\Tests\ImageTest;
 
 class VolumeControllerTest extends ApiTestCase
@@ -38,7 +38,7 @@ class VolumeControllerTest extends ApiTestCase
 
     public function testShowVideoVolume()
     {
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
 
         $this->beEditor();
         $this->get("volumes/{$id}/geo")->assertStatus(404);
