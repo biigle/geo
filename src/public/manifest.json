@@ -1,27 +1,27 @@
 {
-  "_imageMap-CKUaWZp1.js": {
-    "file": "assets/imageMap-CKUaWZp1.js",
+  "_imageMap-BWxE-gVl.js": {
+    "file": "assets/imageMap-BWxE-gVl.js",
     "name": "imageMap"
   },
   "src/resources/assets/js/geo/main.js": {
-    "file": "assets/main-DF492BFE.js",
+    "file": "assets/main-Bo5hxxqJ.js",
     "name": "main",
     "src": "src/resources/assets/js/geo/main.js",
     "isEntry": true,
     "imports": [
-      "_imageMap-CKUaWZp1.js"
+      "_imageMap-BWxE-gVl.js"
     ],
     "css": [
       "assets/main-hkusp5pz.css"
     ]
   },
   "src/resources/assets/js/volumes/main.js": {
-    "file": "assets/main-ezN7l4la.js",
+    "file": "assets/main-lmobO5Bz.js",
     "name": "main",
     "src": "src/resources/assets/js/volumes/main.js",
     "isEntry": true,
     "imports": [
-      "_imageMap-CKUaWZp1.js"
+      "_imageMap-BWxE-gVl.js"
     ],
     "css": [
       "assets/main-CMtbvg-0.css"
