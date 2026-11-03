@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Geo\Http\Controllers\Api;
 
 use ApiTestCase;
+use Biigle\Tests\AnnotationSessionTest;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
@@ -50,5 +51,57 @@ class ProjectImageAnnotationLabelControllerTest extends ApiTestCase
         $this->get("/api/v1/projects/{$pid}/images/filter/annotation-label/{$lid}")
             ->assertStatus(200)
             ->assertExactJson([$image->id]);
+    }
+
+    public function testIndexAnnotationSession()
+    {
+        $pid = $this->project()->id;
+        $label = $this->labelRoot();
+
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $annotation = ImageAnnotationTest::create([
+            'image_id' => $image->id,
+            'created_at' => now()->subDays(2),
+        ]);
+        ImageAnnotationLabelTest::create([
+            'annotation_id' => $annotation->id,
+            'label_id' => $label->id,
+            'user_id' => $this->editor()->id,
+        ]);
+
+        $image2 = ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'b.jpg',
+        ]);
+        $annotation2 = ImageAnnotationTest::create([
+            'image_id' => $image2->id,
+            'created_at' => now(),
+        ]);
+        ImageAnnotationLabelTest::create([
+            'annotation_id' => $annotation2->id,
+            'label_id' => $label->id,
+            'user_id' => $this->editor()->id,
+        ]);
+
+        $session = AnnotationSessionTest::create([
+            'volume_id' => $this->volume()->id,
+            'starts_at' => now()->subDay(),
+            'ends_at' => now()->addDay(),
+            'hide_own_annotations' => true,
+            'hide_other_users_annotations' => false,
+        ]);
+        $session->users()->attach($this->editor());
+
+        $this->beEditor();
+        // The annotation created before the session is hidden.
+        $this->get("/api/v1/projects/{$pid}/images/filter/annotation-label/{$label->id}")
+            ->assertStatus(200)
+            ->assertExactJson([$image2->id]);
+
+        // Users that are not part of the session see everything.
+        $this->beGuest();
+        $this->get("/api/v1/projects/{$pid}/images/filter/annotation-label/{$label->id}")
+            ->assertStatus(200)
+            ->assertJsonCount(2);
     }
 }
