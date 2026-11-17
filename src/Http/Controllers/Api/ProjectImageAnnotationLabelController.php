@@ -5,6 +5,7 @@ namespace Biigle\Modules\Geo\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\ImageAnnotation;
 use Biigle\Project;
+use Illuminate\Http\Request;
 
 class ProjectImageAnnotationLabelController extends Controller
 {
@@ -23,17 +24,20 @@ class ProjectImageAnnotationLabelController extends Controller
      * @apiSuccessExample {json} Success response:
      * [1, 5, 6]
      *
+     * @param Request $request
      * @param  int  $pid
      * @param  int  $lid
      * @return \Illuminate\Http\Response
      */
-    public function index($pid, $lid)
+    public function index(Request $request, $pid, $lid)
     {
-        // TODO: This endpoint does not respect annotation sessions like its volume
-        // counterpart!
-
         $project = Project::findOrFail($pid);
         $this->authorize('access', $project);
+
+        $user = $request->user();
+        // Respect the active annotation sessions of the volumes (like the volume
+        // counterpart of this endpoint).
+        $sessions = $project->getActiveAnnotationSessions($user);
 
         return ImageAnnotation::join('image_annotation_labels', 'image_annotations.id', '=', 'image_annotation_labels.annotation_id')
                 ->join('images', 'image_annotations.image_id', '=', 'images.id')
@@ -43,6 +47,7 @@ class ProjectImageAnnotationLabelController extends Controller
                         ->from('project_volume')
                         ->where('project_id', $pid);
                 })
+                ->allowedBySessions($sessions, $user)
                 ->groupBy('images.id')
                 ->pluck('images.id');
     }
