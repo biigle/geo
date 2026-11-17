@@ -8,7 +8,7 @@
       >
         <image-map v-if="images.length" :images="images" :selectable="true" v-on:select="handleSelectedImages"></image-map>
         <p class="text-muted">
-            <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd>Ctrl</kbd> as well as the left mouse button and move the cursor on the map.
+            <em>Hint:</em> Select image locations on the volume map by drawing an encompassing rectangle. To do this, press and hold <kbd v-text="modifierKey"></kbd> as well as the left mouse button and move the cursor on the map.
         </p>
         <template #footer>
             <div>
@@ -23,6 +23,7 @@
 import CoordApi from '../api/volumeImageWithCoord.js';
 import ImageMap from '../../geo/components/imageMap.vue';
 import {LoaderMixin} from '../import.js';
+import {MAC} from '@biigle/ol/has';
 import {Modal} from '../import.js';
 
 export default {
@@ -47,6 +48,9 @@ export default {
             images: [],
             disabled: true,
             imageIds: [],
+            // The drag box uses the platform modifier key (Cmd on macOS, where Ctrl
+            // and click opens the context menu).
+            modifierKey: MAC ? 'Cmd' : 'Ctrl',
         }
     },
     methods: {
